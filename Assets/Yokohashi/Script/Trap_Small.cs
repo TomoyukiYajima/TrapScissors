@@ -14,6 +14,7 @@ public class Trap_Small : MonoBehaviour
     public TrapState _state;
     private bool recovery;
     private bool collider;
+    public GameObject getTarget;
 
     #region 鋏むときに必要な変数
     //鋏むんでいるオブジェクトを入れる
@@ -96,5 +97,10 @@ public class Trap_Small : MonoBehaviour
     public void Null()
     {
         _targetAnimal = null;
+    }
+
+    public GameObject GetAnimal()
+    {
+        return _targetAnimal;
     }
 }

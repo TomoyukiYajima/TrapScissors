@@ -61,11 +61,24 @@ public class PlayerAction : MonoBehaviour
         {
             if(_onTrapFlag == false && _trapCount < _trapMax)
             {
-                GameObject _trap = Instantiate(_trapObje);
-                _trap.transform.position = new Vector3(this.transform.position.x,
+                // 生成して、子オブジェクトにする
+                //Instantiate(
+                //    m_CreateEnemy, this.transform.position,
+                //    this.transform.rotation, this.transform
+                //    );
+                // 生成カウントに加算
+                GameObject traps = GameObject.Find("Traps");
+                if(traps != null)
+                {
+                    Vector3 pos = new Vector3(this.transform.position.x,
                                                        this.transform.position.y - 1.5f,
                                                        this.transform.position.z);
-                _trapCount++;
+                    Instantiate(
+                        _trapObje, pos, 
+                        traps.transform.rotation, traps.transform
+                        );
+                    _trapCount++;
+                }
             }
             else if(_onTrapFlag == true)
             {
