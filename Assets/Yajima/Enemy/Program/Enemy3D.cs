@@ -28,6 +28,8 @@ public class Enemy3D : MonoBehaviour
     [SerializeField]
     protected Transform m_RayPoint = null;              // レイポイント
     [SerializeField]
+    protected Transform m_MouthPoint = null;            // 口ポイント
+    [SerializeField]
     protected Transform[] m_MovePoints = null;          // 移動用ポイント配列
     [SerializeField]
     protected GameObject m_Sprite = null;               // スプライト
@@ -40,7 +42,9 @@ public class Enemy3D : MonoBehaviour
     #region protected変数
     protected int m_Size = 1;                           // 動物の大きさ(内部数値)
     protected float m_StateTimer = 0.0f;                // 状態の時間
-    protected string m_LineObjName = "Player";
+    //protected string m_LineObjName = "Player";
+    protected string m_FeedName = "Feed";               // 反応するえさの名前
+    protected string m_AnimalFeedName = "";             // 反応するトラバサミにかかった動物の名前
     protected bool m_IsRendered = false;                // カメラに映っているか
     protected Vector3 m_TotalVelocity = Vector3.zero;   // 合計の移動量
     protected Vector3 m_Velocity = Vector3.right;       // 移動量
@@ -48,6 +52,7 @@ public class Enemy3D : MonoBehaviour
     protected Transform m_DiscoverPlayer;               // プレイヤーを発見
     //protected Transform m_InitPoint;
     protected Player m_Player = null;                   // 当たったプレイヤー
+    protected Trap_Small m_Trap = null;
     protected Rigidbody m_Rigidbody;
     protected DSNumber m_DSNumber =
         DSNumber.DISCOVERED_CHASE_NUMBER;               // 追跡状態の番号 
@@ -72,11 +77,12 @@ public class Enemy3D : MonoBehaviour
     private TrapHitState m_THState =
         TrapHitState.TrapHit_Rage;                  // トラップヒット状態
     private EnemySprite m_EnemySprite;              // エネミースプライト                                          
-    private List<State>
-        m_DiscoveredStates = new List<State>();     // 発見後の行動
+    //private List<State>
+    //    m_DiscoveredStates = new List<State>();     // 発見後の行動
 
-    private const int MultSpeed = 10;               // 速度の倍率(調整しやすくさせるため)
-    private const string PlayerTag = "Player";      // プレイヤータグ
+    private const int MULT_SPEED = 10;               // 速度の倍率(調整しやすくさせるため)
+    private const string PLAYER_TAG = "Player";      // プレイヤータグ
+    private const string TRAP_NAME = "sample1(Clone)";
     #endregion
 
     #region 列挙クラス
@@ -239,6 +245,9 @@ public class Enemy3D : MonoBehaviour
     protected virtual void Idel(float deltaTime)
     {
         // えさの捜索
+        SearchFeed();
+        // トラバサミの捜索
+        SearchTrap();
 
         GameObject obj = null;
         if (InPlayer(out obj))
@@ -324,10 +333,16 @@ public class Enemy3D : MonoBehaviour
     // えさ発見移動
     protected virtual void DiscoverFeedMove(float deltaTime)
     {
-        var length = Vector3.Distance(
-            m_Agent.destination, this.transform.position
-            );
+        // 口ポインタとの距離を計算
+        //var length = Vector3.Distance(
+        //    m_Agent.destination, m_MouthPoint.position
+        //    );
+        // 二次元(x, z)の距離を求める
+        var v1 = new Vector2(m_Agent.destination.x, m_Agent.destination.z);
+        var v2 = new Vector2(m_MouthPoint.position.x, m_MouthPoint.position.z);
+        var length = Vector2.Distance(v1, v2);
 
+        // 一定距離内なら、持ち上げ状態に遷移
         if (length < 0.5f)
         {
             // 持ち上げ状態に遷移
@@ -344,10 +359,32 @@ public class Enemy3D : MonoBehaviour
 
         // 持ち上げ終了したら、持ち帰り状態に遷移
         ChangeDiscoverFeedState(DiscoverFeedState.DiscoverFeed_TakeAway);
+
+        // 動物を持ち上げる
+        var animal = m_Trap.GetAnimal();
+        var animalParent = animal.transform.parent;
+        // 口オブジェクトの子オブジェクトに変更
+        var agent = animal.GetComponent<NavMeshAgent>();
+        agent.enabled = false;
+        animalParent.transform.parent = m_MouthPoint;
+        animalParent.transform.localPosition = Vector3.zero;
+        animalParent.transform.localRotation = new Quaternion();
+        var sprite = m_Sprite.GetComponent<EnemySprite>();
+        animalParent.transform.localScale = 
+            new Vector3(
+                animal.transform.localScale.x / sprite.GetSpriteScale().x,
+                animal.transform.localScale.y / sprite.GetSpriteScale().y,
+                animal.transform.localScale.z / sprite.GetSpriteScale().z
+                );
+        animal.transform.localPosition = Vector3.zero;
+        animal.transform.localRotation = new Quaternion();
+
         // 生成ボックスの移動ポイント取得
-        var box = this.transform.parent.GetComponentInParent<EnemyCreateBox>();
+        var nest = GameObject.Find("WolfNest");
+        m_Trap.Null();
+        m_Trap = null;
         // 初期位置に移動
-        ChangeMovePoint(box.GetMovePoint(0).position);
+        ChangeMovePoint(nest.transform.position);
         m_Agent.Resume();
     }
     // えさ持ち帰り状態
@@ -367,7 +404,14 @@ public class Enemy3D : MonoBehaviour
     // トラバサミ発見状態
     protected virtual void DiscoverTrap(float deltaTime)
     {
-
+        GameObject obj = null;
+        // トラバサミを見つけたか
+        if (!InObject(TRAP_NAME, out obj))
+        {
+            ChangeState(State.Idel, AnimationNumber.ANIME_IDEL_NUMBER);
+            m_Agent.Resume();
+            ChangeSpriteColor(Color.red);
+        }
     }
     #endregion
 
@@ -689,7 +733,7 @@ public class Enemy3D : MonoBehaviour
 
         //velocity = Vector3.forward;
         // 移動
-        var cameraR = Vector3.Scale(m_MainCamera.transform.right, Vector3.one);
+        ///var cameraR = Vector3.Scale(m_MainCamera.transform.right, Vector3.one);
         //var v = (Vector3.forward - Vector3.right) * m_Velocity.z +
         //    cameraR * m_Velocity.x;
 
@@ -698,7 +742,7 @@ public class Enemy3D : MonoBehaviour
         //var v = (Vector3.forward - Vector3.right) * Input.GetAxis("Vertical") + cameraR * Input.GetAxis("Horizontal");
 
         m_TotalVelocity = 
-            (m_Speed * subSpeed) * MultSpeed * 
+            (m_Speed * subSpeed) * MULT_SPEED * 
             v.normalized * deltaTime;
     }
     // 移動関数
@@ -796,6 +840,82 @@ public class Enemy3D : MonoBehaviour
         }
     }
 
+    // 指定位置から逃げるようにします
+    protected void PointRunaway(Transform point)
+    {
+        //var pointBox = GameObject.Find("MovePoints");
+        // 移動ポイントコンテナがない場合は、
+        // 自分の持っているポイントで移動する
+        var length = 0.0f;
+        var pointPos = point.position;
+        var setPos = Vector3.zero;
+        // 持っているポイントで、音の位置との最長距離を求める
+        for (int i = 0; i != m_MovePoints.Length; i++)
+        {
+            var pos = m_MovePoints[i].position;
+            var pointLength = Vector3.Distance(pointPos, pos);
+            //var degree = Vector3.Angle(pointPos, pos);
+            // 前回のポイントとの位置より長かったら,
+            // 角度が一定角度より大きければ更新する
+            //  && Mathf.Abs(degree) > 20.0f
+            if (length < pointLength)
+            {
+                length = pointLength;
+                setPos = pos;
+            }
+        }
+        ChangeMovePoint(setPos);
+
+        //if (pointBox == null)
+        //{
+        //    var length = 0.0f;
+        //    var pointPos = point.position;
+        //    // 持っているポイントで、音の位置との最長距離を求める
+        //    for (int i = 0; i != m_MovePoints.Length; i++)
+        //    {
+        //        var pos = m_MovePoints[i].position;
+        //        var pointLength = Vector3.Distance(pointPos, pos);
+        //        var degree = Vector3.Angle(pointPos, pos);
+        //        // 前回のポイントとの位置より長かったら,
+        //        // 角度が一定角度より大きければ更新する
+        //        if (length < pointLength && Mathf.Abs(degree) > 20.0f)
+        //        {
+        //            length = pointLength;
+        //            m_MovePointPosition = pos;
+        //        }
+        //    }
+        //}
+        //else
+        //{
+        //    // 移動ポイントコンテナがある場合は、全ポイントを調べて
+        //    // 移動ポイントを決める
+        //    //pointBox.child
+        //    int count = 0;
+        //    foreach(Transform child in pointBox.transform)
+        //    {
+        //        m_BoxPoints.Add(child);
+        //        m_ResultPoints[m_BoxPoints[count]] = count;
+        //        count++;
+        //    }
+        //    // 取得したポイント全部との最長距離を取る
+        //    //var length = 0.0f;
+        //    for (int i = 0; i != m_BoxPoints.Count; i++)
+        //    {
+        //        var pos = m_BoxPoints[i].position;
+        //        var pointLength = Vector3.Distance(point.position, pos);
+        //        //// 前回のポイントとの位置より長かったら、更新する
+        //        //if (length < pointLength)
+        //        //{
+        //        //    length = pointLength;
+        //        //    m_MovePointPosition = pos;
+        //        //}
+
+        //        // 移動ポイントの評価
+
+        //    }
+        //}
+    }
+
     // メインカメラの確認を行います
     private void CheckMainCamera()
     {
@@ -881,18 +1001,10 @@ public class Enemy3D : MonoBehaviour
     protected virtual void SearchFeed()
     {
         //gameObject.transform.FindChild
-        var trapName = "Feed";//"sample1(Clone)";
-
-        var traps = GameObject.Find("Traps");
-        foreach(Transform child in traps.transform)
-        {
-            // ターゲットの取得
-            
-            // えさとかかっている動物の名前が同一なら、状態遷移
-        }
+        //var feedName = "Feed";//"sample1(Clone)";
         // えさを見つけたら、えさの場所に移動
         GameObject obj = null;
-        if (InObject(trapName, out obj))
+        if (InObject(m_FeedName, out obj))
         {
             // えさ発見移動状態に遷移
             ChangeDiscoverFeedState(DiscoverFeedState.DiscoverFeed_Move);
@@ -906,11 +1018,59 @@ public class Enemy3D : MonoBehaviour
         }
     }
 
+    // トラバサミの捜索
+    protected void SearchTrap()
+    {
+        //var traps = GameObject.Find("Traps");
+        //foreach (Transform child in traps.transform)
+        //{
+        //    // ターゲットの取得
+
+        //    // えさとかかっている動物の名前が同一なら、状態遷移
+        //}
+
+        var traps = GameObject.Find(TRAP_NAME);
+
+        if (traps == null) return;
+        GameObject obj = null;
+        // トラバサミを見つけたか
+        if (InObject(TRAP_NAME, out obj))
+        {
+            var trap = traps.GetComponent<Trap_Small>();
+            if (trap == null) return;
+            // もし、反応するえさがある場合は、えさ発見移動状態に遷移
+            m_Trap = trap;
+            //var name = "RabbitEnemy";
+            var animal = trap.GetAnimal();
+            if (animal != null && animal.name == m_AnimalFeedName)
+            {
+                ChangeDiscoverFeedState(DiscoverFeedState.DiscoverFeed_Move);
+                //var enemy = m_DiscoverObj.GetComponent<Enemy3D>();
+                //if (enemy == null) return;
+                //m_Animal = enemy;
+                // 移動ポイントを動物に変更
+                ChangeMovePoint(animal.transform.position);
+                ChangeSpriteColor(Color.magenta);
+                return;
+            }
+
+            // トラバサミ発見状態に遷移
+            ChangeDiscoverState(DiscoverState.Discover_Trap);
+            var box = this.transform.parent.GetComponentInParent<EnemyCreateBox>();
+            //// 移動ポイントを一つ前に変更
+            //ChangeMovePoint(box.GetMovePoint(Mathf.Max(0, (m_CurrentMovePoint - 1)) % m_MovePoints.Length).position);
+            // 次のポイントに変更
+            ChangeMovePoint();
+            ChangeSpriteColor(Color.cyan);
+            return;
+        }
+    }
+
     // プレイヤーとの衝突判定処理
     protected void OnCollidePlayer(Collider collision)
     {
         var tag = collision.gameObject.tag;
-        if (tag == PlayerTag)
+        if (tag == PLAYER_TAG)
         {
             ////// 当たったプレイヤーを子供に追加
             ////collision.gameObject.transform.parent = gameObject.transform;
@@ -1060,7 +1220,8 @@ public class Enemy3D : MonoBehaviour
         ChangeSpriteColor(Color.green);
         // 自身のトリガーをオンにする
         var collider = gameObject.GetComponent<Collider>();
-        if(collider != null) collider.isTrigger = true;
+        //if (collider != null) collider.isTrigger = true;
+        collider.enabled = false;
         //// 相手側のトリガーもオンにする
         //var otherCollider = obj.GetComponent<Collider>();
         //if (otherCollider != null) otherCollider.isTrigger = true;
@@ -1202,6 +1363,7 @@ public class Enemy3D : MonoBehaviour
         SerializedProperty ViewAngle;
         SerializedProperty GroundPoint;
         SerializedProperty RayPoint;
+        SerializedProperty MouthPoint;
         SerializedProperty MovePoints;
         SerializedProperty Sprite;
         SerializedProperty MainCamera;
@@ -1210,8 +1372,6 @@ public class Enemy3D : MonoBehaviour
 
         protected List<SerializedProperty> m_Serializes = new List<SerializedProperty>();
         protected List<string> m_SerializeNames = new List<string>();
-
-        
 
         public void OnEnable()
         {
@@ -1229,6 +1389,7 @@ public class Enemy3D : MonoBehaviour
             GroundPoint = serializedObject.FindProperty("m_GroundPoint");
             RayPoint = serializedObject.FindProperty("m_RayPoint");
             MovePoints = serializedObject.FindProperty("m_MovePoints");
+            MouthPoint = serializedObject.FindProperty("m_MouthPoint");
             Sprite = serializedObject.FindProperty("m_Sprite");
             MainCamera = serializedObject.FindProperty("m_MainCamera");
             WChackPoint = serializedObject.FindProperty("m_WChackPoint");
@@ -1269,16 +1430,17 @@ public class Enemy3D : MonoBehaviour
             ViewAngle.floatValue = EditorGUILayout.FloatField("視野角度(度数法)", enemy.m_ViewAngle);
 
             EditorGUILayout.Space();
-            EditorGUILayout.LabelField("〇各種オブジェクトのTransfome");
+            EditorGUILayout.LabelField("〇各種オブジェクトの位置ベクトル");
             // Transform
             GroundPoint.objectReferenceValue = EditorGUILayout.ObjectField("接地ポイント", enemy.m_GroundPoint, typeof(Transform), true);
             RayPoint.objectReferenceValue = EditorGUILayout.ObjectField("レイポイント", enemy.m_RayPoint, typeof(Transform), true);
+            MouthPoint.objectReferenceValue = EditorGUILayout.ObjectField("口ポイント", enemy.m_MouthPoint, typeof(Transform), true);
             // 配列
             EditorGUILayout.PropertyField(MovePoints, new GUIContent("徘徊ポイント"), true);
             // EditorGUILayout.PropertyField( prop , new GUIContent( “array1” ), true );
 
             EditorGUILayout.Space();
-            EditorGUILayout.LabelField("〇各種オブジェクト");
+            EditorGUILayout.LabelField("〇各種オブジェクトのオブジェクト設定");
             Sprite.objectReferenceValue = EditorGUILayout.ObjectField("敵の画像", enemy.m_Sprite, typeof(GameObject), true);
             MainCamera.objectReferenceValue = EditorGUILayout.ObjectField("メインカメラ", enemy.m_MainCamera, typeof(CameraMove), true);
             WChackPoint.objectReferenceValue = EditorGUILayout.ObjectField("壁捜索ポイント", enemy.m_WChackPoint, typeof(WallChackPoint), true);

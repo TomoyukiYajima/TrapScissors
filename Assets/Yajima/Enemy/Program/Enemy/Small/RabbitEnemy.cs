@@ -51,7 +51,7 @@ public class RabbitEnemy : Enemy3D
 
     public override void SoundNotice(Transform point)
     {
-        var pointBox = GameObject.Find("MovePoints");
+        //var pointBox = GameObject.Find("MovePoints");
         // 移動ポイントコンテナがない場合は、
         // 自分の持っているポイントで移動する
         var length = 0.0f;

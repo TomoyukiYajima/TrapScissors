@@ -57,4 +57,10 @@ public class EnemySprite : MonoBehaviour {
         if (m_Render != null) return;
         m_Render = m_Child.GetComponent<SpriteRenderer>();
     }
+
+    // スプライトの大きさを取得します
+    public Vector3 GetSpriteScale()
+    {
+        return m_Child.transform.localScale;
+    }
 }

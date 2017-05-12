@@ -12,11 +12,4 @@ public class LargeEnemy : MiddleEnemy {
     //void Update () {
 
     //}
-
-    #region override関数
-    public override void SoundNotice(Transform point)
-    {
-        base.SoundNotice(point);
-    }
-    #endregion
 }

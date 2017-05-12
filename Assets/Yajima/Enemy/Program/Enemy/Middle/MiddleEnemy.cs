@@ -16,8 +16,8 @@ public class MiddleEnemy : Enemy3D {
     protected float m_MoveDegree = 0.0f;        // 移動角度
     protected GameObject m_DiscoverObj;         // 発見したオブジェクト
     protected Enemy3D m_Animal = null;          // 発見した動物
-    //protected DiscoverMoveState m_DiscoverMoveState =
-    //    DiscoverMoveState.DiscoverMove_Animal;            // 発見状態
+                                                //protected DiscoverMoveState m_DiscoverMoveState =
+                                                //    DiscoverMoveState.DiscoverMove_Animal;            // 発見状態
     #endregion
 
     #region 列挙クラス
@@ -158,6 +158,13 @@ public class MiddleEnemy : Enemy3D {
     //    // ステータスの初期化
     //    InitState();
     //}
+    #endregion
+
+    #region override関数
+    public override void SoundNotice(Transform point)
+    {
+        base.SoundNotice(point);
+    }
     #endregion
 
     #region エディターのシリアライズ変更
