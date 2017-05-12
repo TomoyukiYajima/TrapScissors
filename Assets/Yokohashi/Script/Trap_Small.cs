@@ -61,13 +61,10 @@ public class Trap_Small : MonoBehaviour
         //{
         //    return;
         //}
+        if (_state == TrapState.CAPTURE_TRAP) return;
         if (col.tag == "LargeEnemy" || col.tag == "SmallEnemy")
         {
-            print("a");
             _targetAnimal = col.gameObject;
-
-           
-
             if (col.tag == "LargeEnemy")
             {
                 print("b");
