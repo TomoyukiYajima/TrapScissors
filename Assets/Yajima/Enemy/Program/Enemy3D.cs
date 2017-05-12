@@ -1043,7 +1043,7 @@ public class Enemy3D : MonoBehaviour
         //    if (trap._state == Trap_Small.TrapState.CAPTURE) return;
         //}
         // すでにはさんでいる場合は、返す
-        if (trap._state == Trap_Small.TrapState.CAPTURE) return;
+        if (trap._state == Trap_Small.TrapState.CAPTURE_TRAP) return;
 
         // トラップ化状態に遷移
         ChangeTrapHitState(

@@ -5,8 +5,9 @@ public class Trap_Small : MonoBehaviour
 {
     public enum TrapState
     {
-        WAIT,       //動物が掛かるのを待っている状態
-        CAPTURE,    //動物を捕まえている状態
+        WAIT_TRAP,       //動物が掛かるのを待っている状態
+        CAPTURE_TRAP,    //動物を捕まえている状態
+        MOVE_TRAP
     }
 
 
@@ -30,7 +31,7 @@ public class Trap_Small : MonoBehaviour
     void Start()
     {
         _targetAnimal = null;
-        _state = TrapState.WAIT;
+        _state = TrapState.WAIT_TRAP;
         recovery = true;
         collider = false;
     }
@@ -48,7 +49,7 @@ public class Trap_Small : MonoBehaviour
         }
         else
         {
-            _state = TrapState.WAIT;
+            _state = TrapState.WAIT_TRAP;
         }
     }
 
@@ -64,7 +65,7 @@ public class Trap_Small : MonoBehaviour
             print("a");
             _targetAnimal = col.gameObject;
 
-            ChengeState(TrapState.CAPTURE);
+           
 
             if (col.tag == "LargeEnemy")
             {
@@ -76,6 +77,8 @@ public class Trap_Small : MonoBehaviour
                 Enemy3D enemy = col.GetComponent<Enemy3D>();
                 enemy.ChangeTrap(gameObject);
             }
+
+            ChengeState(TrapState.CAPTURE_TRAP);
         }
 
     }
