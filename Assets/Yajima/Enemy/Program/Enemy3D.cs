@@ -46,8 +46,16 @@ public class Enemy3D : MonoBehaviour
     protected Vector3 m_Velocity = Vector3.right;       // 移動量
     protected Vector3 m_MovePointPosition;              // 移動ポイントの位置
     protected Transform m_DiscoverPlayer;               // プレイヤーを発見
+    //protected Transform m_InitPoint;
     protected Player m_Player = null;                   // 当たったプレイヤー
     protected Rigidbody m_Rigidbody;
+    protected DSNumber m_DSNumber =
+        DSNumber.DISCOVERED_CHASE_NUMBER;               // 追跡状態の番号 
+    protected DiscoverState m_DState = 
+        DiscoverState.Discover_None;                    // 発見状態
+    protected DiscoverFeedState m_DFState = 
+        DiscoverFeedState.DiscoverFeed_Move;            // えさ発見状態  
+    protected NavMeshAgent m_Agent;                     // ナビメッシュエージェント  
 
     // モーション番号
     protected int m_MotionNumber = (int)AnimationNumber.ANIME_IDEL_NUMBER;
@@ -63,9 +71,6 @@ public class Enemy3D : MonoBehaviour
     private State m_State = State.Idel;             // 状態
     private TrapHitState m_THState =
         TrapHitState.TrapHit_Rage;                  // トラップヒット状態
-    //private DSNumber m_DSNumber =
-    //    DSNumber.DISCOVERED_CHASE_NUMBER;           // 追跡状態の番号   
-    private NavMeshAgent m_Agent;                   // ナビメッシュエージェント  
     private EnemySprite m_EnemySprite;              // エネミースプライト                                          
     private List<State>
         m_DiscoveredStates = new List<State>();     // 発見後の行動
@@ -78,12 +83,30 @@ public class Enemy3D : MonoBehaviour
     // 状態クラス 
     public enum State
     {
-        Idel,       // 待機状態
-        Chase,      // 追跡状態
-        Discover,   // 発見状態
-        TrapHit,    // トラバサミに挟まれている状態
-        Runaway,    // 逃亡状態
-        DeadIdel    // 死亡待機状態
+        Idel,           // 待機状態
+        //Chase,          // 追跡状態
+        Discover,       // 発見状態
+        DiscoverMove,   // 発見後の移動状態
+        TrapHit,        // トラバサミに挟まれている状態
+        //Runaway,        // 逃亡状態
+        //AnimalTakeOut,  // 動物持ち帰り状態
+        //FeedEat,        // 餌食べ状態
+        DeadIdel        // 死亡待機状態
+    }
+    // 発見状態
+    protected enum DiscoverState
+    {
+        Discover_None,
+        Discover_Player,
+        Discover_Feed,
+        Discover_Trap
+    }
+    // えさ発見状態
+    protected enum DiscoverFeedState
+    {
+        DiscoverFeed_Move,      // 発見移動
+        DiscoverFeed_Lift,      // 持ち上げ状態
+        DiscoverFeed_TakeAway   // 持ち帰り状態
     }
     // トラバサミに挟まれた時の状態クラス
     protected enum TrapHitState
@@ -109,7 +132,9 @@ public class Enemy3D : MonoBehaviour
     protected enum DSNumber
     {
         DISCOVERED_CHASE_NUMBER = 0,
-        DISCOVERED_RUNAWAY_NUMBER = 1
+        DISCOVERED_RUNAWAY_NUMBER = 1,
+        DISCOVERED_ANIMAL_TAKEOUT_NUMBER = 2,
+        DISCOVERED_FEED_NUMBER = 3
     }
 
     #endregion
@@ -128,8 +153,8 @@ public class Enemy3D : MonoBehaviour
         // 移動配列に何も入っていなかった場合は通常移動
         //if(m_MovePoints.Length == 0)
 
-        m_DiscoveredStates.Add(State.Chase);
-        m_DiscoveredStates.Add(State.Runaway);
+        //m_DiscoveredStates.Add(State.Chase);
+        //m_DiscoveredStates.Add(State.Runaway);
 
         // スプライトカラーの変更
         ChangeSpriteColor(Color.red);
@@ -162,9 +187,12 @@ public class Enemy3D : MonoBehaviour
         {
             case State.Idel: Idel(deltaTime); break;
             case State.Discover: Discover(deltaTime); break;
-            case State.Chase: Chase(deltaTime); break;
+            //case State.DiscoverMove: DiscoverMove(deltaTime); break;
+            //case State.Chase: Chase(deltaTime); break;
+            //case State.AnimalTakeOut: AnimalTakeOut(deltaTime); break;
+            //case State.FeedEat: FeedEat(deltaTime); break;
             case State.TrapHit: TrapHit(deltaTime); break;
-            case State.Runaway: Runaway(deltaTime); break;
+            //case State.Runaway: Runaway(deltaTime); break;
             case State.DeadIdel: DeadIdel(deltaTime); break;
         };
 
@@ -210,18 +238,23 @@ public class Enemy3D : MonoBehaviour
     // 待機状態
     protected virtual void Idel(float deltaTime)
     {
+        // えさの捜索
+
         GameObject obj = null;
         if (InPlayer(out obj))
         {
             // 発見状態に遷移
-            ChangeState(State.Discover, AnimationNumber.ANIME_IDEL_NUMBER);
+            m_DSNumber = DSNumber.DISCOVERED_CHASE_NUMBER;
+            //ChangeState(State.Discover, AnimationNumber.ANIME_IDEL_NUMBER);
+            ChangeDiscoverState(DiscoverState.Discover_Player);
             var player = obj.GetComponent<Player>();
-            if(player != null)
-            {
-                m_Player = player;
-            }
+            if(player != null) m_Player = player;
             m_DiscoverPlayer = obj.transform;
-            //m_DSNumber = DSNumber.DISCOVERED_RUNAWAY_NUMBER;
+            m_DSNumber = DSNumber.DISCOVERED_RUNAWAY_NUMBER;
+            // 移動ポイントの変更
+            m_Agent.Resume();
+            SoundNotice(m_DiscoverPlayer);
+            ChangeSpriteColor(Color.blue);
             return;
         };
 
@@ -231,35 +264,114 @@ public class Enemy3D : MonoBehaviour
         //else PointMove(deltaTime);
     }
 
+    #region 発見状態
     // 発見状態
-    protected virtual void Discover(
-        float deltaTime,
-        DSNumber number =
-        DSNumber.DISCOVERED_CHASE_NUMBER)
+    protected virtual void Discover(float deltaTime)
     {
-        //// 接地したら、他の状態に遷移
-        //if (!m_IsPravGround && IsGround())
-        //{
-        //    //ChangeState(State.Runaway, AnimationNumber.ANIME_RUNAWAY_NUMBER);
-        //    ChangeState(
-        //        m_DiscoveredStates[(int)m_DSNumber],
-        //        AnimationNumber.ANIME_CHASE_NUMBER);
-        //    return;
-        //}
-        ChangeState(State.Runaway, AnimationNumber.ANIME_RUNAWAY_NUMBER);
+        switch (m_DState)
+        {
+            case DiscoverState.Discover_Player: DiscoverPlayer(deltaTime); break;
+            case DiscoverState.Discover_Feed: DiscoverFeed(deltaTime); break;
+            case DiscoverState.Discover_Trap: DiscoverTrap(deltaTime); break;
+        }
+    }
+    // 発見状態の変更
+    protected void ChangeDiscoverState(DiscoverState state)
+    {
+        ChangeState(State.Discover, AnimationNumber.ANIME_DISCOVER_NUMBER);
+        // 同じ行動なら返す
+        if (m_DState == state) return;
+        m_DState = state;
+        m_StateTimer = 0.0f;
+    }
+    protected virtual void DiscoverPlayer(float deltaTime)
+    {
+        // 移動(通常の移動速度の数倍)
+        Move(deltaTime, 4.0f);
+        //Camera.
+        GameObject obj = null;
+        if (!InPlayer(out obj))
+        {
+            // 発見状態に遷移
+            ChangeState(State.Idel, AnimationNumber.ANIME_IDEL_NUMBER);
+            m_Agent.Resume();
+            m_Player = null;
+            ChangeSpriteColor(Color.red);
+            return;
+        };
+    }
+
+    #region えさ発見状態
+    // えさ発見状態
+    protected virtual void DiscoverFeed(float deltaTime)
+    {
+        switch (m_DFState)
+        {
+            case DiscoverFeedState.DiscoverFeed_Move: DiscoverFeedMove(deltaTime); break;
+            case DiscoverFeedState.DiscoverFeed_Lift: DiscoverFeedLift(deltaTime); break;
+            case DiscoverFeedState.DiscoverFeed_TakeAway: DiscoverFeedTakeOut(deltaTime); break;
+        }
+    }
+    // えさ発見状態の状態変更
+    protected void ChangeDiscoverFeedState(DiscoverFeedState state)
+    {
+        ChangeDiscoverState(DiscoverState.Discover_Feed);
+        // 同じ行動なら返す
+        if (m_DFState == state) return;
+        m_DFState = state;
+        m_StateTimer = 0.0f;
+    }
+    // えさ発見移動
+    protected virtual void DiscoverFeedMove(float deltaTime)
+    {
+        var length = Vector3.Distance(
+            m_Agent.destination, this.transform.position
+            );
+
+        if (length < 0.5f)
+        {
+            // 持ち上げ状態に遷移
+            ChangeDiscoverFeedState(DiscoverFeedState.DiscoverFeed_Lift);
+            ChangeSpriteColor(Color.yellow);
+            return;
+        }
+    }
+    // えさ持ち上げ状態
+    protected virtual void DiscoverFeedLift(float deltaTime)
+    {
+        // 仮
+        if (m_StateTimer < 1.0f) return;
+
+        // 持ち上げ終了したら、持ち帰り状態に遷移
+        ChangeDiscoverFeedState(DiscoverFeedState.DiscoverFeed_TakeAway);
+        // 生成ボックスの移動ポイント取得
+        var box = this.transform.parent.GetComponentInParent<EnemyCreateBox>();
+        // 初期位置に移動
+        ChangeMovePoint(box.GetMovePoint(0).position);
         m_Agent.Resume();
-        SoundNotice(m_DiscoverPlayer);
-        ChangeSpriteColor(Color.blue);
     }
-
-    // 追跡状態
-    protected void Chase(float deltaTime)
+    // えさ持ち帰り状態
+    protected virtual void DiscoverFeedTakeOut(float deltaTime)
     {
-        // 移動
-        ChasePlayer();
-        //Move(deltaTime, 2.0f);
+        var length = Vector3.Distance(
+            m_Agent.destination, this.transform.position
+            );
+        // 移動ポイントに到達したら消える
+        if (length > 0.5f) return;
+        ChangeState(State.DeadIdel, AnimationNumber.ANIME_DEAD_NUMBER);
+        // ステータスの初期化
+        InitState();
     }
+    #endregion
 
+    // トラバサミ発見状態
+    protected virtual void DiscoverTrap(float deltaTime)
+    {
+
+    }
+    #endregion
+
+    #region トラバサミヒット状態
     // トラバサミに挟まれている状態
     protected void TrapHit(float deltaTime)
     {
@@ -349,33 +461,13 @@ public class Enemy3D : MonoBehaviour
         //m_Agent.Resume();
         //ChangeSpriteColor(Color.red);
     }
-
-    // 逃げ状態
-    protected void Runaway(float deltaTime)
-    {
-        // 移動(通常の移動速度の数倍)
-        Move(deltaTime, 4.0f);
-        //Camera.
-        GameObject obj = null;
-        if (!InPlayer(out obj))
-        {
-            // 発見状態に遷移
-            ChangeState(State.Idel, AnimationNumber.ANIME_IDEL_NUMBER);
-            m_Agent.Resume();
-            m_Player = null;
-            ChangeSpriteColor(Color.red);
-            //m_DSNumber = DSNumber.DISCOVERED_RUNAWAY_NUMBER;
-            return;
-        };
-        //find
-    }
+    #endregion
 
     // 死亡待機状態
     protected void DeadIdel(float deltaTime)
     {
         // 外部からアクティブ状態に変更されたら、待機状態に遷移
         if (!gameObject.activeSelf) return;
-        // ReMove();
         ChangeState(State.Idel, AnimationNumber.ANIME_IDEL_NUMBER);
         gameObject.SetActive(true);
         m_Agent.Resume();
@@ -434,6 +526,13 @@ public class Enemy3D : MonoBehaviour
         return InObject("PlayerSprite", out player);
     }
 
+    //// タグの付いたオブジェクトを捜します
+    //protected bool InTagObject(string tag, out GameObject hitObj)
+    //{
+    //    hitObj = null;
+    //    return false;
+    //}
+
     protected bool InObject(string name, out GameObject hitObj)
     {
         //var isPlayer = false;
@@ -445,7 +544,7 @@ public class Enemy3D : MonoBehaviour
         // レイポイントからオブジェクトの位置までのレイを伸ばす
         var playerDir = obj.transform.position - m_RayPoint.position;
         Ray ray = new Ray(
-            m_RayPoint.position, 
+            m_RayPoint.position,
             playerDir
             );
         RaycastHit hitInfo;
@@ -474,18 +573,55 @@ public class Enemy3D : MonoBehaviour
         return true;
     }
 
+    // レイチェックを行います
+    //private bool ChackRay(Vector3 position, GameObject obj, out GameObject hitObj)
+    //{
+    //    // レイポイントからオブジェクトの位置までのレイを伸ばす
+    //    var playerDir = obj.transform.position - m_RayPoint.position;
+    //    Ray ray = new Ray(
+    //        m_RayPoint.position,
+    //        playerDir
+    //        );
+    //    RaycastHit hitInfo;
+    //    var hit = Physics.Raycast(ray, out hitInfo);
+    //    // プレイヤーに当たらなかった場合、
+    //    // プレイヤー以外に当たった場合は返す
+    //    //print("見えているか調査");
+    //    if (!hit || hitInfo.collider.name != objName) return false;
+    //    // 当たったオブジェクト
+    //    hitObj = hitInfo.collider.gameObject;
+    //    // プレイヤーとの距離を求める
+    //    var length = Vector3.Distance(
+    //        m_RayPoint.position,
+    //        obj.transform.position
+    //        );
+    //    // 可視距離から離れていれば返す
+    //    //print("距離調査");
+    //    if (length > m_ViewLength) return false;
+    //    // 視野角の外ならば返す
+    //    var dir = obj.transform.position - m_RayPoint.position;
+    //    var angle = Vector3.Angle(m_RayPoint.forward, dir);
+    //    //print("角度調査");
+    //    if (Mathf.Abs(angle) > m_ViewAngle) return false;
+    //    // プレイヤーを見つけた
+    //    //print("見つけた");
+    //    return true;
+    //}
+
     // 罠の動物が見えているか
     protected bool IsInTrapAnimal(out GameObject hitObj)
     {
-        //hitObj = null;
+        hitObj = null;
+        // 
+        //var animal = GameObject.Find("trapAnimal");
         ////// プレイヤーがいない場合は返す
         ////if (m_Player == null) return false;
         //// プレイヤーが空の場合、プレイヤーをセットする
-        //SetPlayer();
+        ////SetPlayer();
         //// プレイヤーがトラップ状態でなかったら、返す
         //// トラップ状態でも、ターゲットがいなければ返す
-        //if (m_Player.GetState() != Player.State.TRAP ||
-        //    m_Player._target == null) return false;
+        ////if (m_Player.GetState() != Player.State.TRAP ||
+        ////    m_Player._target == null) return false;
 
         //Ray ray = new Ray(
         //    m_RayPoint.transform.position,
@@ -497,7 +633,7 @@ public class Enemy3D : MonoBehaviour
         //// 間にオブジェクトがある場合は返す
         //if (hitInfo.collider != null) return false;
         //// 罠になっている動物を入れる
-        //hitObj = m_Player._target;
+        //hitObj = null; //m_Player._target;
         //// 罠の動物との距離を求める
         //var length = Vector3.Distance(
         //    m_RayPoint.transform.position,
@@ -514,8 +650,6 @@ public class Enemy3D : MonoBehaviour
         //// プレイヤーを見つけた
         //print("見つけた");
         //return true;
-
-        hitObj = null;
         return false;
     }
 
@@ -567,23 +701,16 @@ public class Enemy3D : MonoBehaviour
             (m_Speed * subSpeed) * MultSpeed * 
             v.normalized * deltaTime;
     }
-
+    // 移動関数
     protected virtual void Move(float deltaTime, float subSpeed = 1.0f)
     {
         if (m_MovePoints.Length > 0) PointMove(deltaTime);
         else ReturnMove(deltaTime, subSpeed);
     }
-
+    // ナビメッシュの移動を行います(指定位置ベクトルに移動)
     private void PointMove(float deltaTime)
     {
-        //var pointPos = m_MovePoints[m_CurrentMovePoint % m_MovePoints.Length].position;
-        //var v = pointPos - this.transform.position;
-        //dir = dir.normalized;
-        //m_Velocity = Vector3.Normalize(pointPos - this.transform.position);
-        // ポイントとの距離が一定距離に達したら、移動ポイントを変える
-        // Vector3.Distance(m_MovePointPosition, this.transform.position)
-
-        //// エージェントの移動
+        // エージェントの移動
         //m_Agent.destination = m_MovePoints[m_CurrentMovePoint % m_MovePoints.Length].position;
         // ベクトルとの角度によって、角度を変更します
         // 目的地に到着したら、目的地のポイントを変える
@@ -592,7 +719,6 @@ public class Enemy3D : MonoBehaviour
             );
         if (length < 0.5f) ChangeMovePoint();
     }
-
     // 移動ポイントの変更を行います
     private void ChangeMovePoint()
     {
@@ -601,15 +727,8 @@ public class Enemy3D : MonoBehaviour
         var pos = 
             m_MovePoints[m_CurrentMovePoint % m_MovePoints.Length].position;
         ChangeMovePoint(pos);
-        //// エージェントの移動
-        //m_Agent.destination = m_MovePointPosition;
-        //ChangeSpriteAngle();
-
-        ////m_Velocity = m_MovePointPosition - this.transform.position;
-        ////var changeAngle = 180 / 3;        
-        ////print(Vector2.Angle(rightV, dir));
     }
-
+    // 移動ポイントの変更を行います(位置ベクトル指定)
     protected void ChangeMovePoint(Vector3 position)
     {
         // 次の移動ポイントに変更
@@ -617,8 +736,9 @@ public class Enemy3D : MonoBehaviour
         // エージェントの移動
         m_Agent.destination = m_MovePointPosition;
         ChangeSpriteAngle();
+        m_Agent.Resume();
     }
-
+    //スプライトの角度の変更を行います
     private void ChangeSpriteAngle()
     {
         // スプライトの角度変更
@@ -640,7 +760,6 @@ public class Enemy3D : MonoBehaviour
         if (Vector2.Angle(rightV, dir) >= 90.0f) x = -1;
         m_EnemySprite.ChangeSprite(num, x);
     }
-
     // オブジェクトの確認を行います
     private void CheckObject()
     {
@@ -651,7 +770,6 @@ public class Enemy3D : MonoBehaviour
         // メインカメラの確認
         CheckMainCamera();
     }
-
     // 生成ボックスの確認を行います
     private void CheckCreateBox()
     {
@@ -694,7 +812,6 @@ public class Enemy3D : MonoBehaviour
             m_Sprite.transform.LookAt(p);
         }
     }
-
     // スプライトの確認を行います
     private void CheckSprite()
     {
@@ -759,6 +876,35 @@ public class Enemy3D : MonoBehaviour
     //{
     //    var length = 0.0f;
     //}
+
+    // えさの捜索を行います
+    protected virtual void SearchFeed()
+    {
+        //gameObject.transform.FindChild
+        var trapName = "Feed";//"sample1(Clone)";
+
+        var traps = GameObject.Find("Traps");
+        foreach(Transform child in traps.transform)
+        {
+            // ターゲットの取得
+            
+            // えさとかかっている動物の名前が同一なら、状態遷移
+        }
+        // えさを見つけたら、えさの場所に移動
+        GameObject obj = null;
+        if (InObject(trapName, out obj))
+        {
+            // えさ発見移動状態に遷移
+            ChangeDiscoverFeedState(DiscoverFeedState.DiscoverFeed_Move);
+            //var enemy = m_DiscoverObj.GetComponent<Enemy3D>();
+            //if (enemy == null) return;
+            //m_Animal = enemy;
+            // 移動ポイントを動物に変更
+            ChangeMovePoint(obj.transform.position);
+            ChangeSpriteColor(Color.magenta);
+            return;
+        }
+    }
 
     // プレイヤーとの衝突判定処理
     protected void OnCollidePlayer(Collider collision)
@@ -837,15 +983,18 @@ public class Enemy3D : MonoBehaviour
             ChangeState(State.Idel, AnimationNumber.ANIME_IDEL_NUMBER);
             return;
         }
-        var direction = Vector2.right;
-        var dir = player.transform.position - this.transform.position;
-        var length = 2.0f;
-        // 近づきすぎたら、移動しない
-        if (Mathf.Abs(dir.x) < length) direction.x = 0.0f;
-        // 方向転換
-        if (dir.x < 0.0f) direction.x = -1.0f;
-        // 移動量に代入
-        m_TotalVelocity = m_Speed * direction * Time.deltaTime;
+        // 移動ポイントの変更
+        ChangeMovePoint(player.transform.position);
+        m_Agent.Resume();
+        //var direction = Vector2.right;
+        //var dir = player.transform.position - this.transform.position;
+        //var length = 2.0f;
+        //// 近づきすぎたら、移動しない
+        //if (Mathf.Abs(dir.x) < length) direction.x = 0.0f;
+        //// 方向転換
+        //if (dir.x < 0.0f) direction.x = -1.0f;
+        //// 移動量に代入
+        //m_TotalVelocity = m_Speed * direction * Time.deltaTime;
     }
 
     // 敵がはさまれた時の、暴れる時間を返します(秒数)
@@ -884,15 +1033,38 @@ public class Enemy3D : MonoBehaviour
     // 敵をトラップ化させます
     public void ChangeTrap(GameObject obj = null)
     {
+        // すでに引っかかって状態なら、返す
+        if (obj == null) return;
+        // 挟まったトラバサミを入れる
+        m_TrapObj = obj;
+        var trap = obj.GetComponent<Trap_Small>();
+        //if(trap != null)
+        //{
+        //    if (trap._state == Trap_Small.TrapState.CAPTURE) return;
+        //}
+        // すでにはさんでいる場合は、返す
+        if (trap._state == Trap_Small.TrapState.CAPTURE) return;
+
         // トラップ化状態に遷移
         ChangeTrapHitState(
             TrapHitState.TrapHit_Change,
             AnimationNumber.ANIME_TRAP_NUMBER
             );
+
+        // トラップ側の状態を見て、どの状態に遷移するかを判断する
+        // 小型バサミ
+
+        // 大型バサミ
+
+
         ChangeSpriteColor(Color.green);
-        // 挟まったトラバサミを入れる
-        if (obj == null) return;
-        m_TrapObj = obj;
+        // 自身のトリガーをオンにする
+        var collider = gameObject.GetComponent<Collider>();
+        if(collider != null) collider.isTrigger = true;
+        //// 相手側のトリガーもオンにする
+        //var otherCollider = obj.GetComponent<Collider>();
+        //if (otherCollider != null) otherCollider.isTrigger = true;
+
         //// プレイヤーが空だったら、入れる
         //SetPlayer();
     }

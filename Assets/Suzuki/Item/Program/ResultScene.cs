@@ -4,36 +4,47 @@ using System.Collections;
 
 public class ResultScene : MonoBehaviour
 {
-    private SpriteRenderer _sp;
-    private SceneManagerScript _scene;
+    public enum ResultScoreState
+    {
+        FIRST,       //Scoreが低い時
+        SECOND,      //Scoreが中間の時
+        THIRD,       //Scpreが高い時
+    }
 
-
-    
+    public ResultScoreState _rstate;
+    public int _addscore;   //出スコア
+    private int _inscore;   //入スコア
     // Use this for initialization
     void Start()
     {
-        _scene = SceneManagerScript.FindObjectOfType<SceneManagerScript>();
-        _sp = SpriteRenderer.FindObjectOfType<SpriteRenderer>();
-        _sp.color = new Color(0, 0, 0, 0);
-        Result();
+        _rstate = ResultScoreState.FIRST;
+        _inscore = 0;
+
     }
 
     // Update is called once per frame
     void Update()
     {
-        Result();
+        // _inscore = GameManager.gameManager.GetScore();
+        //AddScore(_addscore);
     }
-    void Result()
+    void StateChange()
     {
-        if (Input.GetKeyDown(KeyCode.C))
+        if (_inscore >= 100&&_inscore<200)  //適当
         {
-            _scene.FadeBlack();
-            _sp.color = new Color(0, 0, 0, 1);
+            ChangeScoreState(ResultScoreState.SECOND);
         }
-        if (Input.GetKeyDown(KeyCode.G))
+        else if (_inscore >= 200)         //適当
         {
-            _scene.FadeWhite();
-            _sp.color = new Color(0, 0, 0, 0);
+            ChangeScoreState(ResultScoreState.THIRD);
         }
     }
+    public void ChangeScoreState(ResultScoreState rstate)
+    {
+        _rstate = rstate;
+    }
+    //public void AddScore(int _addscore)
+    //{
+    //    _addscore = _inscore;
+    //}
 }

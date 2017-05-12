@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class LargeEnemy : Enemy3D {
+public class LargeEnemy : MiddleEnemy {
 
     // Use this for initialization
     //void Start () {
@@ -13,10 +13,10 @@ public class LargeEnemy : Enemy3D {
 
     //}
 
-    //#region override関数
-    //public override void SoundNotice(Transform point)
-    //{
-    //    base.SoundNotice(point);
-    //}
-    //#endregion
+    #region override関数
+    public override void SoundNotice(Transform point)
+    {
+        base.SoundNotice(point);
+    }
+    #endregion
 }
