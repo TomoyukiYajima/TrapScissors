@@ -62,6 +62,9 @@ public class Player : MonoBehaviour
     //移動処理
     void Move(float gravity)
     {
+        _moveDirection.y = 0.0f;
+        float y = _moveDirection.y;
+
         Vector3 newPosition = transform.position;
 
         var cameraRight = Vector3.Scale(_mainCamera.transform.right, new Vector3(1, 1, 1)).normalized;

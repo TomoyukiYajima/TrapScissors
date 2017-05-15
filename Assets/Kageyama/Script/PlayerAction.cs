@@ -3,7 +3,7 @@
 最終編集者：影山清晃
 
 内　　　容：プレイヤーのアクション
-最終更新日：2017/04/27
+最終更新日：2017/05/15
 *******************************************/
 using UnityEngine;
 using System.Collections;
@@ -22,8 +22,11 @@ public class PlayerAction : MonoBehaviour
     #endregion
     #region 餌設置に必要な変数
     [SerializeField]
-    private GameObject[] _feed;
-    private int _feedNumber;
+    private GameObject _food;
+    private int _foodNumber;
+    [SerializeField]
+    private GameObject _foodUI;
+    private FoodUIMove _foodUIMove;
     #endregion
     #region 指笛に必要な変数
     [SerializeField]
@@ -37,8 +40,11 @@ public class PlayerAction : MonoBehaviour
     void Start ()
     {
         _onTrapFlag = false;
-        _feedNumber = 0;
+        _foodNumber = 0;
         _trapMax = GameManager.gameManager.TrapNumber();
+        _foodUIMove = _foodUI.GetComponent<FoodUIMove>();
+        //今選んでいる餌を調べる
+        _foodNumber = _foodUIMove.SelectFoodNumber();
         _trap = _bigTrap.GetComponent<BigTrap>();
     }
 	
@@ -52,20 +58,11 @@ public class PlayerAction : MonoBehaviour
     //プレイヤーのボタン操作
     void Action()
     {
-        //設置する餌を切り替える
-        if (Input.GetKeyDown(KeyCode.V)) FeedChenge(-1);
-        else if (Input.GetKeyDown(KeyCode.B)) FeedChenge(1);
-
         //トラップの設置、回収
         if (Input.GetKeyDown(KeyCode.Z))
         {
             if(_onTrapFlag == false && _trapCount < _trapMax)
             {
-                // 生成して、子オブジェクトにする
-                //Instantiate(
-                //    m_CreateEnemy, this.transform.position,
-                //    this.transform.rotation, this.transform
-                //    );
                 // 生成カウントに加算
                 GameObject traps = GameObject.Find("Traps");
                 if(traps != null)
@@ -91,10 +88,7 @@ public class PlayerAction : MonoBehaviour
         //餌をまく
         if(Input.GetKeyDown(KeyCode.X))
         {
-            //GameObject _trap = Instantiate(_feed[_feedNumber]);
-            //_trap.transform.position = new Vector3(this.transform.position.x,
-            //                                       this.transform.position.y - 1.5f,
-            //                                       this.transform.position.z);
+            FoodCheck();
         }
 
         //音を鳴らす
@@ -110,14 +104,21 @@ public class PlayerAction : MonoBehaviour
     /// 設置する餌を切り替える
     /// </summary>
     /// <param name="num">右側に切りかえるなら正の数、左側なら負の数</param>
-    public void FeedChenge(int num)
+    public void FoodCheck()
     {
-        if (num >= 0) num = 1;
-        else num = -1;
+        //今選んでいる餌を調べる
+        _foodNumber = _foodUIMove.SelectFoodNumber();
+        //選んでいる餌が所持数0以下なら、何もしない
+        if (_foodUIMove.FoodCountCheck(_foodNumber) <= 0) return;
+        _foodUIMove.FoodCountSub(_foodNumber);
 
-        _feedNumber += num;
-        if (_feedNumber >= _feed.Length) _feedNumber = 0;
-        else if (_feedNumber < 0) _feedNumber = _feed.Length - 1;
+        Vector3 pos = new Vector3(this.transform.position.x,
+                                                       this.transform.position.y - 1.5f,
+                                                       this.transform.position.z);
+        //餌を生成
+        GameObject _foodObj = Instantiate(_food);
+        _foodObj.transform.localPosition = pos;
+        _foodObj.GetComponent<Food>().SelectFood(_foodNumber);
     }
 
     /// <summary>

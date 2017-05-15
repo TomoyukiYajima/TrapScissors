@@ -211,6 +211,22 @@ public class SceneManagerScript : MonoBehaviour
     }
 
     /// <summary>
+    /// 現在のシーンをフェードアウトしてから新しく読み込む
+    /// </summary>
+    public void FadeNowScene()
+    {
+        FadeOut(SceneName());
+    }
+
+    /// <summary>
+    /// 現在のシーンを新しく読み込む
+    /// </summary>
+    public void NowScene()
+    {
+        SceneOut(SceneName());
+    }
+
+    /// <summary>
     /// シーン名を取得
     /// </summary>
     /// <returns></returns>

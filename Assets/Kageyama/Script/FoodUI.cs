@@ -4,16 +4,28 @@ using UnityEngine.UI;
 
 public class FoodUI : MonoBehaviour
 {
-    [SerializeField]
-    private int _myNumberll;
+    //自分の次に移動する座標
     private float _toPosition;
+    //親のクラス
     private FoodUIMove _foodUIMove;
+    //自分のRectTransform
     private RectTransform _myRect;
+    //選択されていないときの色
     private float _blackColor = 0.5f;
+    //選択されていないときのサイズ
     private float _smallScale = 0.6f;
+    //移動するべき座標の設定
     private float[] _positions = {-35, 0, 35};
+    //自分の今の番号
     [SerializeField]
     private int _posNumber;
+    //所持数を表示する値
+    private int _possession;
+    //自分の番号
+    [SerializeField]
+    private int _myNumber;
+    [SerializeField]
+    private RectTransform _text;
     // Use this for initialization
     void Start()
     {
@@ -30,15 +42,8 @@ public class FoodUI : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-    }
-
-    /// <summary>
-    /// 自分が何番の餌なのか教えてもらう
-    /// </summary>
-    /// <param name="num"></param>
-    public void SetNumber(int num)
-    {
-        _myNumberll = num;
+        _possession = _foodUIMove.FoodCountCheck(_myNumber);
+        _text.GetComponent<Text>().text = _possession.ToString();
     }
 
     public void RightMoveRotation(GameObject obje)

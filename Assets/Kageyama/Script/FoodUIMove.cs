@@ -4,13 +4,13 @@ using System.Collections;
 public class FoodUIMove : MonoBehaviour
 {
     public GameObject[] _foodUI;
+    public int[] _foodNumber;
     [SerializeField]
     private int _selectFood;
 
 	// Use this for initialization
 	void Start ()
     {
-        _selectFood = 0;
 	}
 	
 	// Update is called once per frame
@@ -61,5 +61,42 @@ public class FoodUIMove : MonoBehaviour
     public GameObject SelectFood()
     {
         return _foodUI[_selectFood];
+    }
+
+    /// <summary>
+    /// 選んでいる餌の番号を返す
+    /// </summary>
+    /// <returns></returns>
+    public int SelectFoodNumber()
+    {
+        return _selectFood;
+    }
+
+    /// <summary>
+    /// 餌の所持数を増やす
+    /// </summary>
+    /// <param name="num">増やす餌の番号/param>
+    public void FoodCountAdd(int num)
+    {
+        _foodNumber[num]++;
+    }
+
+    /// <summary>
+    /// 餌の所持数を減らす
+    /// </summary>
+    /// <param name="num">減らす餌の番号</param>
+    public void FoodCountSub(int num)
+    {
+        _foodNumber[num]--;
+    }
+
+    /// <summary>
+    /// 餌の所持数を確認する
+    /// </summary>
+    /// <param name="num">確認する餌の番号</param>
+    /// <returns></returns>
+    public int FoodCountCheck(int num)
+    {
+        return _foodNumber[num];
     }
 }
