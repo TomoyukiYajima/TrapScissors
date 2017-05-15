@@ -165,6 +165,12 @@ public class MiddleEnemy : Enemy3D {
     {
         base.SoundNotice(point);
     }
+    // トラバサミに当たった時の行動です
+    protected override void TrapHitAction()
+    {
+        ChangeState(State.Runaway, AnimationNumber.ANIME_RUNAWAY_NUMBER);
+        ChangeSpriteColor(Color.white);
+    }
     #endregion
 
     #region エディターのシリアライズ変更

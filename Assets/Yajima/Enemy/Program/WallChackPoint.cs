@@ -42,6 +42,23 @@ public class WallChackPoint : MonoBehaviour
         m_IsWallHit = false;
     }
 
+    private void CheckWall(Collider col)
+    {
+        if (col.gameObject.tag != "Wall") return;
+        m_IsWallHit = true;
+        m_HitWallObj = col.gameObject;
+    }
+
+    public void OnTriggerEnter(Collider other)
+    {
+        CheckWall(other);
+    }
+
+    public void OnTriggerStay(Collider other)
+    {
+        CheckWall(other);
+    }
+
     //public void OnCollisionEnter2D(Collision2D collision)
     //{
     //    //if (collision.gameObject.tag != "Wall" && 
@@ -49,11 +66,4 @@ public class WallChackPoint : MonoBehaviour
     //    if (collision.gameObject.tag != "Ground") return;
     //    m_IsWallHit = true;
     //}
-
-    public void OnTriggerEnter2D(Collider2D collision)
-    {
-        if (collision.gameObject.tag != "Ground") return;
-        m_IsWallHit = true;
-        m_HitWallObj = collision.gameObject;
-    }
 }

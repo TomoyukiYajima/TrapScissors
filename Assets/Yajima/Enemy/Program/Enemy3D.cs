@@ -43,7 +43,8 @@ public class Enemy3D : MonoBehaviour
     protected int m_Size = 1;                           // 動物の大きさ(内部数値)
     protected float m_StateTimer = 0.0f;                // 状態の時間
     //protected string m_LineObjName = "Player";
-    protected string m_FeedName = "Feed";               // 反応するえさの名前
+    protected string m_FeedName = "Food";               // 反応するえさの名前
+    // えさStateの追加
     protected string m_AnimalFeedName = "";             // 反応するトラバサミにかかった動物の名前
     protected bool m_IsRendered = false;                // カメラに映っているか
     protected Vector3 m_TotalVelocity = Vector3.zero;   // 合計の移動量
@@ -56,9 +57,9 @@ public class Enemy3D : MonoBehaviour
     protected Rigidbody m_Rigidbody;
     protected DSNumber m_DSNumber =
         DSNumber.DISCOVERED_CHASE_NUMBER;               // 追跡状態の番号 
-    protected DiscoverState m_DState = 
+    protected DiscoverState m_DState =
         DiscoverState.Discover_None;                    // 発見状態
-    protected DiscoverFeedState m_DFState = 
+    protected DiscoverFeedState m_DFState =
         DiscoverFeedState.DiscoverFeed_Move;            // えさ発見状態  
     protected NavMeshAgent m_Agent;                     // ナビメッシュエージェント  
 
@@ -94,9 +95,10 @@ public class Enemy3D : MonoBehaviour
         Discover,       // 発見状態
         DiscoverMove,   // 発見後の移動状態
         TrapHit,        // トラバサミに挟まれている状態
-        //Runaway,        // 逃亡状態
+        Runaway,        // 逃亡状態
         //AnimalTakeOut,  // 動物持ち帰り状態
         //FeedEat,        // 餌食べ状態
+        Faint,          // 気絶状態
         DeadIdel        // 死亡待機状態
     }
     // 発見状態
@@ -198,7 +200,8 @@ public class Enemy3D : MonoBehaviour
             //case State.AnimalTakeOut: AnimalTakeOut(deltaTime); break;
             //case State.FeedEat: FeedEat(deltaTime); break;
             case State.TrapHit: TrapHit(deltaTime); break;
-            //case State.Runaway: Runaway(deltaTime); break;
+            case State.Runaway: Runaway(deltaTime); break;
+            case State.Faint: Faint(deltaTime); break;
             case State.DeadIdel: DeadIdel(deltaTime); break;
         };
 
@@ -257,7 +260,7 @@ public class Enemy3D : MonoBehaviour
             //ChangeState(State.Discover, AnimationNumber.ANIME_IDEL_NUMBER);
             ChangeDiscoverState(DiscoverState.Discover_Player);
             var player = obj.GetComponent<Player>();
-            if(player != null) m_Player = player;
+            if (player != null) m_Player = player;
             m_DiscoverPlayer = obj.transform;
             m_DSNumber = DSNumber.DISCOVERED_RUNAWAY_NUMBER;
             // 移動ポイントの変更
@@ -350,6 +353,15 @@ public class Enemy3D : MonoBehaviour
             ChangeSpriteColor(Color.yellow);
             return;
         }
+
+        // えさがなかったら、待機状態に遷移
+        if (m_Trap == null)
+        {
+            ChangeState(State.Idel, AnimationNumber.ANIME_IDEL_NUMBER);
+            ChangeMovePoint();
+            m_Agent.Resume();
+        }
+
     }
     // えさ持ち上げ状態
     protected virtual void DiscoverFeedLift(float deltaTime)
@@ -370,7 +382,7 @@ public class Enemy3D : MonoBehaviour
         animalParent.transform.localPosition = Vector3.zero;
         animalParent.transform.localRotation = new Quaternion();
         var sprite = m_Sprite.GetComponent<EnemySprite>();
-        animalParent.transform.localScale = 
+        animalParent.transform.localScale =
             new Vector3(
                 animal.transform.localScale.x / sprite.GetSpriteScale().x,
                 animal.transform.localScale.y / sprite.GetSpriteScale().y,
@@ -484,11 +496,24 @@ public class Enemy3D : MonoBehaviour
     // 罠状態
     protected void TrapHitChange(float deltaTime)
     {
+        // トラップから解除されたら
         if (m_TrapObj != null) return;
-        // 死亡待機状態に遷移
-        ChangeState(State.DeadIdel, AnimationNumber.ANIME_DEAD_NUMBER);
-        // ステータスの初期化
-        InitState();
+
+        // 逃げ状態に遷移
+        ChangeState(State.Runaway, AnimationNumber.ANIME_RUNAWAY_NUMBER);
+        ChangeSpriteColor(Color.white);
+        // トラバサミを空っぽにする
+        m_TrapObj = null;
+
+        //// 死亡待機状態に遷移
+        //ChangeState(State.DeadIdel, AnimationNumber.ANIME_DEAD_NUMBER);
+        //// ステータスの初期化
+        //InitState();
+
+        //if (m_Trap != null) return;
+        //if (m_Trap._state == Trap_Small.TrapState.WAIT_TRAP) ;
+        // 進行方向に逃げる
+        // trapReMove();
 
         //// プレイヤーが罠状態なら返す
 
@@ -506,6 +531,34 @@ public class Enemy3D : MonoBehaviour
         //ChangeSpriteColor(Color.red);
     }
     #endregion
+
+    // 逃げ状態
+    protected void Runaway(float deltaTime)
+    {
+        //if()
+        // 前方のポイントに移動するように、ポイントの更新をする
+        ChangeMovePoint(m_MouthPoint.position);
+        //
+        if (m_WChackPoint.IsWallHit())
+        {
+            // 気絶状態に遷移
+            ChangeState(State.Faint, AnimationNumber.ANIME_IDEL_NUMBER);
+            ChangeSpriteColor(Color.yellow);
+            m_Agent.Stop();
+        }
+    }
+
+    // 気絶状態
+    protected void Faint(float deltaTime)
+    {
+        // 一定時間経過まで動かない
+        if (m_StateTimer < 3.0f) return;
+        // 待機状態に遷移
+        ChangeState(State.Idel, AnimationNumber.ANIME_IDEL_NUMBER);
+        ChangeMovePoint();
+        m_Agent.Resume();
+        ChangeSpriteColor(Color.red);
+    }
 
     // 死亡待機状態
     protected void DeadIdel(float deltaTime)
@@ -560,6 +613,20 @@ public class Enemy3D : MonoBehaviour
         m_Sprite.transform.Rotate(Vector3.up, m_RotateDegree);
         // 壁捜索ポイントの方向変更
         m_WChackPoint.ChangeDirection();
+    }
+    // トラバサミに当たった時の行動です
+    protected virtual void TrapHitAction()
+    {
+        // トラップ化状態に遷移
+        ChangeTrapHitState(
+            TrapHitState.TrapHit_Change,
+            AnimationNumber.ANIME_TRAP_NUMBER
+            );
+        // 自身のトリガーをオンにする
+        var collider = gameObject.GetComponent<Collider>();
+        //if (collider != null) collider.isTrigger = true;
+        collider.enabled = false;
+        ChangeSpriteColor(Color.green);
     }
     #endregion
 
@@ -741,8 +808,8 @@ public class Enemy3D : MonoBehaviour
         v.y = 0;
         //var v = (Vector3.forward - Vector3.right) * Input.GetAxis("Vertical") + cameraR * Input.GetAxis("Horizontal");
 
-        m_TotalVelocity = 
-            (m_Speed * subSpeed) * MULT_SPEED * 
+        m_TotalVelocity =
+            (m_Speed * subSpeed) * MULT_SPEED *
             v.normalized * deltaTime;
     }
     // 移動関数
@@ -768,7 +835,7 @@ public class Enemy3D : MonoBehaviour
     {
         // 次の移動ポイントに変更
         m_CurrentMovePoint++;
-        var pos = 
+        var pos =
             m_MovePoints[m_CurrentMovePoint % m_MovePoints.Length].position;
         ChangeMovePoint(pos);
     }
@@ -1184,7 +1251,7 @@ public class Enemy3D : MonoBehaviour
         //ChangeState(State)
         // 暴れ状態に遷移
         ChangeTrapHitState(
-            TrapHitState.TrapHit_Rage, 
+            TrapHitState.TrapHit_Rage,
             AnimationNumber.ANIME_TRAP_HIT_NUMBER
             );
         ChangeSpriteColor(Color.yellow);
@@ -1205,23 +1272,14 @@ public class Enemy3D : MonoBehaviour
         // すでにはさんでいる場合は、返す
         if (trap._state == Trap_Small.TrapState.CAPTURE_TRAP) return;
 
-        // トラップ化状態に遷移
-        ChangeTrapHitState(
-            TrapHitState.TrapHit_Change,
-            AnimationNumber.ANIME_TRAP_NUMBER
-            );
+        // トラバサミに挟まった時のアクション
+        TrapHitAction();
 
         // トラップ側の状態を見て、どの状態に遷移するかを判断する
         // 小型バサミ
 
         // 大型バサミ
 
-
-        ChangeSpriteColor(Color.green);
-        // 自身のトリガーをオンにする
-        var collider = gameObject.GetComponent<Collider>();
-        //if (collider != null) collider.isTrigger = true;
-        collider.enabled = false;
         //// 相手側のトリガーもオンにする
         //var otherCollider = obj.GetComponent<Collider>();
         //if (otherCollider != null) otherCollider.isTrigger = true;
@@ -1285,6 +1343,16 @@ public class Enemy3D : MonoBehaviour
     {
         //var tag = collision.gameObject.tag;
 
+        //// 壁に当たった場合の処理
+        //if (tag == "Wall")
+        //{
+        //    if (m_State != State.Runaway) return;
+        //    // 逃げ状態だったら、気絶状態に遷移
+        //    ChangeState(State.Faint, AnimationNumber.ANIME_IDEL_NUMBER);
+        //    ChangeSpriteColor(Color.yellow);
+        //    m_Agent.Stop();
+        //}
+
         // プレイヤーに当たった場合
         //if (tag == m_PlayerTag)
         //{
@@ -1300,6 +1368,22 @@ public class Enemy3D : MonoBehaviour
         // エネミー同士が当たった場合
         //if (tag == "Enemy") { this.transform.Rotate(Vector3.up, 180.0f); }
     }
+
+    //public void OnCollisionStay(Collision collision)
+    //{
+    //    var tag = collision.gameObject.tag;
+
+    //    // 壁に当たった場合の処理
+    //    if (tag == "Wall")
+    //    {
+    //        if (m_State != State.Runaway) return;
+    //        // 逃げ状態だったら、気絶状態に遷移
+    //        ChangeState(State.Faint, AnimationNumber.ANIME_IDEL_NUMBER);
+    //        ChangeSpriteColor(Color.yellow);
+    //        m_Agent.Stop();
+    //    }
+    //}
+
     #endregion
 
     #region ギズモ関数
