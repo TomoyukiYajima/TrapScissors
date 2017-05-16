@@ -19,18 +19,16 @@ public class ResultScene : MonoBehaviour
     {
         _rstate = ResultScoreState.FIRST;
         _inscore = 0;
-
     }
 
     // Update is called once per frame
     void Update()
     {
-        // _inscore = GameManager.gameManager.GetScore();
-        //AddScore(_addscore);
+        //_inscore = GameManager.gameManager.GetScore();
     }
     void StateChange()
     {
-        if (_inscore >= 100&&_inscore<200)  //適当
+        if (_inscore >= 100 && _inscore < 200)  //適当
         {
             ChangeScoreState(ResultScoreState.SECOND);
         }
@@ -43,8 +41,21 @@ public class ResultScene : MonoBehaviour
     {
         _rstate = rstate;
     }
-    //public void AddScore(int _addscore)
-    //{
-    //    _addscore = _inscore;
-    //}
+    public void AddScore(int _addscore)
+    {
+        _addscore = _inscore;
+    }
+}
+
+public class ChangeScene : MonoBehaviour
+{
+    private ResultScene _result;
+    void Start()
+    {
+        
+    }
+    void Update()
+    {
+
+    }
 }
