@@ -10,14 +10,14 @@ public class BigTrap : MonoBehaviour
         WAIT,       //動物が掛かるのを待っている状態
         CAPTURE,    //動物を捕まえている状態
     }
-
+   private int _time;
     public TrapState _state;
     [SerializeField, TooltipAttribute("Resultで表示されるオブジェクト")]
     private GameObject _result;
     private bool _flg;
     #region 挟むときに必要な変数
     //鋏んでいるオブジェクトを入れる
-    [SerializeField] 
+    [SerializeField]
     private GameObject _targetAnimal;
     #endregion
     private SceneManagerScript _scene;
@@ -51,9 +51,14 @@ public class BigTrap : MonoBehaviour
 
             _targetAnimal = col.gameObject;
             _flg = true;
-            SceneManagerScript.sceneManager.FadeBlack();
+
             _result.SetActive(true);
         }
+        //if (Time.time <= 180)
+        //{
+        //    SceneManagerScript.sceneManager.FadeBlack();
+            
+        //}
     }
 
     public void ChengeState(TrapState state)

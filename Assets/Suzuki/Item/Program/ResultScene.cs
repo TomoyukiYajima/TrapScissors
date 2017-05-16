@@ -47,15 +47,15 @@ public class ResultScene : MonoBehaviour
     }
 }
 
-public class ChangeScene : MonoBehaviour
-{
-    private ResultScene _result;
-    void Start()
-    {
+//public class ChangeScene : MonoBehaviour
+//{
+//    private ResultScene _result;
+//    void Start()
+//    {
         
-    }
-    void Update()
-    {
+//    }
+//    void Update()
+//    {
 
-    }
-}
+//    }
+//}
