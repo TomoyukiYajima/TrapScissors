@@ -8,6 +8,11 @@ public class WallChackPoint : MonoBehaviour
     private GameObject m_HitWallObj;        // 当たったオブジェクト
     #endregion
 
+    //void Update()
+    //{
+        
+    //}
+
     // 壁に衝突したか
     public bool IsWallHit() { return m_IsWallHit; }
 
@@ -44,6 +49,7 @@ public class WallChackPoint : MonoBehaviour
 
     private void CheckWall(Collider col)
     {
+        m_IsWallHit = false;
         if (col.gameObject.tag != "Wall") return;
         m_IsWallHit = true;
         m_HitWallObj = col.gameObject;

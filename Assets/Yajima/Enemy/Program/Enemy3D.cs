@@ -502,6 +502,10 @@ public class Enemy3D : MonoBehaviour
         // 逃げ状態に遷移
         ChangeState(State.Runaway, AnimationNumber.ANIME_RUNAWAY_NUMBER);
         ChangeSpriteColor(Color.white);
+        // 自身の衝突判定をオンにする
+        var collider = gameObject.GetComponent<Collider>();
+        //if (collider != null) collider.isTrigger = true;
+        collider.enabled = true;
         // トラバサミを空っぽにする
         m_TrapObj = null;
 
@@ -831,7 +835,7 @@ public class Enemy3D : MonoBehaviour
         if (length < 0.5f) ChangeMovePoint();
     }
     // 移動ポイントの変更を行います
-    private void ChangeMovePoint()
+    protected virtual void ChangeMovePoint()
     {
         // 次の移動ポイントに変更
         m_CurrentMovePoint++;
@@ -1260,7 +1264,7 @@ public class Enemy3D : MonoBehaviour
     // 敵をトラップ化させます
     public void ChangeTrap(GameObject obj = null)
     {
-        // すでに引っかかって状態なら、返す
+        // 相手が空なら返す
         if (obj == null) return;
         // 挟まったトラバサミを入れる
         m_TrapObj = obj;
@@ -1390,14 +1394,18 @@ public class Enemy3D : MonoBehaviour
     // ギズモの描画
     public void OnDrawGizmos()
     {
-        DrawObjLine("PlayerSprite");
-        //// 視野角の右端の描画
-        //Gizmos.DrawRay(m_RayPoint.position, Quaternion.Euler(0, m_ViewAngle, 0) * forward);
-        //// 視野角の左端の描画
-        //Gizmos.DrawRay(m_RayPoint.position, Quaternion.Euler(0, -m_ViewAngle, 0) * forward);
+        DrawGizmos();
 
-        //Gizmos.color = Color.green;
-        //DrawObjLine(m_MovePoints[m_CurrentMovePoint].name);
+        //DrawObjLine("PlayerSprite");
+        ////// 視野角の右端の描画
+        ////Gizmos.DrawRay(m_RayPoint.position, Quaternion.Euler(0, m_ViewAngle, 0) * forward);
+        ////// 視野角の左端の描画
+        ////Gizmos.DrawRay(m_RayPoint.position, Quaternion.Euler(0, -m_ViewAngle, 0) * forward);
+        //var color = Color.green;
+        //color.a = 0.2f;
+        //Gizmos.color = color;
+        ////DrawObjLine(m_MovePoints[m_CurrentMovePoint].name);
+        //Gizmos.DrawSphere(transform.parent.position, 5.0f);
 
         //// 移動の描画
         //for(int i = 0; i != m_MovePoints.Length; i++)
@@ -1407,6 +1415,12 @@ public class Enemy3D : MonoBehaviour
         //        m_MovePoints[(i + 1) % m_MovePoints.Length].transform.position
         //        );
         //}
+    }
+
+    protected virtual void DrawGizmos()
+    {
+        // レイの描画
+        DrawObjLine("PlayerSprite");
     }
 
     // 対象との線分を描画します
