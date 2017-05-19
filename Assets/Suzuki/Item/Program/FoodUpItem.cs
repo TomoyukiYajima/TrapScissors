@@ -41,15 +41,15 @@ public class FoodUpItem : MonoBehaviour
         print("a");
     }
 
-    public void OnTriggerEnter(Collider other)
-    {
-        if (other.tag == "Player" && _checksum <= _max)
-        {
+    //public void OnTriggerEnter(Collider other)
+    //{
+    //    if (other.tag == "Player" && _checksum <= _max)
+    //    {
 
-            _fooduimove.FoodCountAdd(_fnum);
-            Destroy(this.gameObject);
+    //        _fooduimove.FoodCountAdd(_fnum);
+    //        Destroy(this.gameObject);
 
-        }
-        print("a");
-    }
+    //    }
+    //    print("a");
+    //}
 }
