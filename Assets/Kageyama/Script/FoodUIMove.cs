@@ -16,11 +16,11 @@ public class FoodUIMove : MonoBehaviour
 	// Update is called once per frame
 	void Update ()
     {
-        if (Input.GetKeyDown(KeyCode.J))
+        if (Input.GetButtonDown("FoodChange_L"))
         {
             LeftRotation();
         }
-        else if (Input.GetKeyDown(KeyCode.K))
+        else if (Input.GetButtonDown("FoodChange_R"))
         {
             RightRotation();
         }

@@ -32,13 +32,13 @@ public class NavMeshPlayer : MonoBehaviour {
         transform.LookAt(p);
     }
 
-    private void OnTriggerEnter(Collider col)
+    private void OnCollisionEnter(Collision col)
     {
-        print("a");
-
-        if (col.tag == "LargeEnemy")
+        if (col.gameObject.tag == "LargeEnemy")
         {
             SceneManagerScript.sceneManager.FadeBlack();
         }
+
     }
+
 }

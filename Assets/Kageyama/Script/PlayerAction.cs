@@ -59,25 +59,25 @@ public class PlayerAction : MonoBehaviour
     void Action()
     {
         //トラップの設置、回収
-        if (Input.GetKeyDown(KeyCode.Z))
+        if (Input.GetButtonDown("Trap"))
         {
-            if(_onTrapFlag == false && _trapCount < _trapMax)
+            if (_onTrapFlag == false && _trapCount < _trapMax)
             {
                 // 生成カウントに加算
                 GameObject traps = GameObject.Find("Traps");
-                if(traps != null)
+                if (traps != null)
                 {
                     Vector3 pos = new Vector3(this.transform.position.x,
                                                        this.transform.position.y - 1.5f,
                                                        this.transform.position.z);
                     Instantiate(
-                        _trapObje, pos, 
+                        _trapObje, pos,
                         traps.transform.rotation, traps.transform
                         );
                     _trapCount++;
                 }
             }
-            else if(_onTrapFlag == true)
+            else if (_onTrapFlag == true)
             {
                 Destroy(_recovery);
                 _onTrapFlag = false;
@@ -85,14 +85,15 @@ public class PlayerAction : MonoBehaviour
             }
         }
 
+
         //餌をまく
-        if(Input.GetKeyDown(KeyCode.X))
+        if (Input.GetButtonDown("Food"))
         {
             FoodCheck();
         }
 
         //音を鳴らす
-        if(Input.GetKeyDown(KeyCode.C))
+        if(Input.GetButtonDown("Whistle"))
         {
             SoundManger.Instance.PlaySE(0);
             StartCoroutine(WhistleActive());
