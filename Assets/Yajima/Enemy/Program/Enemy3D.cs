@@ -59,7 +59,7 @@ public class Enemy3D : MonoBehaviour
     protected Vector3 m_MovePointPosition;              // 移動ポイントの位置
     protected Transform m_DiscoverPlayer;               // プレイヤーを発見
     //protected Transform m_InitPoint;
-    protected Player m_Player = null;                   // 当たったプレイヤー
+    protected GameObject m_Player = null;              // 当たったプレイヤー
     protected Trap_Small m_Trap = null;
     protected Rigidbody m_Rigidbody;
     protected DSNumber m_DSNumber =
@@ -274,9 +274,10 @@ public class Enemy3D : MonoBehaviour
             m_DSNumber = DSNumber.DISCOVERED_CHASE_NUMBER;
             //ChangeState(State.Discover, AnimationNumber.ANIME_IDEL_NUMBER);
             ChangeDiscoverState(DiscoverState.Discover_Player);
-            var player = obj.transform.parent.GetComponent<Player>();
-            if (player != null)
-                m_Player = player;
+            //var player = obj.transform.parent.GetComponent<Player>();
+            //if (player != null)
+            //    m_Player = player;
+            m_Player = obj;
             m_DiscoverPlayer = obj.transform;
             m_DSNumber = DSNumber.DISCOVERED_RUNAWAY_NUMBER;
             // 移動ポイントの変更
