@@ -5,14 +5,20 @@ public class NavMeshPlayer : MonoBehaviour {
 
     public GameObject _mainCamera;
 
+    public float playerSpeed; 
     NavMeshAgent agent;
-    //SceneManagerScript sceneManager;
     private GameObject _targetAnimal;
 
-	// Use this for initialization
-	void Start () {
+    private GameManager _childSprite;
+    private SpriteRenderer _myRenderer;
+    public Sprite[] _sprite;
+
+
+    // Use this for initialization
+    void Start () {
         agent = GetComponent<NavMeshAgent>();
-        //sceneManager = GetComponent<SceneManagerScript>();
+
+        _myRenderer = this.transform.FindChild("PlayerSprite").GetComponent<SpriteRenderer>();
 
         _targetAnimal = null;
 	}
@@ -20,7 +26,7 @@ public class NavMeshPlayer : MonoBehaviour {
 	// Update is called once per frame
 	void Update () {
         Vector3 move = Vector3.forward * Input.GetAxis("Vertical") + Vector3.right * Input.GetAxis("Horizontal");
-        agent.Move(move * Time.deltaTime * 5);
+        agent.Move(move * Time.deltaTime * playerSpeed);
 
         Vector3 p = _mainCamera.transform.localPosition;
         transform.LookAt(p);
