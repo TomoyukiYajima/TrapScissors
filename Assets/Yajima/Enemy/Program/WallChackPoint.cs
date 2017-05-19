@@ -32,7 +32,7 @@ public class WallChackPoint : MonoBehaviour
         //    0.0f
         //    );
         //gameObject.transform.localPosition = newPos;
-        m_IsWallHit = false;
+        //m_IsWallHit = false;
     }
 
     public void ChangeDirection(Vector3 dir)
@@ -44,7 +44,7 @@ public class WallChackPoint : MonoBehaviour
             pos.z * dir.z
             );
         gameObject.transform.localPosition = newPos;
-        m_IsWallHit = false;
+        //m_IsWallHit = false;
     }
 
     private void CheckWall(Collider col)

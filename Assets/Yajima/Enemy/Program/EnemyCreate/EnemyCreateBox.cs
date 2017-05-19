@@ -37,6 +37,11 @@ public class EnemyCreateBox : MonoBehaviour {
             if (camera == null) return;
             m_MainCamera = camera;
         }
+        // もし、動物が設定されていない場合、設定しなおす
+        if(m_CreateEnemy == null)
+        {
+            return;
+        }
 
         // 動物マネージャーの取得
         var obj = this.transform.parent.gameObject;
@@ -76,13 +81,9 @@ public class EnemyCreateBox : MonoBehaviour {
 	void Update () {
         m_Timer += Time.deltaTime;
 
+        // カメラから映っていなかったら、アクティブ状態に変更
         if (!m_IsRendered)
         {
-
-            // 条件を満たしたら、生成
-            //if (m_Timer >= m_CreateTime &&
-            //    this.transform.childCount < m_CreateCount && 
-            //    !m_IsRendered)
             // 生成数に達していなかったら、動物を生成
             if (this.transform.childCount < m_CreateCount)
             {
@@ -90,15 +91,6 @@ public class EnemyCreateBox : MonoBehaviour {
                 CreateEnemy();
                 m_Timer = 0.0f;
             }
-
-            //if(m_ChildObject == null)
-            //{
-            //    // 子供オブジェクトに追加
-            //    var child = this.transform.FindChild(m_CreateEnemy.name);
-            //    if (child == null) return;
-            //    m_ChildObject = child.gameObject;
-            //}
-
             // 子オブジェクトが非アクティブ状態なら、アクティブ状態に変更
             //if (m_ChildObject.activeSelf) return;
             //m_ChildObject.SetActive(true);

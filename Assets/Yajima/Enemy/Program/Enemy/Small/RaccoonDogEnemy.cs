@@ -7,7 +7,7 @@ public class RaccoonDogEnemy : SmallEnemy {
     private int m_PrevPointNum = 0;     // 前回の移動ポイント
     private List<Transform> m_Points =
         new List<Transform>();          // ポイント配列
-    private float radius = 7.0f;
+    private float m_Radius = 7.0f;
 
     // Use this for initialization
     protected override void Start()
@@ -23,7 +23,7 @@ public class RaccoonDogEnemy : SmallEnemy {
                 child.position, this.transform.position
                 );
             // 一定距離外なら返す
-            if (length > radius) continue;
+            if (length > m_Radius) continue;
             // 一定距離内なら、ポインタに追加する
             m_Points.Add(child);
         }
@@ -55,6 +55,6 @@ public class RaccoonDogEnemy : SmallEnemy {
         color.a = 0.2f;
         Gizmos.color = color;
         //DrawObjLine(m_MovePoints[m_CurrentMovePoint].name);
-        Gizmos.DrawSphere(transform.parent.position, radius);
+        Gizmos.DrawSphere(transform.parent.position, m_Radius);
     }
 }

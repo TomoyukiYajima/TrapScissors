@@ -8,29 +8,41 @@ using UnityEditor;
 
 public class SmallEnemy : Enemy3D {
 
+    #region シリアライズ変数
     //[SerializeField]
-    //private float m_TurnLength = 1.0f;
+    //protected GameObject m_Canvas = null;               // キャンバス
+    //[SerializeField]
+    //protected GameObject m_MeatUI = null;               // お肉UI
+    #endregion
 
     #region private関数
-    private float m_MoveLength = 0.0f;
-
+    //private GameObject m_Frame;             // キャンバスのフレーム
     private List<Transform> m_BoxPoints =
         new List<Transform>();              // 移動用ポイントコンテナ
     private Dictionary<Transform, int> m_ResultPoints =
-        new Dictionary<Transform, int>(); // 移動ポイントの評価
+        new Dictionary<Transform, int>();   // 移動ポイントの評価
     #endregion
 
     #region 基盤関数
     // Use this for initialization
-    //protected override void Start()
-    //{
-    //    base.Start();
-    //}
+    protected override void Start()
+    {
+        base.Start();
 
-    //// Update is called once per frame
-    //void Update () {
+        //// キャンパスが設定されていなかったら取得
+        //if (m_Canvas == null) m_Canvas = GameObject.Find("Canvas");
+        //// キャンパスのフレームを取得
+        //var frame = m_Canvas.transform.FindChild("Frame");
+        //if (frame != null) m_Frame = frame.gameObject;
+    }
 
-    //}
+    protected override void DiscoverPlayer(float deltaTime)
+    {
+        // 移動(通常の移動速度の数倍)
+        Move(deltaTime, m_Speed * 2.0f);
+
+        base.DiscoverPlayer(deltaTime);
+    }
     #endregion
 
     #region override関数
@@ -51,6 +63,27 @@ public class SmallEnemy : Enemy3D {
     //    // 角度の設定
     //    SetDegree();
     //}
+
+    protected override void TrapReleaseAction()
+    {
+        CreateMeat(AnimalMeat.MeatNumber.SMALL_NUMBER);
+
+        //// 肉UIの生成
+        //// GameObject _foodObj = Instantiate(_food);
+        //var m = Instantiate(m_MeatUI);
+        //var meat = m.GetComponent<AnimalMeat>();
+        //meat.SetMeat(AnimalMeat.MeatNumber.SMALL_NUMBER);
+        //// カメラ
+        //var camera = GameObject.Find("Main Camera");
+        //if (camera == null) return;
+        //var mainCamera = camera.GetComponent<Camera>();
+        //// スプライトの位置に生成
+        //meat.SetObjPosition(m_Sprite.transform.position, mainCamera);
+        //meat.transform.localScale = Vector3.one;
+
+        //// キャンパスのフレームに追加
+        //Instantiate(m_MeatUI);
+    }
 
     public override void SoundNotice(Transform point)
     {
@@ -130,28 +163,31 @@ public class SmallEnemy : Enemy3D {
     }
     #endregion
 
-    //    #region シリアライズ変更
-    //#if UNITY_EDITOR
-    //    [CustomEditor(typeof(RabbitEnemy), true)]
-    //    [CanEditMultipleObjects]
-    //    public class RabbitEditor : Enemy3DEditor
-    //    {
-    //        SerializedProperty TurnLength;
+    #region シリアライズ変更
+#if UNITY_EDITOR
+    [CustomEditor(typeof(SmallEnemy), true)]
+    [CanEditMultipleObjects]
+    public class SmallEditor : Enemy3DEditor
+    {
+        //SerializedProperty CanvasObj;
+        //SerializedProperty MeatUI;
 
-    //        protected override void OnChildEnable()
-    //        {
-    //            TurnLength = serializedObject.FindProperty("m_TurnLength");
-    //        }
+        protected override void OnChildEnable()
+        {
+            //CanvasObj = serializedObject.FindProperty("m_Canvas");
+            //MeatUI = serializedObject.FindProperty("m_MeatUI");
+        }
 
-    //        protected override void OnChildInspectorGUI()
-    //        {
-    //            RabbitEnemy enemy = target as RabbitEnemy;
+        protected override void OnChildInspectorGUI()
+        {
+            SmallEnemy enemy = target as SmallEnemy;
 
-    //            EditorGUILayout.LabelField("〇ウサギ固有のステータス");
-    //            // int
-    //            TurnLength.floatValue = EditorGUILayout.FloatField("折り返す距離", enemy.m_TurnLength);
-    //        }
-    //    }
-    //#endif
-    //    #endregion
+            //EditorGUILayout.LabelField("〇小動物固有のステータス");
+            //// GameObject
+            //MeatUI.objectReferenceValue = EditorGUILayout.ObjectField("お肉UIオブジェクト", enemy.m_MeatUI, typeof(GameObject), true);
+            //CanvasObj.objectReferenceValue = EditorGUILayout.ObjectField("キャンパスオブジェクト", enemy.m_Canvas, typeof(GameObject), true);
+        }
+    }
+#endif
+    #endregion
 }

@@ -47,6 +47,7 @@ public class EnemySprite : MonoBehaviour {
 
         if (m_DType == type) return;
         m_Child.transform.Rotate(Vector3.up, 180.0f);
+        //m_Child.transform.rotation *= Quaternion.AngleAxis(180.0f, new Vector3(0.0f, 1.0f, 0.0f));
         m_DType = type;
         //print("回転:" + directionX.ToString());
     }

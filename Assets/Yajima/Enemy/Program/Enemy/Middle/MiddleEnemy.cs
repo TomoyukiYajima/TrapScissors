@@ -86,78 +86,13 @@ public class MiddleEnemy : Enemy3D {
     //    //ChangeMovePoint(m_Animal.transform.position);
     //    //m_Agent.Resume();
     //}
-    #endregion
 
-    #region 発見状態派生関数
-    //// 発見状態の変更
-    //protected void ChangeDiscoverMoveState(DiscoverMoveState dState)
-    //{
-    //    ChangeState(State.DiscoverMove, AnimationNumber.ANIME_DISCOVER_NUMBER);
-    //    // 同じ行動なら返す
-    //    if (m_DiscoverMoveState == dState) return;
-    //    m_DiscoverMoveState = dState;
-    //    m_StateTimer = 0.0f;
-    //}
+    protected override void DiscoverPlayer(float deltaTime)
+    {
+        m_Agent.destination = m_Player.transform.position;
 
-    //protected void DiscoverMoveAnimal(float deltaTime)
-    //{
-    //    //// オブジェクトとの方向を計算
-    //    //var addPos = Vector3.up * (m_DiscoverObj.transform.localScale.y * 0.8f);
-    //    //var dir = ObjectDirection(m_DiscoverObj, addPos);
-
-    //    //var length = Vector3.Distance(
-    //    //    this.transform.position,
-    //    //    m_DiscoverObj.transform.position + addPos
-    //    //    );
-
-    //    var length = Vector3.Distance(
-    //        m_Agent.destination, this.transform.position
-    //        );
-
-    //    if (length < 0.5f)
-    //    {
-    //        // 持ち上げ状態に遷移
-    //        ChangeDiscoverMoveState(DiscoverMoveState.DiscoverMove_Lift);
-    //        ChangeSpriteColor(Color.yellow);
-    //        return;
-    //    }
-    //}
-
-    // 持ち上げ行動
-    //protected void DiscoverMoveLift(float deltaTime)
-    //{
-    //    // 仮
-    //    if (m_StateTimer < 1.0f) return;
-    //    //// 持った動物の親を子供に追加する
-    //    //m_Animal.transform.parent.parent = gameObject.transform;
-    //    //m_Animal.EnemyLift();
-
-    //    //var q = new Quaternion(0.0f, 0.0f, 0.0f, 0.0f);
-    //    //m_Animal.transform.parent.rotation = 
-    //    //    m_Animal.transform.rotation = q;
-
-    //    //m_Animal.transform.position = Vector3.zero;
-    //    // 持ち上げ終了したら、持ち帰り状態に遷移
-    //    ChangeDiscoverMoveState(DiscoverMoveState.DiscoverMove_TakeAway);
-    //    // 生成ボックスの移動ポイント取得
-    //    var box = this.transform.parent.GetComponentInParent<EnemyCreateBox>();
-    //    // 初期位置に移動
-    //    ChangeMovePoint(box.GetMovePoint(0).position);
-    //    m_Agent.Resume();
-    //}
-
-    // 持ち帰り行動
-    //protected virtual void DiscoverMoveTakeAway(float deltaTime)
-    //{
-    //    var length = Vector3.Distance(
-    //        m_Agent.destination, this.transform.position
-    //        );
-    //    // 移動ポイントに到達したら消える
-    //    if (length > 0.5f) return;
-    //    ChangeState(State.DeadIdel, AnimationNumber.ANIME_DEAD_NUMBER);
-    //    // ステータスの初期化
-    //    InitState();
-    //}
+        base.DiscoverPlayer(deltaTime);
+    }
     #endregion
 
     #region override関数
@@ -165,11 +100,27 @@ public class MiddleEnemy : Enemy3D {
     {
         base.SoundNotice(point);
     }
-    // トラバサミに当たった時の行動です
-    protected override void TrapHitAction()
+    //// トラバサミに当たった時の行動です
+    //protected override void TrapHitAction()
+    //{
+    //    base.TrapHitAction();
+
+    //    ChangeState(State.Runaway, AnimationNumber.ANIME_RUNAWAY_NUMBER);
+    //    ChangeSpriteColor(Color.white);
+    //}
+
+    // 小さいトラバサミに衝突した時の行動です
+    protected override void SmallTrapHitAction()
     {
         ChangeState(State.Runaway, AnimationNumber.ANIME_RUNAWAY_NUMBER);
         ChangeSpriteColor(Color.white);
+    }
+
+    // 大きいトラバサミに衝突した時の行動です
+    protected override void BigTrapHitAction()
+    {
+        base.SmallTrapHitAction();
+        //base.BigTrapHitAction();
     }
     #endregion
 
