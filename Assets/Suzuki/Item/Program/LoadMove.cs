@@ -4,34 +4,41 @@ using UnityEngine.UI;
 
 public class LoadMove : MonoBehaviour
 {
-    
-    private bool _load;
-
+    public float _speed = 1.0f;
+    private RectTransform _myrect;
     // Use this for initialization
     void Start()
     {
-        _load = false;
+        //transform.Rotate(0f, 180f, 0f);
+        _myrect = gameObject.GetComponent<RectTransform>();
+        ToMovePosition();
     }
 
     // Update is called once per frame
     void Update()
     {
-       // Vector2 _pos = transform.position;
-       // if (_pos.x<=800)
-       // {
-       // _pos.x -= 1.0f;
-       // transform.position = _pos;
-       // }
-       //else if (_pos.x >= 0)
-       // {
-       //     _pos.x += 1.0f;
-       //     transform.position = _pos;
-       // }
-       // return;
 
     }
-    public void Move()
+    void ToMovePosition()
     {
-        _load = true;
+        LeanTween.move(_myrect, new Vector2(30, 30), _speed)
+            .setOnComplete(() =>
+            {
+                ToRotate();
+                LeanTween.move(_myrect, new Vector2(770, 30), _speed)
+                .setOnComplete(() =>
+                {
+                    ToRotate();
+                })
+            .setLoopPingPong();
+            })
+            ;
+        
+
+    }
+    public void ToRotate()
+    {
+        transform.Rotate(0f, 180f, 0f);
+        //LeanTween.rotate(_myrect, 180f, 1f);
     }
 }
