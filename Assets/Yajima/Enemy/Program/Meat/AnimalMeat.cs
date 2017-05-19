@@ -91,7 +91,9 @@ public class AnimalMeat : MonoBehaviour {
         if (ui == null) return;
         m_UI = ui;
         var frame = m_UI.transform.parent;
-        if (frame != null) this.transform.parent = frame;
+        // UI の場合は、上の処理だと警告文が表示される 
+        //if (frame != null) this.transform.parent = frame;
+        if (frame != null) this.transform.SetParent(frame);
     }
 
     private void SetMeat(MeatState state, string meatName, int number)

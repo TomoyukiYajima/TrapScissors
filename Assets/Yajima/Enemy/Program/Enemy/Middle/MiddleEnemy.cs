@@ -119,8 +119,15 @@ public class MiddleEnemy : Enemy3D {
     // 大きいトラバサミに衝突した時の行動です
     protected override void BigTrapHitAction()
     {
-        base.SmallTrapHitAction();
-        //base.BigTrapHitAction();
+        //base.SmallTrapHitAction();
+        // 死亡待機状態に遷移
+        ChangeState(State.DeadIdel, AnimationNumber.ANIME_DEAD_NUMBER);
+        // 肉UIの生成
+        CreateMeat(AnimalMeat.MeatNumber.SMALL_NUMBER);
+        // トラバサミが解放されたときの行動
+        TrapReleaseAction();
+        // ステータスの初期化
+        InitState();
     }
     #endregion
 

@@ -59,11 +59,13 @@ public class Enemy3D : MonoBehaviour
     protected Vector3 m_MovePointPosition;              // 移動ポイントの位置
     protected Transform m_DiscoverPlayer;               // プレイヤーを発見
     //protected Transform m_InitPoint;
-    protected GameObject m_Player = null;              // 当たったプレイヤー
+    protected GameObject m_Player = null;               // 当たったプレイヤー
+    protected GameObject m_FoodObj;                     // えさオブジェクト
     protected Trap_Small m_Trap = null;
     protected Rigidbody m_Rigidbody;
     protected DSNumber m_DSNumber =
         DSNumber.DISCOVERED_CHASE_NUMBER;               // 追跡状態の番号 
+    protected State m_State = State.Idel;               // 状態
     protected DiscoverState m_DState =
         DiscoverState.Discover_None;                    // 発見状態
     protected DiscoverFeedState m_DFState =
@@ -81,8 +83,8 @@ public class Enemy3D : MonoBehaviour
     private float m_MoveStartTime = 0.5f;           // 移動開始時間
     private bool m_IsLift = false;                  // 持ち上げられたか
     private GameObject m_TrapObj = null;            // 挟まったトラバサミ
+    private GameObject m_TrapsObj = null;           // トラバサミの親クラス
     private Transform m_OtherCreateBox;             // 持ち帰る動物の元の親オブジェクト
-    private State m_State = State.Idel;             // 状態
     private TrapHitState m_THState =
         TrapHitState.TrapHit_Rage;                  // トラップヒット状態
     private EnemySprite m_EnemySprite;              // エネミースプライト  
@@ -268,22 +270,11 @@ public class Enemy3D : MonoBehaviour
         SearchTrap();
 
         GameObject obj = null;
+        // プレイヤーを見つけた場合
         if (InPlayer(out obj))
         {
-            // 発見状態に遷移
-            m_DSNumber = DSNumber.DISCOVERED_CHASE_NUMBER;
-            //ChangeState(State.Discover, AnimationNumber.ANIME_IDEL_NUMBER);
-            ChangeDiscoverState(DiscoverState.Discover_Player);
-            //var player = obj.transform.parent.GetComponent<Player>();
-            //if (player != null)
-            //    m_Player = player;
-            m_Player = obj;
-            m_DiscoverPlayer = obj.transform;
-            m_DSNumber = DSNumber.DISCOVERED_RUNAWAY_NUMBER;
-            // 移動ポイントの変更
-            m_Agent.Resume();
-            SoundNotice(m_DiscoverPlayer);
-            ChangeSpriteColor(Color.blue);
+            // プレイヤーを見つけた時の処理
+            ChangePlayerHitMove(obj);
             return;
         };
 
@@ -393,6 +384,10 @@ public class Enemy3D : MonoBehaviour
         // 動物を持ち上げる
         var animal = m_Trap.GetAnimal();
         var animalParent = animal.transform.parent;
+        // 相手側にかかっているトラバサミの削除
+        var animalScript = animal.GetComponent<Enemy3D>();
+        animalScript.ChangeTakeIn();
+        animalScript.DeleteTrap();
         // 口オブジェクトの子オブジェクトに変更
         var agent = animal.GetComponent<NavMeshAgent>();
         agent.enabled = false;
@@ -410,7 +405,7 @@ public class Enemy3D : MonoBehaviour
         animal.transform.localPosition = Vector3.zero;
         animal.transform.localRotation = new Quaternion();
 
-        var animalScript = animal.GetComponent<Enemy3D>();
+        //var animalScript = animal.GetComponent<Enemy3D>();
         // 持ち上げる動物を入れる
         if (animalScript != null) m_TakeInAnimal = animalScript;
         // 生成ボックスの移動ポイント取得
@@ -428,9 +423,8 @@ public class Enemy3D : MonoBehaviour
             m_Agent.destination, this.transform.position
             );
         // 移動ポイントに到達したら消える
-        if (length > 0.5f) return;
+        if (length > m_Speed) return;
         ChangeState(State.DeadIdel, AnimationNumber.ANIME_DEAD_NUMBER);
-        // ステータスの初期化
 
         // 持ち上げた動物の初期化
         //// 動物を持ち上げる
@@ -455,6 +449,7 @@ public class Enemy3D : MonoBehaviour
         //animal.transform.localRotation = new Quaternion();
 
         m_TakeInAnimal = null;
+        // ステータスの初期化
         InitState();
     }
     #endregion
@@ -542,6 +537,8 @@ public class Enemy3D : MonoBehaviour
     // 罠状態
     protected void TrapHitChange(float deltaTime)
     {
+        // 他の動物に持ち上げられたら、持ち帰られ状態に遷移
+
         // トラップから解除されたら
         if (m_TrapObj != null) return;
 
@@ -599,6 +596,8 @@ public class Enemy3D : MonoBehaviour
         {
             // 気絶状態に遷移
             ChangeState(State.Faint, AnimationNumber.ANIME_IDEL_NUMBER);
+            // 付属しているトラバサミの削除
+            DeleteTrap();
             ChangeSpriteColor(Color.yellow);
             m_Agent.Stop();
         }
@@ -900,6 +899,8 @@ public class Enemy3D : MonoBehaviour
     // ステータスの初期化を行います
     protected virtual void InitState()
     {
+        // 待機状態に変更
+        ChangeState(State.Idel, AnimationNumber.ANIME_IDEL_NUMBER);
         // トラバサミを空っぽにする
         m_TrapObj = null;
         // 親オブジェクトを非アクティブに変更
@@ -978,6 +979,24 @@ public class Enemy3D : MonoBehaviour
         //m_Agent.Resume();
         ChangeSpriteAngle();
     }
+    // プレイヤーを見つけた時の処理です
+    protected virtual void ChangePlayerHitMove(GameObject player)
+    {
+        // 発見状態に遷移
+        m_DSNumber = DSNumber.DISCOVERED_CHASE_NUMBER;
+        //ChangeState(State.Discover, AnimationNumber.ANIME_IDEL_NUMBER);
+        ChangeDiscoverState(DiscoverState.Discover_Player);
+        //var player = obj.transform.parent.GetComponent<Player>();
+        //if (player != null)
+        //    m_Player = player;
+        m_Player = player;
+        m_DiscoverPlayer = player.transform;
+        m_DSNumber = DSNumber.DISCOVERED_RUNAWAY_NUMBER;
+        // 移動ポイントの変更
+        m_Agent.Resume();
+        //SoundNotice(m_DiscoverPlayer);
+        ChangeSpriteColor(Color.blue);
+    }
     //スプライトの角度の変更を行います
     private void ChangeSpriteAngle()
     {
@@ -1009,6 +1028,10 @@ public class Enemy3D : MonoBehaviour
         CheckCreateBox();
         // メインカメラの確認
         CheckMainCamera();
+        // トラバサミの親オブジェクトの確認
+        // 付属しているトラバサミの削除
+        var traps = GameObject.Find("Traps");
+        if (traps != null) m_TrapsObj = traps;
     }
     // 生成ボックスの確認を行います
     private void CheckCreateBox()
@@ -1348,6 +1371,24 @@ public class Enemy3D : MonoBehaviour
         meat.transform.localScale = Vector3.one;
     }
 
+    // 付属しているトラバサミの削除
+    protected void DeleteTrap()
+    {
+        // 付属しているトラバサミの削除
+        // 付属しているトラバサミの削除
+        // トラバサミの取得
+        foreach (Transform child in m_TrapsObj.transform)
+        {
+            var trap = child.GetComponent<Trap_Small>();
+            if (trap.GetAnimal() == gameObject)
+            {
+                trap.Null();
+                Destroy(child.gameObject);
+            }
+        }
+        m_Trap = null;
+        m_TrapObj = null;
+    }
     #endregion
 
     #region public関数
@@ -1394,7 +1435,6 @@ public class Enemy3D : MonoBehaviour
             TrapHitState.TrapHit_TakeIn,
             AnimationNumber.ANIME_TRAP_HIT_NUMBER
             );
-        ChangeSpriteColor(Color.black);
     }
 
     // 敵を暴れ状態にさせます
@@ -1475,8 +1515,15 @@ public class Enemy3D : MonoBehaviour
 
     // カメラに映っているかを返します
     public bool IsRendered() { return m_IsRendered; }
+
     // 音に気付きます
     public virtual void SoundNotice(Transform point)
+    {
+        SoundMove(point);
+    }
+
+    // 音の位置に近づきます
+    protected void SoundMove(Transform point)
     {
         //　音の位置をポイントに変更します
         ChangeMovePoint(point.position);
@@ -1485,74 +1532,32 @@ public class Enemy3D : MonoBehaviour
     #endregion
 
     #region 衝突判定関数
-    // 衝突判定(トリガー用)
-    public void OnTriggerEnter(Collider collision)
-    {
-        OnCollidePlayer(collision);
-    }
-
-    // 衝突中(トリガー用)
-    public void OnTriggerStay(Collider collision)
-    {
-        OnCollidePlayer(collision);
-    }
-
-    //public void OnTriggerExit2D(Collider2D collision)
-    //{
-    //    var tag = collision.transform.tag;
-
-    //    if(tag == m_PlayerTag)
-    //    {
-    //        ChangeState(State.Idel, AnimationNumber.ANIME_IDEL_NUMBER);
-    //        return;
-    //    }
-    //}
-
     // 衝突判定
     public void OnCollisionEnter(Collision collision)
     {
         //var tag = collision.gameObject.tag;
+        var objName = collision.transform.name;
 
-        //// 壁に当たった場合の処理
-        //if (tag == "Wall")
-        //{
-        //    if (m_State != State.Runaway) return;
-        //    // 逃げ状態だったら、気絶状態に遷移
-        //    ChangeState(State.Faint, AnimationNumber.ANIME_IDEL_NUMBER);
-        //    ChangeSpriteColor(Color.yellow);
-        //    m_Agent.Stop();
-        //}
-
-        // プレイヤーに当たった場合
-        //if (tag == m_PlayerTag)
-        //{
-        //    // 当たったプレイヤーを子供に追加
-        //    //collision.gameObject.transform.parent = gameObject.transform;
-
-        //    //if (player == null) return;
-        //    //player
-        //    //player._state = Player.State.Endure;
-        //    //player._target = gameObject;
-        //}
-
-        // エネミー同士が当たった場合
-        //if (tag == "Enemy") { this.transform.Rotate(Vector3.up, 180.0f); }
+        // えさの衝突判定に当たった場合の処理
+        if (name == "Food_Animal_Collide")
+        {
+            // 親である餌の取得
+            var obj = collision.transform.parent;
+            var food = obj.GetComponent<Food>();
+            // 反応するえさでなければ返す
+            if (food == null || m_FoodState != food.CheckFoodKind() ||
+                food.CheckFoodKind() == Food.Food_Kind.NULL) return;
+            // えさ発見移動状態に遷移
+            ChangeDiscoverFeedState(DiscoverFeedState.DiscoverFeed_Move);
+            //var enemy = m_DiscoverObj.GetComponent<Enemy3D>();
+            //if (enemy == null) return;
+            //m_Animal = enemy;
+            // 移動ポイントを動物に変更
+            ChangeMovePoint(obj.transform.position);
+            ChangeSpriteColor(Color.magenta);
+            return;
+        }
     }
-
-    //public void OnCollisionStay(Collision collision)
-    //{
-    //    var tag = collision.gameObject.tag;
-
-    //    // 壁に当たった場合の処理
-    //    if (tag == "Wall")
-    //    {
-    //        if (m_State != State.Runaway) return;
-    //        // 逃げ状態だったら、気絶状態に遷移
-    //        ChangeState(State.Faint, AnimationNumber.ANIME_IDEL_NUMBER);
-    //        ChangeSpriteColor(Color.yellow);
-    //        m_Agent.Stop();
-    //    }
-    //}
 
     #endregion
 

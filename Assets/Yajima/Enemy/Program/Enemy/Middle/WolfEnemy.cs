@@ -15,4 +15,9 @@ public class WolfEnemy : MiddleEnemy {
     //{
 
     //}
+
+    #region override関数
+    // 音反応なし
+    public override void SoundNotice(Transform point) { }
+    #endregion
 }

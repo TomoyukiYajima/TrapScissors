@@ -53,6 +53,12 @@ public class SmallEnemy : Enemy3D {
         //m_MoveLength += Mathf.Abs(m_TotalVelocity.x) + Mathf.Abs(m_TotalVelocity.y) + Mathf.Abs(m_TotalVelocity.z);
     }
 
+    protected override void ChangePlayerHitMove(GameObject player)
+    {
+        base.ChangePlayerHitMove(player);
+        PointRunaway(player.transform);
+    }
+
     //protected override void TurnWall()
     //{
     //    // 一定距離移動したら、折り返す
@@ -83,83 +89,6 @@ public class SmallEnemy : Enemy3D {
 
         //// キャンパスのフレームに追加
         //Instantiate(m_MeatUI);
-    }
-
-    public override void SoundNotice(Transform point)
-    {
-        //var pointBox = GameObject.Find("MovePoints");
-        // 移動ポイントコンテナがない場合は、
-        // 自分の持っているポイントで移動する
-        var length = 0.0f;
-        var pointPos = point.position;
-        var setPos = Vector3.zero;
-        // 持っているポイントで、音の位置との最長距離を求める
-        for (int i = 0; i != m_MovePoints.Length; i++)
-        {
-            var pos = m_MovePoints[i].position;
-            var pointLength = Vector3.Distance(pointPos, pos);
-            //var degree = Vector3.Angle(pointPos, pos);
-            // 前回のポイントとの位置より長かったら,
-            // 角度が一定角度より大きければ更新する
-            //  && Mathf.Abs(degree) > 20.0f
-            if (length < pointLength)
-            {
-                length = pointLength;
-                setPos = pos;
-            }
-        }
-        ChangeMovePoint(setPos);
-
-        //if (pointBox == null)
-        //{
-        //    var length = 0.0f;
-        //    var pointPos = point.position;
-        //    // 持っているポイントで、音の位置との最長距離を求める
-        //    for (int i = 0; i != m_MovePoints.Length; i++)
-        //    {
-        //        var pos = m_MovePoints[i].position;
-        //        var pointLength = Vector3.Distance(pointPos, pos);
-        //        var degree = Vector3.Angle(pointPos, pos);
-        //        // 前回のポイントとの位置より長かったら,
-        //        // 角度が一定角度より大きければ更新する
-        //        if (length < pointLength && Mathf.Abs(degree) > 20.0f)
-        //        {
-        //            length = pointLength;
-        //            m_MovePointPosition = pos;
-        //        }
-        //    }
-        //}
-        //else
-        //{
-        //    // 移動ポイントコンテナがある場合は、全ポイントを調べて
-        //    // 移動ポイントを決める
-        //    //pointBox.child
-        //    int count = 0;
-        //    foreach(Transform child in pointBox.transform)
-        //    {
-        //        m_BoxPoints.Add(child);
-        //        m_ResultPoints[m_BoxPoints[count]] = count;
-        //        count++;
-        //    }
-        //    // 取得したポイント全部との最長距離を取る
-        //    //var length = 0.0f;
-        //    for (int i = 0; i != m_BoxPoints.Count; i++)
-        //    {
-        //        var pos = m_BoxPoints[i].position;
-        //        var pointLength = Vector3.Distance(point.position, pos);
-        //        //// 前回のポイントとの位置より長かったら、更新する
-        //        //if (length < pointLength)
-        //        //{
-        //        //    length = pointLength;
-        //        //    m_MovePointPosition = pos;
-        //        //}
-
-        //        // 移動ポイントの評価
-
-        //    }
-        //}
-        m_BoxPoints.Clear();
-        m_ResultPoints.Clear();
     }
     #endregion
 
