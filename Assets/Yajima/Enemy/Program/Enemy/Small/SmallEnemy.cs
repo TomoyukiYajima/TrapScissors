@@ -41,7 +41,23 @@ public class SmallEnemy : Enemy3D {
         // 移動(通常の移動速度の数倍)
         Move(deltaTime, m_Speed * 2.0f);
 
-        base.DiscoverPlayer(deltaTime);
+        //base.DiscoverPlayer(deltaTime);]
+
+        // 移動(通常の移動速度の数倍)
+        //Move(deltaTime, m_Speed * 2.0f);
+        //m_Agent.destination = m_Player.transform.position;
+        //Camera.
+
+        GameObject obj = null;
+        if (!InPlayer(out obj, 20.0f, true))
+        {
+            // 待機状態に遷移
+            ChangeState(State.Idel, AnimationNumber.ANIME_IDEL_NUMBER);
+            m_Agent.Resume();
+            m_Player = null;
+            ChangeSpriteColor(Color.red);
+            return;
+        };
     }
     #endregion
 
@@ -58,6 +74,26 @@ public class SmallEnemy : Enemy3D {
         base.ChangePlayerHitMove(player);
         PointRunaway(player.transform);
     }
+
+    //protected override void DiscoverFoodMove(float deltaTime)
+    //{
+    //    // 二次元(x, z)の距離を求める
+    //    var v1 = new Vector2(m_Agent.destination.x, m_Agent.destination.z);
+    //    var v2 = new Vector2(m_MouthPoint.position.x, m_MouthPoint.position.z);
+    //    var length = Vector2.Distance(v1, v2);
+
+    //    // 一定距離内なら、持ち上げ状態に遷移
+    //    if (length < 0.5f)
+    //    {
+    //        //// 持ち上げ状態に遷移
+    //        //ChangeDiscoverFoodState(DiscoverFoodState.DiscoverFood_Lift);
+    //        // えさ食べ状態に遷移
+    //        ChangeDiscoverFoodState(DiscoverFoodState.DiscoverFood_Eat);
+    //        ChangeSpriteColor(Color.yellow);
+    //        m_Agent.Stop();
+    //        return;
+    //    }
+    //}
 
     //protected override void TurnWall()
     //{

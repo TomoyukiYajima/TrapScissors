@@ -21,5 +21,18 @@ public class BoarEnemy : MiddleEnemy {
         if (m_State == State.DiscoverMove) SoundMove(point);
         else PointRunaway(point);
     }
+
+    protected override bool IsFoodCheck(Food.Food_Kind food)
+    {
+
+        //if (food == Food.Food_Kind.Goat || food == Food.Food_Kind.Rabbit) return true;
+        //return base.IsFoodCheck(food);
+        return food == Food.Food_Kind.Goat || food == Food.Food_Kind.Rabbit;
+    }
+
+    protected override bool IsLikeFood(Food.Food_Kind food)
+    {
+        return food == Food.Food_Kind.Tanuki;
+    }
     #endregion
 }

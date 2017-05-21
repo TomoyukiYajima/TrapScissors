@@ -119,7 +119,7 @@ public class EnemyCreateBox : MonoBehaviour {
         //    this.transform.rotation, this.transform
         //    );
         // 生成カウントに加算
-        m_AnimalManager.AddAnimalCount(1);
+        //m_AnimalManager.AddAnimalCount(1);
 
         //// 子供オブジェクトに追加
         //var child = this.transform.FindChild(m_CreateEnemy.name); // + "(Clone)");

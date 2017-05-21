@@ -7,7 +7,7 @@ public class RabbitEnemy : SmallEnemy {
     {
         base.Start();
 
-        m_FoodState = Food.Food_Kind.Rabbit;
+        //m_FoodState = Food.Food_Kind.Rabbit;
     }
 
     //// Update is called once per frame

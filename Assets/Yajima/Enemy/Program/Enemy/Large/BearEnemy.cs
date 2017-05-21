@@ -21,5 +21,9 @@ public class BearEnemy : LargeEnemy {
         if (m_State == State.DiscoverMove) SoundMove(point);
     }
 
+    protected override bool IsFoodCheck(Food.Food_Kind food)
+    {
+        return food == Food.Food_Kind.Tanuki || food == Food.Food_Kind.Rabbit;
+    }
     #endregion
 }
