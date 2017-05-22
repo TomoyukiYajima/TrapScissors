@@ -5,7 +5,7 @@ public class NavMeshPlayer : MonoBehaviour {
 
     public GameObject _mainCamera;
 
-    public float playerSpeed; 
+    public float playerSpeed = 5; 
     NavMeshAgent agent;
     private GameObject _targetAnimal;
 
@@ -25,7 +25,7 @@ public class NavMeshPlayer : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
-        Vector3 move = Vector3.forward * Input.GetAxis("Vertical") + Vector3.right * Input.GetAxis("Horizontal");
+        Vector3 move = (Vector3.forward - Vector3.right)* Input.GetAxis("Vertical") + (Vector3.right + Vector3.forward)* Input.GetAxis("Horizontal");
         agent.Move(move * Time.deltaTime * playerSpeed);
 
         Vector3 p = _mainCamera.transform.localPosition;
