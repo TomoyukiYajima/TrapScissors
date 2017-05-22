@@ -4,6 +4,7 @@ using System.Collections;
 public class NavMeshPlayer : MonoBehaviour {
 
     public GameObject _mainCamera;
+    public GameObject _gameOver;
 
     public float playerSpeed = 5; 
     NavMeshAgent agent;
@@ -36,6 +37,7 @@ public class NavMeshPlayer : MonoBehaviour {
     {
         if (col.gameObject.tag == "LargeEnemy")
         {
+            _gameOver.SetActive(true);
             SceneManagerScript.sceneManager.FadeBlack();
         }
 
