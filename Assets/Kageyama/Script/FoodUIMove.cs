@@ -78,6 +78,8 @@ public class FoodUIMove : MonoBehaviour
     /// <param name="num">増やす餌の番号/param>
     public void FoodCountAdd(int num)
     {
+        //対象の餌の所持数が9以上ならそれ移動増やさない
+        if (_foodNumber[num] >= 5) return;
         _foodNumber[num]++;
     }
 

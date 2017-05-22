@@ -17,7 +17,6 @@ public class SceneManagerScript : MonoBehaviour
     [SerializeField]
     private GameObject _lord;
     #endregion
-
     #region フェードの管理
     [SerializeField]
     private bool _scene_Fade;
@@ -31,7 +30,6 @@ public class SceneManagerScript : MonoBehaviour
     private bool FadeStart;
     private EventSystem _eventSystem;
     #endregion
-
     #region 放置でシーン移行
     [SerializeField]
     private bool _leave_Alone;
@@ -41,7 +39,6 @@ public class SceneManagerScript : MonoBehaviour
     private string _waiting_Scene;
     private float _wTime_Count;
     #endregion
-
     #region BGMを流す
     [SerializeField]
     private bool _bgmMade;
@@ -52,7 +49,6 @@ public class SceneManagerScript : MonoBehaviour
     [SerializeField]
     private bool _sound_FadeOUT;
     #endregion
-
     #region ゲーム終了の処理
     [SerializeField]
     private GameObject _endDialog;
@@ -161,6 +157,7 @@ public class SceneManagerScript : MonoBehaviour
     /// <param name="name">移動先のシーンの名前</param>
     public void FadeOut(string name)
     {
+        TimeStart();
         if (FadeStart == true)
         {
             return;
@@ -186,6 +183,7 @@ public class SceneManagerScript : MonoBehaviour
     /// <param name="number">移動先のシーンの番号</param>
     public void SceneOut(int number)
     {
+        TimeStart();
         SceneManager.LoadSceneAsync(number);
         SoundManger.Instance.StopSE();
         //ロード中に動かす画像があったら表示させる

@@ -32,6 +32,10 @@ public class PlayerAction : MonoBehaviour
     [SerializeField]
     private GameObject _whistle;
     #endregion
+    #region その他
+    [SerializeField]
+    private GameObject _bear;
+    #endregion
 
     [SerializeField]
     private GameObject _bigTrap;
@@ -120,6 +124,9 @@ public class PlayerAction : MonoBehaviour
         GameObject _foodObj = Instantiate(_food);
         _foodObj.transform.localPosition = pos;
         _foodObj.GetComponent<Food>().SelectFood(_foodNumber);
+        //撒かれた餌のカウント
+        GameManager.gameManager.FoodCountAdd();
+        _bear.GetComponent<BearEnemy>().CheckFood();
     }
 
     /// <summary>

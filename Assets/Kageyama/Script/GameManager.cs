@@ -11,28 +11,42 @@ public class GameManager : MonoBehaviour
     {
         START,
         PLAY,
-        END
+        END,
+        PAUSE
     }
 
     protected static GameManager _gameManager;
 
     #region ステージの環境設定
+    //ゲームの状態
     [SerializeField]
     private GameState _gameState;
+    //トラップの最大数
     [SerializeField]
     private int _trapNumber;
     #endregion
     #region 時間設定
+    //制限時間があるかどうか
     [SerializeField]
     private bool _timeCheck;
+    //ゲームの時間
     [SerializeField]
     private float _gameTime;
+    //現在の時間
     private float _timeCount;
     #endregion
     #region ゲーム進行に関する値
+    //現在のポイント
     private int _point;
+    //何番目に何の動物を捕まえたか
     [SerializeField]
     private List<int> _getAnimal = new List<int>();
+    #endregion
+    #region その他
+    //ゲームを止めた時に出すUI
+    [SerializeField]
+    private GameObject _pauseUI;
+    public int _foodCount;
     #endregion
 
     //どこでも参照可
@@ -61,10 +75,6 @@ public class GameManager : MonoBehaviour
 
     void Update()
     {
-        if(Input.GetKeyDown(KeyCode.N))
-        {
-            GetAnimalAdd(1);
-        }
         //ゲーム開始時にする処理
         if (_gameState == GameState.START)
         {
@@ -80,6 +90,10 @@ public class GameManager : MonoBehaviour
         else if (_gameState == GameState.END)
         {
         }
+        else if(_gameState == GameState.PAUSE)
+        {
+            GameStop();
+        }
     }
 
     /// <summary>
@@ -87,6 +101,14 @@ public class GameManager : MonoBehaviour
     /// </summary>
     void GamePlay()
     {
+        //ゲームを止める
+        if (Input.GetButtonDown("Pause"))
+        {
+            SceneManagerScript.sceneManager.FadeBlack();
+            _gameState = GameState.PAUSE;
+            _pauseUI.SetActive(true);
+        }
+
         //制限時間を設けない、または制限時間が0秒以下ならば時間を計測しない
         if (_timeCheck == true && _gameTime > 0)
         {
@@ -97,6 +119,33 @@ public class GameManager : MonoBehaviour
                 SceneManagerScript.sceneManager.FadeBlack();
             }
         }
+    }
+
+    void GameStop()
+    {
+        //ゲームを再開する
+        if (Input.GetButtonDown("Pause"))
+        {
+            Restart();
+        }
+    }
+
+    /// <summary>
+    /// ゲームを再開する
+    /// </summary>
+    public void Restart()
+    {
+        _pauseUI.SetActive(false);
+        SceneManagerScript.sceneManager.FadeWhite();
+        _gameState = GameState.PLAY;
+    }
+
+    /// <summary>
+    /// ゲームを止めているときに出すUIを非表示にする
+    /// </summary>
+    public void PauseUIFalse(GameObject falseObje)
+    {
+        falseObje.SetActive(false);
     }
 
     /// <summary>
@@ -154,6 +203,31 @@ public class GameManager : MonoBehaviour
         return _trapNumber;
     }
 
+    /// <summary>
+    /// ステージに置かれている餌の数を足す
+    /// </summary>
+    public void FoodCountAdd()
+    {
+        _foodCount++;
+    }
+
+    /// <summary>
+    /// ステージに置かれている餌の数を減らす
+    /// </summary>
+    public void FoodCountSub()
+    {
+        _foodCount--;
+    }
+
+    /// <summary>
+    /// ステージに置かれている餌の数
+    /// </summary>
+    /// <returns></returns>
+    public int FoodCountCheck()
+    {
+        return _foodCount;
+    }
+
 #if UNITY_EDITOR
     [CustomEditor(typeof(GameManager))]
     public class SceneManagerEditor : Editor
@@ -163,6 +237,7 @@ public class GameManager : MonoBehaviour
         SerializedProperty TimeCheck;
         SerializedProperty GameTime;
         SerializedProperty GetAnimal;
+        SerializedProperty PauseUI;
 
         public void OnEnable()
         {
@@ -171,6 +246,7 @@ public class GameManager : MonoBehaviour
             TimeCheck = serializedObject.FindProperty("_timeCheck");
             GameTime = serializedObject.FindProperty("_gameTime");
             GetAnimal = serializedObject.FindProperty("_getAnimal");
+            PauseUI = serializedObject.FindProperty("_pauseUI");
         }
         public override void OnInspectorGUI()
         {
@@ -185,8 +261,11 @@ public class GameManager : MonoBehaviour
                 GameTime.floatValue = EditorGUILayout.FloatField("制限時間", manager._gameTime);
             }
             EditorGUILayout.PropertyField(GetAnimal, true);
+            EditorGUILayout.Space();
+            PauseUI.objectReferenceValue = EditorGUILayout.ObjectField("ポーズ中に出すオブジェクト", manager._pauseUI, typeof(GameObject), true) as GameObject;
+
             serializedObject.ApplyModifiedProperties();
-            
+
         }
     }
 #endif

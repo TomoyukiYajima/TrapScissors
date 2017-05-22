@@ -13,6 +13,7 @@ public class StageSelectMove : MonoBehaviour
     private GameObject[] _arrowButton;
     private int _positionNumber;
     private RectTransform _myRect;
+    private bool _moveflag;
 
 	// Use this for initialization
 	void Start ()
@@ -20,17 +21,26 @@ public class StageSelectMove : MonoBehaviour
         _positionNumber = 0;
         _myRect = this.GetComponent<RectTransform>();
         //ButtonSelect();
-
+        _moveflag = false;
     }
 	
 	// Update is called once per frame
 	void Update ()
     {
-        if (Input.GetKeyDown(KeyCode.K))
+        //if (Input.GetKeyDown(KeyCode.K))
+        //{
+        //    RightMove();
+        //}
+        //else if (Input.GetKeyDown(KeyCode.J))
+        //{
+        //    LeftMove();
+        //}
+
+        if(Input.GetAxis("Horizontal") >= 0.5f)
         {
             RightMove();
         }
-        if (Input.GetKeyDown(KeyCode.J))
+        else if (Input.GetAxis("Horizontal") <= -0.5f)
         {
             LeftMove();
         }
@@ -38,20 +48,24 @@ public class StageSelectMove : MonoBehaviour
 
     public void RightMove()
     {
-        if (_positionNumber >= _toPosition.Length - 1) return;
+        if (_positionNumber >= _toPosition.Length - 1 || _moveflag == true) return;
+        _moveflag = true;
         _positionNumber++;
         ArrowCollarChange(0);
         ButtonSelect();
-        LeanTween.move(_myRect, new Vector2(_toPosition[_positionNumber], this.transform.localPosition.y), 0.2f);
+        LeanTween.move(_myRect, new Vector2(_toPosition[_positionNumber], this.transform.localPosition.y), 0.2f)
+            .setOnComplete(() => { _moveflag = false; });
     }
 
     public void LeftMove()
     {
-        if (_positionNumber <= 0) return;
+        if (_positionNumber <= 0 || _moveflag == true) return;
+        _moveflag = true;
         _positionNumber--;
         ArrowCollarChange(1);
         ButtonSelect();
-        LeanTween.move(_myRect, new Vector2(_toPosition[_positionNumber], this.transform.localPosition.y), 0.2f);
+        LeanTween.move(_myRect, new Vector2(_toPosition[_positionNumber], this.transform.localPosition.y), 0.2f)
+            .setOnComplete(()=> { _moveflag = false; });
     }
 
     void ButtonSelect()
