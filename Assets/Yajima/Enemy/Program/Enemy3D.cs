@@ -110,6 +110,7 @@ public class Enemy3D : MonoBehaviour
         //AnimalTakeOut,  // 動物持ち帰り状態
         //FeedEat,        // 餌食べ状態
         Faint,          // 気絶状態
+        Sleep,          // 睡眠状態
         DeadIdel        // 死亡待機状態
     }
     // 発見状態
@@ -223,6 +224,7 @@ public class Enemy3D : MonoBehaviour
             case State.TrapHit: TrapHit(deltaTime); break;
             case State.Runaway: Runaway(deltaTime); break;
             case State.Faint: Faint(deltaTime); break;
+            case State.Sleep: Sleep(deltaTime); break;
             case State.DeadIdel: DeadIdel(deltaTime); break;
         };
 
@@ -686,6 +688,22 @@ public class Enemy3D : MonoBehaviour
         ChangeSpriteColor(Color.red);
     }
 
+    // 睡眠状態
+    protected void Sleep(float deltaTime)
+    {
+        //// えさ判定で、trueならば、起こす(待機状態に遷移)
+        //int value1 = Random.Range(1, 100 + 1);
+        //// 個数によって、判定用の値を変える
+        //int count = 6;
+        //int value2 = Mathf.Min(count, 10) * 6;
+        //print((value1 > value2).ToString());
+
+        // 
+        //ChangeState(State.Idel, AnimationNumber.ANIME_IDEL_NUMBER);
+        //ChangeSpriteColor(Color.red);
+        //m_Agent.Resume();
+    }
+
     // 死亡待機状態
     protected void DeadIdel(float deltaTime)
     {
@@ -822,6 +840,8 @@ public class Enemy3D : MonoBehaviour
         // えさの削除
         Destroy(m_FoodObj);
         m_FoodObj = null;
+        // ゲームマネージャ側の減算処理を呼ぶ
+        GameManager.gameManager.FoodCountSub();
     }
 
     // 好きなえさ

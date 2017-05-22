@@ -3,10 +3,16 @@ using System.Collections;
 
 public class BearEnemy : LargeEnemy {
 
-    //// Use this for initialization
-    //void Start () {
-
-    //}
+    // Use this for initialization
+    protected override void Start()
+    {
+        base.Start();
+        // 睡眠状態に変更
+        m_State = State.Sleep;
+        // スプライトカラーの変更
+        ChangeSpriteColor(new Color(1.0f, 0.0f, 1.0f, 1.0f));
+        m_Agent.Stop();
+    }
 
     //// Update is called once per frame
     //void Update () {
@@ -23,7 +29,37 @@ public class BearEnemy : LargeEnemy {
 
     protected override bool IsFoodCheck(Food.Food_Kind food)
     {
-        return food == Food.Food_Kind.Tanuki || food == Food.Food_Kind.Rabbit;
+        // return food == Food.Food_Kind.Tanuki || food == Food.Food_Kind.Rabbit;
+        return food != Food.Food_Kind.NULL;
+    }
+
+    protected override bool IsLikeFood(Food.Food_Kind food)
+    {
+        return food == Food.Food_Kind.Goat || food == Food.Food_Kind.Tanuki;
+    }
+    #endregion
+
+    #region public関数
+    public void CheckFood()
+    {
+        // えさ判定で、trueならば、起こす(待機状態に遷移)
+        int value1 = Random.Range(1, 100 + 1);
+        // 個数によって、判定用の値を変える
+        // ゲームマネージャから、えさの個数を取得する
+        //int count = GameManager.gameManager.
+        //int value2 = Mathf.Min(count, 10) * 3;
+
+        //アルファ版は確実に起こす
+        int count = GameManager.gameManager.FoodCountCheck();
+        int value2 = Mathf.Min(count, 10) * 10;
+        // 乱数値と比較して、大きかったら起こす
+        //if (value1 < value2) 
+        if (value1 >= value2) return;
+
+        ChangeState(State.Idel, AnimationNumber.ANIME_IDEL_NUMBER);
+        //ChangeState(State.Idel, AnimationNumber.ANIME_IDEL_NUMBER);
+        ChangeSpriteColor(Color.red);
+        m_Agent.Resume();
     }
     #endregion
 }
