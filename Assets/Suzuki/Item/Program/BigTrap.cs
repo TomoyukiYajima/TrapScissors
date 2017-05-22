@@ -45,8 +45,6 @@ public class BigTrap : MonoBehaviour
     {
         if (col.tag == "LargeEnemy")
         {
-
-            
             Enemy3D animal = col.gameObject.GetComponent<Enemy3D>();
             animal.ChangeTrap(gameObject);
             ChengeState(TrapState.CAPTURE);
@@ -54,6 +52,7 @@ public class BigTrap : MonoBehaviour
             //_flg = true;
 
             _result.SetActive(true);
+            SceneManagerScript.sceneManager.FadeBlack();
         }
     }
 
