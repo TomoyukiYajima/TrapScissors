@@ -13,12 +13,10 @@ public class Food : MonoBehaviour {
 
     public Sprite[] _sprite;
 
-    public Food_Kind food_Kind;
+    public Food_Kind food_Kind = Food_Kind.NULL;
 
     // Use this for initialization
     void Start () {
-
-        food_Kind = Food_Kind.NULL;
     }
 	
 	// Update is called once per frame
