@@ -51,7 +51,7 @@ public class BigTrap : MonoBehaviour
             animal.ChangeTrap(gameObject);
             ChengeState(TrapState.CAPTURE);
             _targetAnimal = col.gameObject;
-            _flg = true;
+            //_flg = true;
 
             _result.SetActive(true);
         }
