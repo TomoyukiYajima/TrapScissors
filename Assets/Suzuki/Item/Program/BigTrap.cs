@@ -52,6 +52,7 @@ public class BigTrap : MonoBehaviour
             //_flg = true;
 
             _result.SetActive(true);
+            _result.transform.FindChild("NextStageButton").gameObject.GetComponent<Button>().Select();
             SceneManagerScript.sceneManager.FadeBlack();
         }
     }

@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
+using UnityEngine.UI;
 
 public class NavMeshPlayer : MonoBehaviour {
 
@@ -12,6 +13,7 @@ public class NavMeshPlayer : MonoBehaviour {
     private GameManager _childSprite;
     private SpriteRenderer _myRenderer;
     public Sprite[] _sprite;
+    public GameObject _gameOver;
 
 
     // Use this for initialization
@@ -37,6 +39,8 @@ public class NavMeshPlayer : MonoBehaviour {
         if (col.gameObject.tag == "LargeEnemy")
         {
             SceneManagerScript.sceneManager.FadeBlack();
+            _gameOver.SetActive(true);
+            _gameOver.transform.FindChild("ContinueButton").gameObject.GetComponent<Button>().Select();
         }
 
     }

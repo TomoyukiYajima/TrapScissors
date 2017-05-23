@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using UnityEngine.UI;
 #if UNITY_EDITOR
 using UnityEditor;
 #endif
@@ -107,6 +108,7 @@ public class GameManager : MonoBehaviour
             SceneManagerScript.sceneManager.FadeBlack();
             _gameState = GameState.PAUSE;
             _pauseUI.SetActive(true);
+            _pauseUI.transform.FindChild("Restart").gameObject.GetComponent<Button>().Select();
         }
 
         //制限時間を設けない、または制限時間が0秒以下ならば時間を計測しない
