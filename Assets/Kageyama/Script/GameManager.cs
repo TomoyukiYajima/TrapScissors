@@ -25,6 +25,10 @@ public class GameManager : MonoBehaviour
     //トラップの最大数
     [SerializeField]
     private int _trapNumber;
+    [SerializeField]
+    private float _clampX;
+    [SerializeField]
+    private float _clampZ;
     #endregion
     #region 時間設定
     //制限時間があるかどうか
@@ -230,6 +234,25 @@ public class GameManager : MonoBehaviour
         return _foodCount;
     }
 
+    /// <summary>
+    /// 移動できるX座標の最大の値
+    /// </summary>
+    /// <returns></returns>
+    public float ClampX()
+    {
+        return _clampX;
+    }
+
+    /// <summary>
+    /// 移動できるZ座標の最大の値
+    /// </summary>
+    /// <returns></returns>
+    public float ClampZ()
+    {
+        return _clampZ;
+    }
+
+
 #if UNITY_EDITOR
     [CustomEditor(typeof(GameManager))]
     public class SceneManagerEditor : Editor
@@ -240,6 +263,8 @@ public class GameManager : MonoBehaviour
         SerializedProperty GameTime;
         SerializedProperty GetAnimal;
         SerializedProperty PauseUI;
+        SerializedProperty ClampX;
+        SerializedProperty ClampZ;
 
         public void OnEnable()
         {
@@ -249,6 +274,8 @@ public class GameManager : MonoBehaviour
             GameTime = serializedObject.FindProperty("_gameTime");
             GetAnimal = serializedObject.FindProperty("_getAnimal");
             PauseUI = serializedObject.FindProperty("_pauseUI");
+            ClampX = serializedObject.FindProperty("_clampX");
+            ClampZ = serializedObject.FindProperty("_clampZ");
         }
         public override void OnInspectorGUI()
         {
@@ -265,6 +292,8 @@ public class GameManager : MonoBehaviour
             EditorGUILayout.PropertyField(GetAnimal, true);
             EditorGUILayout.Space();
             PauseUI.objectReferenceValue = EditorGUILayout.ObjectField("ポーズ中に出すオブジェクト", manager._pauseUI, typeof(GameObject), true) as GameObject;
+            ClampX.floatValue = EditorGUILayout.FloatField("X座標の移動できる最大の値", manager._clampX);
+            ClampZ.floatValue = EditorGUILayout.FloatField("Z座標の移動できる最大の値", manager._clampZ);
 
             serializedObject.ApplyModifiedProperties();
 
