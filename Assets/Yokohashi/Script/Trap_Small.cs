@@ -65,17 +65,13 @@ public class Trap_Small : MonoBehaviour
         if (col.tag == "LargeEnemy" || col.tag == "SmallEnemy")
         {
             _targetAnimal = col.gameObject;
+            Enemy3D enemy = col.GetComponent<Enemy3D>();
+            enemy.ChangeTrap(gameObject);
             if (col.tag == "LargeEnemy")
             {
                 print("b");
                 recovery = false;
             }
-            else if (col.tag == "SmallEnemy")
-            {
-                Enemy3D enemy = col.GetComponent<Enemy3D>();
-                enemy.ChangeTrap(gameObject);
-            }
-
             ChengeState(TrapState.CAPTURE_TRAP);
         }
 
