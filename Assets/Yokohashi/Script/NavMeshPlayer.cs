@@ -14,7 +14,7 @@ public class NavMeshPlayer : MonoBehaviour {
     private GameManager _childSprite;
     private SpriteRenderer _myRenderer;
     public Sprite[] _sprite;
-    public GameObject _gameOver;
+    //public GameObject _gameOver;
 
 
     // Use this for initialization

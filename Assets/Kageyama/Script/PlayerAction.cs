@@ -118,7 +118,7 @@ public class PlayerAction : MonoBehaviour
         _foodUIMove.FoodCountSub(_foodNumber);
 
         Vector3 pos = new Vector3(this.transform.position.x,
-                                                       this.transform.position.y - 1.5f,
+                                                       this.transform.position.y,
                                                        this.transform.position.z);
         //餌を生成
         GameObject _foodObj = Instantiate(_food);

@@ -347,7 +347,7 @@ public class Enemy3D : MonoBehaviour
             case DiscoverFoodState.DiscoverFood_Eat: DiscoverFoodEat(deltaTime); break;
             case DiscoverFoodState.DiscoverFood_Lift: DiscoverFoodLift(deltaTime); break;
             case DiscoverFoodState.DiscoverFood_TakeAway: DiscoverFoodTakeOut(deltaTime); break;
-            //case DiscoverFoodState.DiscoverFood_Runaway: DiscoverFeedTakeOut(deltaTime); break;
+                //case DiscoverFoodState.DiscoverFood_Runaway: DiscoverFeedTakeOut(deltaTime); break;
         }
     }
     // えさ発見状態の状態変更
@@ -364,7 +364,8 @@ public class Enemy3D : MonoBehaviour
     {
         // 二次元(x, z)の距離を求める
         var v1 = new Vector2(m_Agent.destination.x, m_Agent.destination.z);
-        var v2 = new Vector2(m_MouthPoint.position.x, m_MouthPoint.position.z);
+        //var v2 = new Vector2(m_MouthPoint.position.x, m_MouthPoint.position.z);
+        var v2 = new Vector2(transform.position.x, transform.position.z);
         var length = Vector2.Distance(v1, v2);
 
         // 一定距離内なら、持ち上げ状態に遷移
@@ -378,6 +379,13 @@ public class Enemy3D : MonoBehaviour
             m_Agent.Stop();
             return;
         }
+
+        // えさが無くなっていたら、待機状態に遷移
+        if (m_FoodObj == null)
+        {
+            ChangeState(State.Idel, AnimationNumber.ANIME_IDEL_NUMBER);
+            ChangeSpriteColor(Color.red);
+        }
     }
     // 動物発見状態
     protected virtual void DiscoverFoodAnimalMove(float deltaTime)
@@ -387,12 +395,16 @@ public class Enemy3D : MonoBehaviour
         //    m_Agent.destination, m_MouthPoint.position
         //    );
         // 二次元(x, z)の距離を求める
+        //var v1 = new Vector2(m_Agent.destination.x, m_Agent.destination.z);
+        //var v2 = new Vector2(m_MouthPoint.position.x, m_MouthPoint.position.z);
+        //var length = Vector2.Distance(v1, v2);
+
         var v1 = new Vector2(m_Agent.destination.x, m_Agent.destination.z);
-        var v2 = new Vector2(m_MouthPoint.position.x, m_MouthPoint.position.z);
+        var v2 = new Vector2(transform.position.x, transform.position.z);
         var length = Vector2.Distance(v1, v2);
 
         // 一定距離内なら、持ち上げ状態に遷移
-        if (length < 0.5f)
+        if (length < 0.8f)
         {
             // 持ち上げ状態に遷移
             ChangeDiscoverFoodState(DiscoverFoodState.DiscoverFood_Lift);
@@ -411,6 +423,14 @@ public class Enemy3D : MonoBehaviour
     // えさ食べ状態
     protected void DiscoverFoodEat(float deltaTime)
     {
+        // えさが無くなっていたら、待機状態に遷移
+        if (m_FoodObj == null)
+        {
+            ChangeState(State.Idel, AnimationNumber.ANIME_IDEL_NUMBER);
+            ChangeSpriteColor(Color.red);
+            m_Agent.Resume();
+        }
+
         if (m_StateTimer <= 2.0f) return;
         // えさを食べた時の処理
         EatFood();
@@ -917,7 +937,7 @@ public class Enemy3D : MonoBehaviour
         RaycastHit hitInfo;
         var hit = Physics.Raycast(ray, out hitInfo);
         // 指定レイヤーと衝突する場合
-        if(layerMask != -1) hit = Physics.Raycast(ray, out hitInfo, layerMask);
+        if (layerMask != -1) hit = Physics.Raycast(ray, out hitInfo, layerMask);
         // プレイヤーに当たらなかった場合、
         // プレイヤー以外に当たった場合は返す
         //print("見えているか調査");
@@ -1047,6 +1067,7 @@ public class Enemy3D : MonoBehaviour
     {
         // 待機状態に変更
         ChangeState(State.Idel, AnimationNumber.ANIME_IDEL_NUMBER);
+        ChangeSpriteColor(Color.red);
         // トラバサミを空っぽにする
         m_TrapObj = null;
         // 親オブジェクトを非アクティブに変更
@@ -1695,6 +1716,8 @@ public class Enemy3D : MonoBehaviour
         // えさの衝突判定に当たった場合の処理
         if (objName == "FoodCollide")
         {
+            // すでにえさを発見している場合は、返す
+            if (m_State == State.Discover && m_DState == DiscoverState.Discover_Food) return;
             // 親である餌の取得
             var obj = other.transform.parent;
             var food = obj.GetComponent<Food>();
@@ -1720,6 +1743,43 @@ public class Enemy3D : MonoBehaviour
             return;
         }
     }
+
+    public void OnTriggerStay(Collider other)
+    {
+        var objName = other.name;
+
+        if (m_State == State.TrapHit) return;
+        // えさの衝突判定に当たった場合の処理
+        if (objName == "FoodCollide")
+        {
+            // すでにえさを発見している場合は、返す
+            if (m_State == State.Discover && m_DState == DiscoverState.Discover_Food) return;
+            // 親である餌の取得
+            var obj = other.transform.parent;
+            var food = obj.GetComponent<Food>();
+            // 反応するえさでなければ返す
+            //var kind = food.CheckFoodKind();
+            if (!IsFoodCheck(food.CheckFoodKind())) return;
+
+            //if (food == null || m_FoodState != food.CheckFoodKind() ||
+            //    food.CheckFoodKind() == Food.Food_Kind.NULL) return;
+
+            // えさ発見移動状態に遷移
+            //ChangeDiscoverFeedState(DiscoverFoodState.DiscoverFood_Move);
+            ChangeFoodMove(food);
+            m_FoodObj = obj.gameObject;
+
+            //var enemy = m_DiscoverObj.GetComponent<Enemy3D>();
+            //if (enemy == null) return;
+            //m_Animal = enemy;
+            // 移動ポイントをえさに変更
+            //ChangeMovePoint(obj.transform.position);
+            //ChangeSpriteColor(Color.magenta);
+
+            return;
+        }
+    }
+
     #endregion
 
     #region ギズモ関数

@@ -89,6 +89,15 @@ public class MiddleEnemy : Enemy3D {
 
     protected override void DiscoverPlayer(float deltaTime)
     {
+        //// プレイヤーとのベクトルを計算して、移動ポイントを更新する
+        var vec = m_Player.transform.position - this.transform.position;
+        var dir = vec.normalized;
+        //var point = m_Player.transform.position + dir * 10.0f;
+        //m_Agent.destination = point;
+        //m_Agent.speed = m_Speed * 1.5f;
+        // velocity に移動量を渡すー＞ナビメッシュが自動で速度の補正をしてしまい、
+        // 動物が追いつけなくなっているため
+        m_Agent.velocity = dir * m_Speed;
         m_Agent.destination = m_Player.transform.position;
 
         base.DiscoverPlayer(deltaTime);
