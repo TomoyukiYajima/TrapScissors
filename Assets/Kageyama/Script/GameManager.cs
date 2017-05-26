@@ -273,6 +273,16 @@ public class GameManager : MonoBehaviour
         return _clampZ_min;
     }
 
+    public GameState GameStateCheck()
+    {
+        return _gameState;
+    }
+
+    public void GameStateSet(GameState state)
+    {
+        _gameState = state;
+    }
+
 
 #if UNITY_EDITOR
     [CustomEditor(typeof(GameManager))]

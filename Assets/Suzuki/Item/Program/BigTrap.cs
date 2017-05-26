@@ -49,11 +49,9 @@ public class BigTrap : MonoBehaviour
             animal.ChangeTrap(gameObject);
             ChengeState(TrapState.CAPTURE);
             _targetAnimal = col.gameObject;
-            //_flg = true;
 
             _result.SetActive(true);
-            _result.transform.FindChild("NextStageButton").gameObject.GetComponent<Button>().Select();
-            SceneManagerScript.sceneManager.FadeBlack();
+            GameManager.gameManager.GameStateSet(GameManager.GameState.END);
         }
     }
 

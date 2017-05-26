@@ -359,7 +359,6 @@ public class SceneManagerScript : MonoBehaviour
     /// </summary>
     public void TimeStart()
     {
-
         Time.timeScale = 1;
     }
 
@@ -369,7 +368,6 @@ public class SceneManagerScript : MonoBehaviour
     /// <param name="speed"></param>
     public void TimeSet(float speed)
     {
-
         Time.timeScale = speed;
     }
 
