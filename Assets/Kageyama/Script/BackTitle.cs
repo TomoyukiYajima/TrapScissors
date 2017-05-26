@@ -12,9 +12,9 @@ public class BackTitle : MonoBehaviour
 	// Update is called once per frame
 	void Update ()
     {
-        if(Input.GetButtonDown("Trap"))
+        if (Input.GetButtonDown("Trap"))
         {
             SceneManagerScript.sceneManager.FadeOut("Title");
         }
-	}
+    }
 }

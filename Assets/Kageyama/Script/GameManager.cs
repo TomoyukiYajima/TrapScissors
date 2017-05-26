@@ -26,9 +26,13 @@ public class GameManager : MonoBehaviour
     [SerializeField]
     private int _trapNumber;
     [SerializeField]
-    private float _clampX;
+    private float _clampX_max;
     [SerializeField]
-    private float _clampZ;
+    private float _clampX_min;
+    [SerializeField]
+    private float _clampZ_max;
+    [SerializeField]
+    private float _clampZ_min;
     #endregion
     #region 時間設定
     //制限時間があるかどうか
@@ -238,18 +242,35 @@ public class GameManager : MonoBehaviour
     /// 移動できるX座標の最大の値
     /// </summary>
     /// <returns></returns>
-    public float ClampX()
+    public float ClampX_MAX()
     {
-        return _clampX;
+        return _clampX_max;
+    }
+    /// <summary>
+    /// 移動できるX座標の最小の値
+    /// </summary>
+    /// <returns></returns>
+    public float ClampX_MIN()
+    {
+        return _clampX_min;
     }
 
     /// <summary>
     /// 移動できるZ座標の最大の値
     /// </summary>
     /// <returns></returns>
-    public float ClampZ()
+    public float ClampZ_MAX()
     {
-        return _clampZ;
+        return _clampZ_max;
+    }
+
+    /// <summary>
+    /// 移動できるZ座標の最小の値
+    /// </summary>
+    /// <returns></returns>
+    public float ClampZ_MIN()
+    {
+        return _clampZ_min;
     }
 
 
@@ -263,8 +284,10 @@ public class GameManager : MonoBehaviour
         SerializedProperty GameTime;
         SerializedProperty GetAnimal;
         SerializedProperty PauseUI;
-        SerializedProperty ClampX;
-        SerializedProperty ClampZ;
+        SerializedProperty ClampX_MAX;
+        SerializedProperty ClampX_MIN;
+        SerializedProperty ClampZ_MAX;
+        SerializedProperty ClampZ_MIN;
 
         public void OnEnable()
         {
@@ -274,8 +297,10 @@ public class GameManager : MonoBehaviour
             GameTime = serializedObject.FindProperty("_gameTime");
             GetAnimal = serializedObject.FindProperty("_getAnimal");
             PauseUI = serializedObject.FindProperty("_pauseUI");
-            ClampX = serializedObject.FindProperty("_clampX");
-            ClampZ = serializedObject.FindProperty("_clampZ");
+            ClampX_MAX = serializedObject.FindProperty("_clampX_max");
+            ClampX_MIN = serializedObject.FindProperty("_clampX_min");
+            ClampZ_MAX = serializedObject.FindProperty("_clampZ_max");
+            ClampZ_MIN = serializedObject.FindProperty("_clampZ_min");
         }
         public override void OnInspectorGUI()
         {
@@ -292,8 +317,18 @@ public class GameManager : MonoBehaviour
             EditorGUILayout.PropertyField(GetAnimal, true);
             EditorGUILayout.Space();
             PauseUI.objectReferenceValue = EditorGUILayout.ObjectField("ポーズ中に出すオブジェクト", manager._pauseUI, typeof(GameObject), true) as GameObject;
-            ClampX.floatValue = EditorGUILayout.FloatField("X座標の移動できる最大の値", manager._clampX);
-            ClampZ.floatValue = EditorGUILayout.FloatField("Z座標の移動できる最大の値", manager._clampZ);
+
+            EditorGUILayout.Space();
+            EditorGUILayout.LabelField("X座標の移動可能範囲( MIN / MAX )");
+            EditorGUILayout.BeginHorizontal();
+            ClampX_MIN.floatValue = EditorGUILayout.FloatField(manager._clampX_min, GUILayout.Width(32));
+            ClampX_MAX.floatValue = EditorGUILayout.FloatField(manager._clampX_max, GUILayout.Width(32));
+            EditorGUILayout.EndHorizontal();
+            EditorGUILayout.LabelField("Z座標の移動可能範囲( MIN / MAX )");
+            EditorGUILayout.BeginHorizontal();
+            ClampZ_MIN.floatValue = EditorGUILayout.FloatField(manager._clampZ_min, GUILayout.Width(32));
+            ClampZ_MAX.floatValue = EditorGUILayout.FloatField(manager._clampZ_max, GUILayout.Width(32));
+            EditorGUILayout.EndHorizontal();
 
             serializedObject.ApplyModifiedProperties();
 
