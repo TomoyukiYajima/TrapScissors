@@ -30,6 +30,12 @@ public class SceneManagerScript : MonoBehaviour
     private bool FadeStart;
     private EventSystem _eventSystem;
     #endregion
+    #region 何かボタンを押してシーン移動
+    [SerializeField]
+    private bool _anyButtonMove;
+    [SerializeField]
+    private string _anyButtonMoveName;
+    #endregion
     #region 放置でシーン移行
     [SerializeField]
     private bool _leave_Alone;
@@ -102,6 +108,35 @@ public class SceneManagerScript : MonoBehaviour
         {
             if (_sound_FadeIN == true) SoundManger.Instance.FadeInBGM(_BGM_Number);
             else SoundManger.Instance.PlayBGM(_BGM_Number);
+        }
+    }
+    public void Update()
+    {
+        //何かボタンを押して移動するなら下の処理を行う
+        if (_anyButtonMove == true && Input.anyKeyDown)
+        {
+            FadeOut(_anyButtonMoveName);
+            return;
+        }
+
+        //Escキーをおしたらゲーム終了
+        if (Input.GetKeyDown(KeyCode.Escape))
+        {
+            QuitCheck();
+            return;
+        }
+
+        //放置でシーン移動をしないならこの下の処理を行わない
+        if (_leave_Alone == true)
+        {
+            _wTime_Count += Time.deltaTime;
+            if (_wTime_Count >= _waiting_Time)
+            {
+                SceneOut(_waiting_Scene);
+            }
+            if (Input.anyKeyDown) _wTime_Count = 0;
+
+            return;
         }
     }
 
@@ -232,6 +267,7 @@ public class SceneManagerScript : MonoBehaviour
     {
         return SceneManager.GetActiveScene().name;
     }
+
     /// <summary>
     /// ゲームを終了する
     /// </summary>
@@ -337,23 +373,16 @@ public class SceneManagerScript : MonoBehaviour
         Time.timeScale = speed;
     }
 
-    public void Update()
+    /// <summary>
+    /// 何かボタンを押したらシーン移動のフラグを変更する
+    /// </summary>
+    /// <param name="flag">trueにするかfalseにするか</param>
+    /// <param name="stageName">移動するシーン名</param>
+    public void AnyButtonOn(bool flag, string stageName)
     {
-        //Escキーをおしたらゲーム終了
-        if (Input.GetKeyDown(KeyCode.Escape))
-        {
-            QuitCheck();
-        }
-
-        //放置でシーン移動をしないならこの下の処理を行わない
-        if (_leave_Alone == false) return;
-        _wTime_Count += Time.deltaTime;
-        if(_wTime_Count >= _waiting_Time)
-        {
-            SceneOut(_waiting_Scene);
-        }
-        if (Input.anyKeyDown) _wTime_Count = 0;
+        _anyButtonMove = flag;
     }
+
     
 #if UNITY_EDITOR
     [CustomEditor(typeof(SceneManagerScript))]
@@ -372,6 +401,8 @@ public class SceneManagerScript : MonoBehaviour
         SerializedProperty Fade_IN_Sound;
         SerializedProperty Fade_OUT_Sound;
         SerializedProperty EndDialog;
+        SerializedProperty AnyButtonMove;
+        SerializedProperty AnyButtonMoveName;
 
         public void OnEnable()
         {
@@ -388,6 +419,8 @@ public class SceneManagerScript : MonoBehaviour
             Fade_OUT_Sound = serializedObject.FindProperty("_sound_FadeOUT");
             Scene_Fade = serializedObject.FindProperty("_scene_Fade");
             EndDialog = serializedObject.FindProperty("_endDialog");
+            AnyButtonMove = serializedObject.FindProperty("_anyButtonMove");
+            AnyButtonMoveName = serializedObject.FindProperty("_anyButtonMoveName");
         }
         public override void OnInspectorGUI()
         {
@@ -412,6 +445,12 @@ public class SceneManagerScript : MonoBehaviour
             {
                 Waiting_Time.floatValue = EditorGUILayout.FloatField("放置時間", scene._waiting_Time);
                 Waiting_Scene.stringValue = EditorGUILayout.TextField("移動するシーン", scene._waiting_Scene);
+            }
+
+            AnyButtonMove.boolValue = EditorGUILayout.Toggle("何かボタンを押したらシーン移動", scene._anyButtonMove);
+            if(scene._anyButtonMove == true)
+            {
+                AnyButtonMoveName.stringValue = EditorGUILayout.TextField("移動するシーン", scene._anyButtonMoveName);
             }
 
             EditorGUILayout.Space();
