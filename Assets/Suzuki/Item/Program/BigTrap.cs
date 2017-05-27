@@ -51,6 +51,7 @@ public class BigTrap : MonoBehaviour
             _targetAnimal = col.gameObject;
 
             _result.SetActive(true);
+            GameManager.gameManager.HuntCountAdd();
             GameManager.gameManager.GameStateSet(GameManager.GameState.END);
         }
     }

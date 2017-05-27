@@ -56,6 +56,7 @@ public class GameManager : MonoBehaviour
     [SerializeField]
     private GameObject _pauseUI;
     public int _foodCount;
+    private int _huntcount;
     #endregion
 
     //どこでも参照可
@@ -123,11 +124,11 @@ public class GameManager : MonoBehaviour
         if (_timeCheck == true && _gameTime > 0)
         {
             _timeCount += Time.deltaTime;
-            if (_timeCount >= _gameTime)
-            {
-                _gameState = GameState.END;
-                SceneManagerScript.sceneManager.FadeBlack();
-            }
+            //if (_timeCount >= _gameTime)
+            //{
+            //    _gameState = GameState.END;
+            //    SceneManagerScript.sceneManager.FadeBlack();
+            //}
         }
     }
 
@@ -281,6 +282,22 @@ public class GameManager : MonoBehaviour
     public void GameStateSet(GameState state)
     {
         _gameState = state;
+    }
+
+    public void HuntCountAdd()
+    {
+        _huntcount++;
+    }
+
+    public int HuntCountCheck()
+    {
+        _huntcount = 10;
+        return _huntcount;
+    }
+
+    public int GameTime()
+    {
+        return (int)_timeCount;
     }
 
 
