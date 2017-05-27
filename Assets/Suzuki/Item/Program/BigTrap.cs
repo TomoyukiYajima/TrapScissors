@@ -50,6 +50,7 @@ public class BigTrap : MonoBehaviour
             ChengeState(TrapState.CAPTURE);
             _targetAnimal = col.gameObject;
 
+            _flg = true;
             _result.SetActive(true);
             GameManager.gameManager.HuntCountAdd();
             GameManager.gameManager.GameStateSet(GameManager.GameState.END);

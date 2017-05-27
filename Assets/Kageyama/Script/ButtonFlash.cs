@@ -10,7 +10,7 @@ public class ButtonFlash : MonoBehaviour
 	void Start ()
     {
         _myRect = this.GetComponent<RectTransform>();
-        LeanTween.scale(_myRect, new Vector2(1.0f, 1.0f), 2)
+        LeanTween.scale(_myRect, new Vector3(1.0f, 1.0f, 1.0f), 2)
             .setLoopPingPong()
             .setEase(LeanTweenType.easeOutQuart);
         LeanTween.alpha(_myRect, 1.0f, 2)

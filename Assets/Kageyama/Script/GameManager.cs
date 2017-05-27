@@ -291,7 +291,6 @@ public class GameManager : MonoBehaviour
 
     public int HuntCountCheck()
     {
-        _huntcount = 10;
         return _huntcount;
     }
 

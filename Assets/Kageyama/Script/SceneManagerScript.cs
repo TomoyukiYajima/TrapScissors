@@ -308,6 +308,24 @@ public class SceneManagerScript : MonoBehaviour
     }
 
     /// <summary>
+    /// シーン移動せずに画面全体を薄暗くする
+    /// </summary>
+    public void Black()
+    {
+        if (FadeStart == true)
+        {
+            return;
+        }
+        _fade_Object.SetActive(true);
+        FadeStart = true;
+        LeanTween.alpha(_fade, 0.5f, 0.1f)
+            .setOnComplete(() =>
+            {
+                FadeStart = false;
+            });
+    }
+
+    /// <summary>
     /// シーン移動せずに画面全体を薄暗くして時間を止める
     /// </summary>
     public void FadeBlack()
@@ -323,6 +341,25 @@ public class SceneManagerScript : MonoBehaviour
             {
                 FadeStart = false;
                 TimeStop();
+            });
+    }
+
+    /// <summary>
+    /// 暗くなっている画面を明るくする
+    /// </summary>
+    public void White()
+    {
+        if (FadeStart == true)
+        {
+            return;
+        }
+
+        FadeStart = true;
+        LeanTween.alpha(_fade, 0, 0.1f)
+            .setOnComplete(() =>
+            {
+                _fade_Object.SetActive(false);
+                FadeStart = false;
             });
     }
 
@@ -378,6 +415,7 @@ public class SceneManagerScript : MonoBehaviour
     /// <param name="stageName">移動するシーン名</param>
     public void AnyButtonOn(bool flag, string stageName)
     {
+        _anyButtonMoveName = stageName;
         _anyButtonMove = flag;
     }
 

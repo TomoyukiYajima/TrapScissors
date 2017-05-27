@@ -5,23 +5,22 @@ public class AnyButton : MonoBehaviour
 {
     [SerializeField]
     private GameObject _AnyButtonImage;
+    [SerializeField]
+    private string _nextStage;
+    [SerializeField]
+    private float _waitTime;
 
 	// Use this for initialization
 	void Start ()
     {
         StartCoroutine(AnyButtonON());
 	}
-	
-	// Update is called once per frame
-	void Update () {
-	
-	}
 
     IEnumerator AnyButtonON()
     {
-        yield return new WaitForSecondsRealtime(2.0f);
+        yield return new WaitForSecondsRealtime(_waitTime);
         _AnyButtonImage.SetActive(true);
-        SceneManagerScript.sceneManager.AnyButtonOn(true, "StageSelect");
+        SceneManagerScript.sceneManager.AnyButtonOn(true, _nextStage);
 
     }
 }

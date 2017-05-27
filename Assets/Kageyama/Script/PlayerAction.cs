@@ -55,7 +55,8 @@ public class PlayerAction : MonoBehaviour
 	// Update is called once per frame
 	void Update ()
     {
-        if (_trap.FlgTarget() == true) return;
+        //大型トラップが何かを捕まえた、もしくはゲームが終了していたらアクションをできないようにする
+        if (_trap.FlgTarget() == true || GameManager.gameManager.GameStateCheck() == GameManager.GameState.END) return;
         Action();
 	}
 
