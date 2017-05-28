@@ -9,7 +9,6 @@ public class LoadMove : MonoBehaviour
     // Use this for initialization
     void Start()
     {
-        //transform.Rotate(0f, 180f, 0f);
         _myrect = gameObject.GetComponent<RectTransform>();
         ToMovePosition();
     }
@@ -21,24 +20,32 @@ public class LoadMove : MonoBehaviour
     }
     void ToMovePosition()
     {
-        LeanTween.move(_myrect, new Vector2(30, 30), _speed)
+        int _randX = Random.Range(-370, 370);
+        if(_randX - this.transform.localPosition.x == 0)
+        {
+            ToMovePosition();
+            return;
+        }
+        else if (_randX <= this.transform.localPosition.x)
+        {
+            _speed = (this.transform.localPosition.x - _randX) / 200.0f;
+            ToRotate(0);
+        }
+        else
+        {
+            _speed = (_randX - this.transform.localPosition.x) / 200.0f;
+            ToRotate(180);
+        }
+        LeanTween.move(_myrect, new Vector2(_randX, -195), _speed)
             .setOnComplete(() =>
             {
-                ToRotate();
-                LeanTween.move(_myrect, new Vector2(770, 30), _speed)
-                .setOnComplete(() =>
-                {
-                    ToRotate();
-                })
-            .setLoopPingPong();
-            })
-            ;
+                ToMovePosition();
+            });
         
 
     }
-    public void ToRotate()
+    public void ToRotate(float rotate)
     {
-        transform.Rotate(0f, 180f, 0f);
-        //LeanTween.rotate(_myrect, 180f, 1f);
+        transform.Rotate(0f, rotate, 0f);
     }
 }
