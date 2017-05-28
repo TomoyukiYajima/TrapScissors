@@ -6,17 +6,22 @@ using System.Collections.Generic;
 using UnityEditor;
 #endif
 
-public class SmallEnemy : Enemy3D {
+public class SmallEnemy : Enemy3D
+{
 
     #region シリアライズ変数
     //[SerializeField]
     //protected GameObject m_Canvas = null;               // キャンバス
     //[SerializeField]
     //protected GameObject m_MeatUI = null;               // お肉UI
+    [SerializeField]
+    protected GameObject m_RemovePoint = null;  // 逃げるポイント
     #endregion
 
     #region private関数
     //private GameObject m_Frame;             // キャンバスのフレーム
+    private RunawayPoint m_RunawayPoint;    // 逃げ用ポイント
+    private float m_MoveLength = 0.0f;      // 移動距離
     private List<Transform> m_BoxPoints =
         new List<Transform>();              // 移動用ポイントコンテナ
     private Dictionary<Transform, int> m_ResultPoints =
@@ -29,35 +34,98 @@ public class SmallEnemy : Enemy3D {
     {
         base.Start();
 
+        m_RunawayPoint = m_RemovePoint.GetComponent<RunawayPoint>();
+
         //// キャンパスが設定されていなかったら取得
         //if (m_Canvas == null) m_Canvas = GameObject.Find("Canvas");
         //// キャンパスのフレームを取得
         //var frame = m_Canvas.transform.FindChild("Frame");
         //if (frame != null) m_Frame = frame.gameObject;
+
+        //// 壁を発見したとき
+        //GameObject wall = null;
+        //if (InWall(out wall, 20))
+        //{
+        //    // ベクトルを求める
+        //    var cross = Vector3.Cross(wall.transform.up, this.transform.forward);
+        //    m_RemovePoint.transform.localPosition = cross;
+        //}
+    }
+
+    protected override void Update()
+    {
+        base.Update();
+
+        m_RunawayPoint.SetPosition(this.transform.position);
     }
 
     protected override void DiscoverPlayer(float deltaTime)
     {
         // 移動(通常の移動速度の数倍)
-        Move(deltaTime, m_Speed * 2.0f);
-
+        Move(deltaTime, m_DiscoverSpeed);
+        m_MoveLength += m_DiscoverSpeed * deltaTime;
         //base.DiscoverPlayer(deltaTime);]
+        ChangeMovePoint(m_RunawayPoint.gameObject.transform.position);
+        // 壁を発見したとき
+        GameObject wall = null;
+        if (InWall(out wall, 2))
+        {
+            // 壁に沿うように逃げる
+            var rotate = wall.transform.rotation.eulerAngles;
+            m_RunawayPoint.ChangeAddPosition(rotate.y);
+            //print(rotate.y.ToString());
+        }
 
         // 移動(通常の移動速度の数倍)
         //Move(deltaTime, m_Speed * 2.0f);
         //m_Agent.destination = m_Player.transform.position;
         //Camera.
 
+        // 一定距離移動したら、待機状態に遷移
         GameObject obj = null;
-        if (!InPlayer(out obj, 20.0f, true))
+        // if (!InPlayer(out obj, 20.0f, true) || m_MoveLength > 20)
+        if (m_MoveLength > 20)
         {
             // 待機状態に遷移
             ChangeState(State.Idel, AnimationNumber.ANIME_IDEL_NUMBER);
             m_Agent.Resume();
             m_Player = null;
+            // 移動速度を変える
+            m_Agent.speed = m_Speed;
+            m_MoveLength = 0.0f;
             ChangeSpriteColor(Color.red);
             return;
         };
+    }
+
+    protected override void DiscoverAnimal(float deltaTime)
+    {
+        // 逃げる
+        ChangeMovePoint(m_RunawayPoint.gameObject.transform.position);
+        m_MoveLength += m_DiscoverSpeed * deltaTime;
+        ChangeSpriteColor(Color.white);
+
+        // 壁を発見したとき
+        GameObject wall = null;
+        if (InWall(out wall, 2))
+        {
+            // 壁に沿うように逃げる
+            var rotate = wall.transform.rotation.eulerAngles;
+            m_RunawayPoint.ChangeAddPosition(rotate.y);
+            //print(rotate.y.ToString());
+        }
+
+        // 一定距離移動したら、待機状態に遷移
+        if (m_MoveLength > 20)
+        {
+            // 待機状態に遷移
+            ChangeState(State.Idel, AnimationNumber.ANIME_IDEL_NUMBER);
+            m_MoveLength = 0.0f;
+            // 移動速度を変える
+            m_Agent.speed = m_Speed;
+            m_Agent.Resume();
+            ChangeSpriteColor(Color.red);
+        }
     }
     #endregion
 
@@ -73,6 +141,28 @@ public class SmallEnemy : Enemy3D {
     {
         base.ChangePlayerHitMove(player);
         PointRunaway(player.transform);
+    }
+
+    protected override void TriggerEnterObject(Collider other)
+    {
+        base.TriggerEnterObject(other);
+
+        var objName = other.name;
+        // 攻撃判定との衝突判定
+        // お肉状態に遷移
+        if (objName == "AttackCollider")
+            ChangeMeat();
+    }
+
+    protected override void TriggerStayObject(Collider other)
+    {
+        base.TriggerStayObject(other);
+
+        var objName = other.name;
+        // 攻撃判定との衝突判定
+        // お肉状態に遷移
+        if (objName == "AttackCollider")
+            ChangeMeat();
     }
 
     //protected override void DiscoverFoodMove(float deltaTime)
@@ -109,22 +199,6 @@ public class SmallEnemy : Enemy3D {
     protected override void TrapReleaseAction()
     {
         CreateMeat(AnimalMeat.MeatNumber.SMALL_NUMBER);
-
-        //// 肉UIの生成
-        //// GameObject _foodObj = Instantiate(_food);
-        //var m = Instantiate(m_MeatUI);
-        //var meat = m.GetComponent<AnimalMeat>();
-        //meat.SetMeat(AnimalMeat.MeatNumber.SMALL_NUMBER);
-        //// カメラ
-        //var camera = GameObject.Find("Main Camera");
-        //if (camera == null) return;
-        //var mainCamera = camera.GetComponent<Camera>();
-        //// スプライトの位置に生成
-        //meat.SetObjPosition(m_Sprite.transform.position, mainCamera);
-        //meat.transform.localScale = Vector3.one;
-
-        //// キャンパスのフレームに追加
-        //Instantiate(m_MeatUI);
     }
     #endregion
 
@@ -136,11 +210,13 @@ public class SmallEnemy : Enemy3D {
     {
         //SerializedProperty CanvasObj;
         //SerializedProperty MeatUI;
+        SerializedProperty RemovePoint;
 
         protected override void OnChildEnable()
         {
             //CanvasObj = serializedObject.FindProperty("m_Canvas");
             //MeatUI = serializedObject.FindProperty("m_MeatUI");
+            RemovePoint = serializedObject.FindProperty("m_RemovePoint");
         }
 
         protected override void OnChildInspectorGUI()
@@ -151,6 +227,8 @@ public class SmallEnemy : Enemy3D {
             //// GameObject
             //MeatUI.objectReferenceValue = EditorGUILayout.ObjectField("お肉UIオブジェクト", enemy.m_MeatUI, typeof(GameObject), true);
             //CanvasObj.objectReferenceValue = EditorGUILayout.ObjectField("キャンパスオブジェクト", enemy.m_Canvas, typeof(GameObject), true);
+            RemovePoint.objectReferenceValue = EditorGUILayout.ObjectField("逃げポイント", enemy.m_RemovePoint, typeof(GameObject), true);
+
         }
     }
 #endif

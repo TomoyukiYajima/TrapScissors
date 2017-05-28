@@ -10,6 +10,8 @@ public class MiddleEnemy : Enemy3D {
     #region シリアライズ
     [SerializeField]
     protected bool m_IsLiftWait = false;        // 動物を持ってくる時に、一度待機するか
+    [SerializeField]
+    protected GameObject m_AttackCollider;      // 攻撃判定
     #endregion
 
     #region protected変数
@@ -97,7 +99,7 @@ public class MiddleEnemy : Enemy3D {
         //m_Agent.speed = m_Speed * 1.5f;
         // velocity に移動量を渡すー＞ナビメッシュが自動で速度の補正をしてしまい、
         // 動物が追いつけなくなっているため
-        m_Agent.velocity = dir * m_Speed;
+        m_Agent.velocity = dir * m_DiscoverSpeed; //m_Speed;
         m_Agent.destination = m_Player.transform.position;
 
         base.DiscoverPlayer(deltaTime);
@@ -150,10 +152,12 @@ public class MiddleEnemy : Enemy3D {
     public class MiddleEnemyEditor : Enemy3DEditor
     {
         SerializedProperty IsLiftWait;
+        SerializedProperty AttackCollider;
 
         protected override void OnChildEnable()
         {
             IsLiftWait = serializedObject.FindProperty("m_IsLiftWait");
+            AttackCollider = serializedObject.FindProperty("m_AttackCollider");
         }
 
         protected override void OnChildInspectorGUI()
@@ -163,6 +167,7 @@ public class MiddleEnemy : Enemy3D {
             EditorGUILayout.LabelField("〇中型動物のステータス");
             // bool
             IsLiftWait.boolValue = EditorGUILayout.Toggle("持ち帰る時に待機するか", middleEnemy.m_IsLiftWait);
+            AttackCollider.objectReferenceValue = EditorGUILayout.ObjectField("攻撃判定", middleEnemy.m_AttackCollider, typeof(GameObject), true);
         }
     }
 #endif
