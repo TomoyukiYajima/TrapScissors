@@ -41,10 +41,8 @@ public class NavMeshPlayer : MonoBehaviour {
         if (GameManager.gameManager.GameStateCheck() == GameManager.GameState.END) return;
         if (col.gameObject.tag == "LargeEnemy")
         {
+            GameManager.gameManager.GameStateSet(GameManager.GameState.END);
             _gameOver.SetActive(true);
-            SceneManagerScript.sceneManager.FadeBlack();
-            _gameOver.SetActive(true);
-            _gameOver.transform.FindChild("ContinueButton").gameObject.GetComponent<Button>().Select();
         }
 
     }
