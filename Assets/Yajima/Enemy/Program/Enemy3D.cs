@@ -45,6 +45,8 @@ public class Enemy3D : MonoBehaviour
     protected GameObject m_Meat = null;                 // お肉
     [SerializeField]
     protected GameObject m_MeatUI = null;               // お肉UI
+    [SerializeField]
+    protected GameObject m_DiscoverUI = null;           // 発見時のUI
     #endregion
 
     #region protected変数
@@ -66,6 +68,7 @@ public class Enemy3D : MonoBehaviour
     protected GameObject m_Player = null;               // 当たったプレイヤー
     protected GameObject m_FoodObj;                     // えさオブジェクト
     protected GameObject m_TargetAnimal;                // 追跡・逃亡用動物
+    protected DiscoverMark m_Mark;                      // 発見時のマーク
     protected Trap_Small m_Trap = null;
     protected Rigidbody m_Rigidbody;
     protected DSNumber m_DSNumber =
@@ -186,6 +189,7 @@ public class Enemy3D : MonoBehaviour
 
         //m_DiscoveredStates.Add(State.Chase);
         //m_DiscoveredStates.Add(State.Runaway);
+        m_Mark = m_DiscoverUI.GetComponent<DiscoverMark>();
 
         // スプライトカラーの変更
         ChangeSpriteColor(Color.red);
@@ -207,6 +211,9 @@ public class Enemy3D : MonoBehaviour
             var collider = gameObject.GetComponent<Collider>();
             //if (collider != null) collider.isTrigger = true;
             if (collider.enabled) collider.enabled = false;
+            // エージェントの停止
+            m_Agent.Stop();
+            //gameObject.SetActive(false);
             return;
         }
 
@@ -565,6 +572,7 @@ public class Enemy3D : MonoBehaviour
         {
             // 追跡状態に遷移
             ChangeDiscoverState(DiscoverState.Discover_Player);
+            //m_Mark.ExclamationMark();
             ChangeSpriteColor(Color.blue);
             return;
         }
@@ -1264,6 +1272,7 @@ public class Enemy3D : MonoBehaviour
         m_DSNumber = DSNumber.DISCOVERED_CHASE_NUMBER;
         //ChangeState(State.Discover, AnimationNumber.ANIME_IDEL_NUMBER);
         ChangeDiscoverState(DiscoverState.Discover_Player);
+        m_Mark.ExclamationMark();
         // 移動速度を変える
         m_Agent.speed = m_DiscoverSpeed;
         //var player = obj.transform.parent.GetComponent<Player>();
@@ -1564,11 +1573,17 @@ public class Enemy3D : MonoBehaviour
             // 動物が見えていたら、動物発見状態に遷移
             if (InObject(animal))
             {
-                ChangeDiscoverState(DiscoverState.Discover_Animal);
-                m_TargetAnimal = animal;
+                AnimalHit(animal);
                 break;
             }
         }
+    }
+
+    // 動物を見つけた時の処理です
+    protected virtual void AnimalHit(GameObject animal)
+    {
+        ChangeDiscoverState(DiscoverState.Discover_Animal);
+        m_TargetAnimal = animal;
     }
 
     // プレイヤーとの衝突判定処理
@@ -1987,6 +2002,7 @@ public class Enemy3D : MonoBehaviour
         SerializedProperty CanvasObj;
         SerializedProperty Meat;
         SerializedProperty MeatUI;
+        SerializedProperty DiscoverUI;
 
         protected List<SerializedProperty> m_Serializes = new List<SerializedProperty>();
         protected List<string> m_SerializeNames = new List<string>();
@@ -2016,6 +2032,7 @@ public class Enemy3D : MonoBehaviour
             CanvasObj = serializedObject.FindProperty("m_Canvas");
             Meat = serializedObject.FindProperty("m_Meat");
             MeatUI = serializedObject.FindProperty("m_MeatUI");
+            DiscoverUI = serializedObject.FindProperty("m_DiscoverUI");
 
             OnChildEnable();
         }
@@ -2071,6 +2088,7 @@ public class Enemy3D : MonoBehaviour
             // GameObject
             Meat.objectReferenceValue = EditorGUILayout.ObjectField("お肉オブジェクト", enemy.m_Meat, typeof(GameObject), true);
             MeatUI.objectReferenceValue = EditorGUILayout.ObjectField("お肉UIオブジェクト", enemy.m_MeatUI, typeof(GameObject), true);
+            DiscoverUI.objectReferenceValue = EditorGUILayout.ObjectField("発見UIオブジェクト", enemy.m_DiscoverUI, typeof(GameObject), true);
             CanvasObj.objectReferenceValue = EditorGUILayout.ObjectField("キャンパスオブジェクト", enemy.m_Canvas, typeof(GameObject), true);
 
             EditorGUILayout.Space();

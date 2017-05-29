@@ -58,6 +58,7 @@ public class WolfEnemy : MiddleEnemy {
             if(m_Player != null)
             {
                 ChangeDiscoverState(DiscoverState.Discover_Player);
+                //m_Mark.ExclamationMark();
                 ChangeSpriteColor(Color.blue);
                 // えさの削除
                 Destroy(m_FoodObj);

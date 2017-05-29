@@ -55,9 +55,17 @@ public class SmallEnemy : Enemy3D
     protected override void Update()
     {
         base.Update();
-
         m_RunawayPoint.SetPosition(this.transform.position);
+        //var rotate = wall.transform.rotation.eulerAngles;
     }
+
+    //protected override void Idel(float deltaTime)
+    //{
+    //    // 逃げポイントの追加位置の変更
+    //    m_RunawayPoint.ChangeAddPosition(270 - this.transform.localRotation.eulerAngles.y);
+
+    //    base.Idel(deltaTime);
+    //}
 
     protected override void DiscoverPlayer(float deltaTime)
     {
@@ -140,7 +148,23 @@ public class SmallEnemy : Enemy3D
     protected override void ChangePlayerHitMove(GameObject player)
     {
         base.ChangePlayerHitMove(player);
+        // 逃げポイントの追加位置の変更
+        // 前方ベクトルから、角度の取得
+        var vec = player.transform.position - this.transform.position;
+        var angle = Mathf.Atan2(vec.z, vec.x);
+        m_RunawayPoint.ChangeAddPosition(angle * Mathf.Rad2Deg - 180);
         PointRunaway(player.transform);
+    }
+
+    protected override void AnimalHit(GameObject animal)
+    {
+        base.AnimalHit(animal);
+        // 逃げポイントの追加位置の変更
+        // 前方ベクトルから、角度の取得
+        var vec = animal.transform.position - this.transform.position;
+        var angle = Mathf.Atan2(vec.z, vec.x);
+        m_Mark.ExclamationMark();
+        m_RunawayPoint.ChangeAddPosition(angle * Mathf.Rad2Deg - 180);
     }
 
     protected override void TriggerEnterObject(Collider other)

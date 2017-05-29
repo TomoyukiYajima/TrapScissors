@@ -140,6 +140,11 @@ public class MiddleEnemy : Enemy3D {
         // ステータスの初期化
         InitState();
     }
+    protected override void AnimalHit(GameObject animal)
+    {
+        base.AnimalHit(animal);
+        m_Mark.ExclamationMark();
+    }
     #endregion
 
     #region エディターのシリアライズ変更

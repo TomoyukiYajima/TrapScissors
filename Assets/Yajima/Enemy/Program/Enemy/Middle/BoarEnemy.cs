@@ -30,6 +30,13 @@ public class BoarEnemy : MiddleEnemy {
     }
 
     #region override関数
+    protected override void Idel(float deltaTime)
+    {
+        // 逃げポイントの追加位置の変更
+        //m_RunawayPoint.ChangeAddPosition(270 - this.transform.localRotation.eulerAngles.y);
+
+        base.Idel(deltaTime);
+    }
     protected override void DiscoverAnimal(float deltaTime)
     {
         // 逃げる
@@ -59,6 +66,18 @@ public class BoarEnemy : MiddleEnemy {
             ChangeSpriteColor(Color.red);
         }
     }
+
+    protected override void AnimalHit(GameObject animal)
+    {
+        base.AnimalHit(animal);
+        // 逃げポイントの追加位置の変更
+        // 前方ベクトルから、角度の取得
+        var vec = animal.transform.position - this.transform.position;
+        var angle = Mathf.Atan2(vec.z, vec.x);
+        m_Mark.ExclamationMark();
+        m_RunawayPoint.ChangeAddPosition(angle * Mathf.Rad2Deg - 180);
+    }
+
     protected override void TriggerEnterObject(Collider other)
     {
         base.TriggerEnterObject(other);
