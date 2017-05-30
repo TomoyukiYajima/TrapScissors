@@ -296,6 +296,7 @@ public class GameManager : MonoBehaviour
 
     public int GameTime()
     {
+        _timeCount = 150;
         return (int)_timeCount;
     }
 
