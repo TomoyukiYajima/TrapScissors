@@ -776,9 +776,9 @@ public class Enemy3D : MonoBehaviour
         // 持っている肉が無かったら、死亡待機状態に遷移
         var meat = this.transform.FindChild("Food(Clone)");
         if (meat != null) return;
+        ChangeState(State.DeadIdel, AnimationNumber.ANIME_DEAD_NUMBER);
         // ステータスの初期化
         InitState();
-        ChangeState(State.DeadIdel, AnimationNumber.ANIME_DEAD_NUMBER);
     }
 
     // 死亡待機状態
@@ -786,8 +786,8 @@ public class Enemy3D : MonoBehaviour
     {
         // 外部からアクティブ状態に変更されたら、待機状態に遷移
         if (!gameObject.activeSelf) return;
-        ChangeState(State.Idel, AnimationNumber.ANIME_IDEL_NUMBER);
         gameObject.SetActive(true);
+        ChangeState(State.Idel, AnimationNumber.ANIME_IDEL_NUMBER);
         // 最初のポイントに移動
         ChangeMovePoint(m_MovePointPosition);
         m_Agent.Resume();
@@ -1185,10 +1185,7 @@ public class Enemy3D : MonoBehaviour
         ChangeSpriteColor(Color.red);
         // トラバサミを空っぽにする
         m_TrapObj = null;
-        // 親オブジェクトを非アクティブに変更
-        this.transform.parent.gameObject.SetActive(false);
         //this.transform.position = this.transform.parent.position;
-        this.transform.localPosition = Vector3.zero;
         // ナビメッシュエージェント関連の初期化
         m_Agent.enabled = true;
         m_CurrentMovePoint = 0;
@@ -1198,6 +1195,11 @@ public class Enemy3D : MonoBehaviour
         var collider = gameObject.GetComponent<Collider>();
         //if (collider != null) collider.isTrigger = true;
         collider.enabled = true;
+
+        // 初期位置に変更
+        this.transform.localPosition = Vector3.zero;
+        // 親オブジェクトを非アクティブに変更
+        this.transform.parent.gameObject.SetActive(false);
     }
 
     // 移動関数

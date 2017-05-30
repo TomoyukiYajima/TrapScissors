@@ -45,14 +45,86 @@ public class RayCircularSector : MonoBehaviour {
             -transform.parent.rotation.eulerAngles.y,
             0.0f)
             );
-        m_MeshFilter.mesh = CreateSolidArcMesh();
-        //ChangeMeshStatus(m_MeshFilter.mesh);
+        //m_MeshFilter.mesh = CreateSolidArcMesh();
+
+        m_MeshFilter.mesh = ChangeVertices(m_MeshFilter.mesh);
     }
 
     // 扇形メッシュの作成
     private Mesh CreateSolidArcMesh()
     {
         Mesh mesh = new Mesh();
+        // 頂点の設定
+        SetVertices(mesh);
+
+        //// 頂点座標の計算
+        //Vector3[] vertices = new Vector3[2 + m_TriangleCount];
+        //Vector2[] uv = new Vector2[2 + m_TriangleCount];
+        //// 0番目を円の中心座標にする
+        //vertices[0] = Vector3.zero;
+        //uv[0] = Vector2.one * 0.5f;
+
+        //float radius = Mathf.Deg2Rad *
+        //    ((m_EndDegree - m_StartDegree) / (float)m_TriangleCount
+        //    );
+        //// 前方ベクトルから、角度の取得
+        //var angle = Mathf.Atan2(transform.forward.z, transform.forward.x);
+        //var addRad = 270 * Mathf.Deg2Rad;
+
+        //// 頂点データの計算
+        //for (int i = 0; i != m_TriangleCount + 1; i++)
+        //{
+        //    // 角度の設定
+        //    var rad = radius * i + (Mathf.Deg2Rad * m_StartDegree);
+        //    float x = Mathf.Cos(rad + angle + addRad);
+        //    float z = Mathf.Sin(rad + angle + addRad);
+        //    // 二次元の頂点を設定する
+        //    var vec = new Vector3(x * m_Radius * 2, 0.0f, z * m_Radius * 2);
+
+        //    var point = vec + this.transform.position;
+        //    // レイポイントからオブジェクトの位置までのレイを伸ばす
+        //    Ray ray = new Ray(this.transform.position, point - transform.position);
+        //    RaycastHit hitInfo;
+        //    var hit = Physics.Raycast(ray, out hitInfo);
+
+        //    // 壁に衝突した場合は、位置の補正
+        //    if (hit && hitInfo.collider.tag == "Wall")
+        //    {
+        //        if(hitInfo.distance < m_Radius / 2)
+        //        {
+        //            vec = new Vector3(
+        //            x * (hitInfo.distance * 2),
+        //            0.0f, z * (hitInfo.distance * 2));
+        //        }
+        //    }
+        //    vertices[i + 1] = vec;
+        //    uv[i + 1] = new Vector2(x * 0.5f + 0.5f, z * 0.5f + 0.5f);
+        //}
+        //// 頂点座標の変更
+        //mesh.vertices = vertices;
+        //mesh.uv = uv;
+
+        // 三角形ポリゴンの生成(板ポリゴン)
+        int[] triangles = new int[3 * m_TriangleCount];
+        for (int i = 0; i != m_TriangleCount; i++)
+        {
+            var point = i * 3;
+            // 生成する三角形ポリゴンの原点
+            triangles[point] = 0;
+            // 他２点の設定
+            for (int j = 1; j != 3; j++)
+            {
+                triangles[point + j] = i + j;
+            }
+        }
+        // メッシュの設定
+        mesh.triangles = triangles;
+        return mesh;
+    }
+
+    // 
+    private void SetVertices(Mesh mesh)
+    {
         // 頂点座標の計算
         Vector3[] vertices = new Vector3[2 + m_TriangleCount];
         Vector2[] uv = new Vector2[2 + m_TriangleCount];
@@ -86,7 +158,7 @@ public class RayCircularSector : MonoBehaviour {
             // 壁に衝突した場合は、位置の補正
             if (hit && hitInfo.collider.tag == "Wall")
             {
-                if(hitInfo.distance < m_Radius / 2)
+                if (hitInfo.distance < m_Radius)
                 {
                     vec = new Vector3(
                     x * (hitInfo.distance * 2),
@@ -99,22 +171,11 @@ public class RayCircularSector : MonoBehaviour {
         // 頂点座標の変更
         mesh.vertices = vertices;
         mesh.uv = uv;
+    }
 
-        // 三角形ポリゴンの生成(板ポリゴン)
-        int[] triangles = new int[3 * m_TriangleCount];
-        for (int i = 0; i != m_TriangleCount; i++)
-        {
-            var point = i * 3;
-            // 生成する三角形ポリゴンの原点
-            triangles[point] = 0;
-            // 他２点の設定
-            for (int j = 1; j != 3; j++)
-            {
-                triangles[point + j] = i + j;
-            }
-        }
-        // メッシュの設定
-        mesh.triangles = triangles;
+    private Mesh ChangeVertices(Mesh mesh)
+    {
+        SetVertices(mesh);
         return mesh;
     }
 
