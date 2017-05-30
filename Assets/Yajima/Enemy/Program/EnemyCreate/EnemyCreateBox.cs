@@ -44,20 +44,20 @@ public class EnemyCreateBox : MonoBehaviour {
         }
 
         // 動物マネージャーの取得
-        var obj = this.transform.parent.gameObject;
-        //if(obj != null)
+        //var obj = this.transform.parent.gameObject;
+        ////if(obj != null)
+        ////{
+        ////    SetAnimalManager(obj);
+        ////}
+        ////else 
+        //if (obj == null)
         //{
-        //    SetAnimalManager(obj);
+        //    var enemiesObject = GameObject.Find("Enemies");
+        //    if (enemiesObject == null) return;
+        //    obj = enemiesObject;
+        //    //var 
         //}
-        //else 
-        if (obj == null)
-        {
-            var enemiesObject = GameObject.Find("Enemies");
-            if (enemiesObject == null) return;
-            obj = enemiesObject;
-            //var 
-        }
-        SetAnimalManager(obj);
+        //SetAnimalManager(obj);
 
         // 開始時に生成しない場合は返す
         if (!m_IsStartCreate) return;
