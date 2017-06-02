@@ -117,10 +117,8 @@ public class PlayerAction : MonoBehaviour
     /// <param name="num">右側に切りかえるなら正の数、左側なら負の数</param>
     public void FoodCheck()
     {
-        print("読んだ");
-        if (_onFoodFlag == false && GameManager.gameManager.FoodCountCheck() < _foodMax)
+        if (_onFoodFlag == false)
         {
-            print("置けるかも？");
             //今選んでいる餌を調べる
             _foodNumber = _foodUIMove.SelectFoodNumber();
             //選んでいる餌が所持数0以下なら、何もしない
@@ -137,18 +135,16 @@ public class PlayerAction : MonoBehaviour
             //撒かれた餌のカウント
             GameManager.gameManager.FoodCountAdd();
             _bear.GetComponent<BearEnemy>().CheckFood();
-
-            print("置けた");
+            GameManager.gameManager.PutFoodAdd(_foodObj);
+            
         }
         else if (_onFoodFlag == true)
         {
-            print("回収できるかも？");
             if (_foodUIMove.FoodCountCheck(_foodNumber) >= 5) return;
             Destroy(_foodRecovery);
             _onFoodFlag = false;
             _foodUIMove.FoodCountAdd(_foodNumber);
             GameManager.gameManager.FoodCountSub();
-            print("回収");
         }
     }
 

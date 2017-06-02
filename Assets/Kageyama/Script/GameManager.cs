@@ -53,6 +53,9 @@ public class GameManager : MonoBehaviour
     //何番目に何の動物を捕まえたか
     [SerializeField]
     private List<int> _getAnimal = new List<int>();
+    //餌をどの順番で置いたか
+    [SerializeField]
+    private List<GameObject> _putFood = new List<GameObject>();
     #endregion
     #region その他
     //ゲームを止めた時に出すUI
@@ -236,6 +239,7 @@ public class GameManager : MonoBehaviour
     public void FoodCountSub()
     {
         _foodCount--;
+        StartCoroutine(PutFoodSub());
     }
 
     /// <summary>
@@ -302,9 +306,62 @@ public class GameManager : MonoBehaviour
         return _huntcount;
     }
 
+    public void PutFoodAdd(GameObject foodObje)
+    {
+        if (_putFood.Count >= _foodNumber)
+        {
+            Destroy(_putFood[0]);
+            for(int i = 0; i < _putFood.Count - 1; i++)
+            {
+                _putFood[i] = _putFood[i + 1];
+            }
+            _putFood[_putFood.Count - 1] = foodObje;
+        }
+        else
+        {
+            _putFood.Add(foodObje);
+        }
+    }
+
+    IEnumerator PutFoodSub()
+    {
+        yield return new WaitForSecondsRealtime(0.2f);
+        PutFoodSort();
+    }
+
+    public void PutFoodSort()
+    {
+        int nullCheck = 0;
+        print("調べるよ");
+        for(int i = 0; i < _putFood.Count; i++)
+        {
+            if(_putFood[i] == null)
+            {
+                break;
+            }
+            nullCheck++;
+        }
+        if (nullCheck >= 5)
+        {
+            print("全員いるよ、餌のソートできないよ、おかしいよ、何で？");
+            return;
+        }
+        for(int i = nullCheck; i < _putFood.Count; i++)
+        {
+            //リストの最後の餌なら消す
+            if( i == _putFood.Count -1)
+            {
+                _putFood.Remove(_putFood[i]);
+            }
+            else
+            {
+                _putFood[i] = _putFood[i + 1];
+            }
+        }
+    }
+
     public int GameTime()
     {
-        _timeCount = 150;
         return (int)_timeCount;
     }
 
@@ -319,6 +376,7 @@ public class GameManager : MonoBehaviour
         SerializedProperty TimeCheck;
         SerializedProperty GameTime;
         SerializedProperty GetAnimal;
+        SerializedProperty PutFood;
         SerializedProperty PauseUI;
         SerializedProperty ClampX_MAX;
         SerializedProperty ClampX_MIN;
@@ -333,6 +391,7 @@ public class GameManager : MonoBehaviour
             TimeCheck = serializedObject.FindProperty("_timeCheck");
             GameTime = serializedObject.FindProperty("_gameTime");
             GetAnimal = serializedObject.FindProperty("_getAnimal");
+            PutFood = serializedObject.FindProperty("_putFood");
             PauseUI = serializedObject.FindProperty("_pauseUI");
             ClampX_MAX = serializedObject.FindProperty("_clampX_max");
             ClampX_MIN = serializedObject.FindProperty("_clampX_min");
@@ -352,7 +411,9 @@ public class GameManager : MonoBehaviour
             {
                 GameTime.floatValue = EditorGUILayout.FloatField("制限時間", manager._gameTime);
             }
-            EditorGUILayout.PropertyField(GetAnimal, true);
+            EditorGUILayout.Space();
+            EditorGUILayout.PropertyField(GetAnimal, new GUIContent("何の動物を取得したか"), true);
+            EditorGUILayout.PropertyField(PutFood, new GUIContent("設置されている餌"), true);
             EditorGUILayout.Space();
             PauseUI.objectReferenceValue = EditorGUILayout.ObjectField("ポーズ中に出すオブジェクト", manager._pauseUI, typeof(GameObject), true) as GameObject;
 
