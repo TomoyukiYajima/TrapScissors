@@ -474,7 +474,7 @@ public class SceneManagerScript : MonoBehaviour
             Outtime.floatValue = EditorGUILayout.FloatField(scene._outtime, GUILayout.Width(32));
             EditorGUILayout.EndHorizontal();
 
-            EndDialog.objectReferenceValue = EditorGUILayout.ObjectField("ゲームを終了するか確認するダイアログ", scene._endDialog, typeof(GameObject), true) as GameObject;
+            EndDialog.objectReferenceValue = EditorGUILayout.ObjectField("終了確認ダイアログ", scene._endDialog, typeof(GameObject), true) as GameObject;
 
             Leave_Alone.boolValue = EditorGUILayout.Toggle("放置したらシーン移動", scene._leave_Alone);
             if(scene._leave_Alone == true)

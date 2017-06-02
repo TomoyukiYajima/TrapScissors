@@ -16,6 +16,7 @@ public class FoodUIMove : MonoBehaviour
 	// Update is called once per frame
 	void Update ()
     {
+        if (GameManager.gameManager.GameStateCheck() == GameManager.GameState.END) return;
         if (Input.GetButtonDown("FoodChange_L"))
         {
             LeftRotation();

@@ -15,7 +15,7 @@ public class PlayerAction : MonoBehaviour
     private GameObject _trapObje;
     [TooltipAttribute("回収する罠")]
     private GameObject _recovery;
-    [TooltipAttribute("回収できるかどうか")]
+    [TooltipAttribute("罠を回収できるかどうか")]
     private bool _onTrapFlag;
     public int _trapMax;
     private int _trapCount;
@@ -27,6 +27,10 @@ public class PlayerAction : MonoBehaviour
     [SerializeField]
     private GameObject _foodUI;
     private FoodUIMove _foodUIMove;
+    [TooltipAttribute("餌を回収できるかどうか")]
+    private bool _onFoodFlag;
+    private int _foodMax;
+    private GameObject _foodRecovery;
     #endregion
     #region 指笛に必要な変数
     [SerializeField]
@@ -46,6 +50,7 @@ public class PlayerAction : MonoBehaviour
         _onTrapFlag = false;
         _foodNumber = 0;
         _trapMax = GameManager.gameManager.TrapNumber();
+        _foodMax = GameManager.gameManager.FoodNumber();
         _foodUIMove = _foodUI.GetComponent<FoodUIMove>();
         //今選んでいる餌を調べる
         _foodNumber = _foodUIMove.SelectFoodNumber();
@@ -112,22 +117,39 @@ public class PlayerAction : MonoBehaviour
     /// <param name="num">右側に切りかえるなら正の数、左側なら負の数</param>
     public void FoodCheck()
     {
-        //今選んでいる餌を調べる
-        _foodNumber = _foodUIMove.SelectFoodNumber();
-        //選んでいる餌が所持数0以下なら、何もしない
-        if (_foodUIMove.FoodCountCheck(_foodNumber) <= 0) return;
-        _foodUIMove.FoodCountSub(_foodNumber);
+        print("読んだ");
+        if (_onFoodFlag == false && GameManager.gameManager.FoodCountCheck() < _foodMax)
+        {
+            print("置けるかも？");
+            //今選んでいる餌を調べる
+            _foodNumber = _foodUIMove.SelectFoodNumber();
+            //選んでいる餌が所持数0以下なら、何もしない
+            if (_foodUIMove.FoodCountCheck(_foodNumber) <= 0) return;
+            _foodUIMove.FoodCountSub(_foodNumber);
 
-        Vector3 pos = new Vector3(this.transform.position.x,
-                                                       this.transform.position.y,
-                                                       this.transform.position.z);
-        //餌を生成
-        GameObject _foodObj = Instantiate(_food);
-        _foodObj.transform.localPosition = pos;
-        _foodObj.GetComponent<Food>().SelectFood(_foodNumber);
-        //撒かれた餌のカウント
-        GameManager.gameManager.FoodCountAdd();
-        _bear.GetComponent<BearEnemy>().CheckFood();
+            Vector3 pos = new Vector3(this.transform.position.x,
+                                                           this.transform.position.y,
+                                                           this.transform.position.z);
+            //餌を生成
+            GameObject _foodObj = Instantiate(_food);
+            _foodObj.transform.localPosition = pos;
+            _foodObj.GetComponent<Food>().SelectFood(_foodNumber);
+            //撒かれた餌のカウント
+            GameManager.gameManager.FoodCountAdd();
+            _bear.GetComponent<BearEnemy>().CheckFood();
+
+            print("置けた");
+        }
+        else if (_onFoodFlag == true)
+        {
+            print("回収できるかも？");
+            if (_foodUIMove.FoodCountCheck(_foodNumber) >= 5) return;
+            Destroy(_foodRecovery);
+            _onFoodFlag = false;
+            _foodUIMove.FoodCountAdd(_foodNumber);
+            GameManager.gameManager.FoodCountSub();
+            print("回収");
+        }
     }
 
     /// <summary>
@@ -145,12 +167,16 @@ public class PlayerAction : MonoBehaviour
     {
         //罠と衝突したら回収できるようにする
         TrapFlagChenge(col, true);
+        //餌と衝突したら回収できるようにする
+        FoodFlagChenge(col, true);
     }
 
     void OnTriggerExit(Collider col)
     {
         //罠から離れたら、Trapを置けるようにする
         TrapFlagChenge(col, false);
+        //餌から離れたら、Trapを置けるようにする
+        FoodFlagChenge(col, false);
     }
 
     /// <summary>
@@ -167,4 +193,16 @@ public class PlayerAction : MonoBehaviour
             else if (_onTrapFlag == false) _recovery = null;
         }
     }
+
+    public void FoodFlagChenge(Collider col, bool flag)
+    {
+        if (col.tag == "Food")
+        {
+            _onFoodFlag = flag;
+            if (_onFoodFlag == true) _foodRecovery = col.gameObject;
+            else if (_onFoodFlag == false) _recovery = null;
+        }
+    }
+
+
 }

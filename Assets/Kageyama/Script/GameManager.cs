@@ -25,6 +25,9 @@ public class GameManager : MonoBehaviour
     //トラップの最大数
     [SerializeField]
     private int _trapNumber;
+    //餌の最大数
+    [SerializeField]
+    private int _foodNumber;
     [SerializeField]
     private float _clampX_max;
     [SerializeField]
@@ -214,6 +217,11 @@ public class GameManager : MonoBehaviour
         return _trapNumber;
     }
 
+    public int FoodNumber()
+    {
+        return _foodNumber;
+    }
+
     /// <summary>
     /// ステージに置かれている餌の数を足す
     /// </summary>
@@ -307,6 +315,7 @@ public class GameManager : MonoBehaviour
     {
         SerializedProperty State;
         SerializedProperty TrapNumber;
+        SerializedProperty FoodNumber;
         SerializedProperty TimeCheck;
         SerializedProperty GameTime;
         SerializedProperty GetAnimal;
@@ -320,6 +329,7 @@ public class GameManager : MonoBehaviour
         {
             State = serializedObject.FindProperty("_gameState");
             TrapNumber = serializedObject.FindProperty("_trapNumber");
+            FoodNumber = serializedObject.FindProperty("_foodNumber");
             TimeCheck = serializedObject.FindProperty("_timeCheck");
             GameTime = serializedObject.FindProperty("_gameTime");
             GetAnimal = serializedObject.FindProperty("_getAnimal");
@@ -336,6 +346,7 @@ public class GameManager : MonoBehaviour
 
             EditorGUILayout.PropertyField(State, new GUIContent("ゲームの状況"));
             TrapNumber.intValue = EditorGUILayout.IntField("仕掛けられる罠の最大数", manager._trapNumber);
+            FoodNumber.intValue = EditorGUILayout.IntField("仕掛けられる餌の最大数", manager._foodNumber);
             TimeCheck.boolValue = EditorGUILayout.Toggle("制限時間をつける", manager._timeCheck);
             if (manager._timeCheck == true)
             {
