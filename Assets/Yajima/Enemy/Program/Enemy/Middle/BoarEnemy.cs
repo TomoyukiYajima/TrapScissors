@@ -7,12 +7,20 @@ using UnityEditor;
 
 public class BoarEnemy : MiddleEnemy {
 
+    #region 変数
+    #region シリアライズ変数
     [SerializeField]
     protected GameObject m_RemovePoint = null;  // 逃げるポイント
+    #endregion
 
+    #region private変数
     private RunawayPoint m_RunawayPoint;    // 逃げ用ポイント
     private float m_MoveLength = 0.0f;      // 移動距離
+    #endregion
+    #endregion
 
+    #region 関数
+    #region 基盤関数
     // Use this for initialization
     protected override void Start ()
     {
@@ -28,6 +36,7 @@ public class BoarEnemy : MiddleEnemy {
 
         m_RunawayPoint.SetPosition(this.transform.position);
     }
+    #endregion
 
     #region override関数
     protected override void Idel(float deltaTime)
@@ -118,6 +127,7 @@ public class BoarEnemy : MiddleEnemy {
     {
         return food == Food.Food_Kind.Tanuki;
     }
+    #endregion
     #endregion
 
     #region シリアライズ変更

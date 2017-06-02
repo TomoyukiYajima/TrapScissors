@@ -3,10 +3,15 @@ using System.Collections;
 using System.Collections.Generic;
 
 public class WolfEnemy : MiddleEnemy {
+
+    #region 変数
     private Food.Food_Kind m_EatFood;   // 食べたえさ
     private List<Transform> m_Boars = 
         new List<Transform>();          // イノシシの配列
+    #endregion
 
+    #region 関数
+    #region 基盤関数
     // Use this for initialization
     protected override void Start()
     {
@@ -26,12 +31,7 @@ public class WolfEnemy : MiddleEnemy {
             m_Boars.Add(boarAnimal);
         }
     }
-
-    //// Update is called once per frame
-    //void Update()
-    //{
-
-    //}
+    #endregion
 
     #region override関数
     protected override void Attack(float deltaTime)
@@ -118,5 +118,6 @@ public class WolfEnemy : MiddleEnemy {
         m_EatFood = food;
         return food == Food.Food_Kind.Tanuki || food == Food.Food_Kind.Rabbit;
     }
+    #endregion
     #endregion
 }

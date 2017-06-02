@@ -3,6 +3,8 @@ using System.Collections;
 
 public class BearEnemy : LargeEnemy {
 
+    #region 関数
+    #region 基盤関数
     // Use this for initialization
     protected override void Start()
     {
@@ -13,11 +15,7 @@ public class BearEnemy : LargeEnemy {
         ChangeSpriteColor(new Color(1.0f, 0.0f, 1.0f, 1.0f));
         m_Agent.Stop();
     }
-
-    //// Update is called once per frame
-    //void Update () {
-
-    //}
+    #endregion
 
     #region override関数
     public override void SoundNotice(Transform point)
@@ -46,23 +44,20 @@ public class BearEnemy : LargeEnemy {
         int value1 = Random.Range(1, 100 + 1);
         // 個数によって、判定用の値を変える
         // ゲームマネージャから、えさの個数を取得する
-        //int count = GameManager.gameManager.
-        //int value2 = Mathf.Min(count, 10) * 3;
-
-        //アルファ版は確実に起こす
         int count = GameManager.gameManager.FoodCountCheck();
-        int value2 = Mathf.Min(count, 10) * 10;
+        int value2 = Mathf.Min(count, 10) * 3;
         // 乱数値と比較して、大きかったら起こす
-        //if (value1 < value2) 
-        if (value1 >= value2) return;
+        //if (value1 < value2)
+        // (乱数値 >= 反応するまでの値)
+        if (value1 > value2) return;
 
         ChangeState(State.Idel, AnimationNumber.ANIME_IDEL_NUMBER);
         // 視界の描画をONにする
         if (!m_RayPoint.gameObject.activeSelf)
             m_RayPoint.gameObject.SetActive(true);
-        //ChangeState(State.Idel, AnimationNumber.ANIME_IDEL_NUMBER);
         ChangeSpriteColor(Color.red);
         m_Agent.Resume();
     }
+    #endregion
     #endregion
 }

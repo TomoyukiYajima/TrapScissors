@@ -7,6 +7,7 @@ using UnityEditor;
 
 public class MiddleEnemy : Enemy3D {
 
+    #region 変数
     #region シリアライズ
     [SerializeField]
     protected bool m_IsLiftWait = false;        // 動物を持ってくる時に、一度待機するか
@@ -21,6 +22,7 @@ public class MiddleEnemy : Enemy3D {
                                                 //protected DiscoverMoveState m_DiscoverMoveState =
                                                 //    DiscoverMoveState.DiscoverMove_Animal;            // 発見状態
     #endregion
+    #endregion
 
     #region 列挙クラス
     //// 餌
@@ -32,6 +34,7 @@ public class MiddleEnemy : Enemy3D {
     //}
     #endregion
 
+    #region 関数
     #region 状態関数
     //protected override void Idel(float deltaTime)
     //{
@@ -123,28 +126,37 @@ public class MiddleEnemy : Enemy3D {
     // 小さいトラバサミに衝突した時の行動です
     protected override void SmallTrapHitAction()
     {
-        ChangeState(State.Runaway, AnimationNumber.ANIME_RUNAWAY_NUMBER);
+        //ChangeState(State.Runaway, AnimationNumber.ANIME_RUNAWAY_NUMBER);
+        ChangeTrapHitState(TrapHitState.TrapHit_Runaway);
         ChangeSpriteColor(Color.white);
     }
 
     // 大きいトラバサミに衝突した時の行動です
     protected override void BigTrapHitAction()
     {
-        //base.SmallTrapHitAction();
-        // 死亡待機状態に遷移
-        ChangeState(State.DeadIdel, AnimationNumber.ANIME_DEAD_NUMBER);
+        ////base.SmallTrapHitAction();
+        //// 死亡待機状態に遷移
+        //ChangeState(State.DeadIdel, AnimationNumber.ANIME_DEAD_NUMBER);
+        //// 肉UIの生成
+        //CreateMeat(AnimalMeat.MeatNumber.SMALL_NUMBER);
+        ////// トラバサミが解放されたときの行動
+        ////TrapReleaseAction();
+        ////// ステータスの初期化
+        ////InitState();
+
         // 肉UIの生成
         CreateMeat(AnimalMeat.MeatNumber.SMALL_NUMBER);
         // トラバサミが解放されたときの行動
         TrapReleaseAction();
-        // ステータスの初期化
-        InitState();
+        // 動物の消去
+        DeadAnimal();
     }
     protected override void AnimalHit(GameObject animal)
     {
         base.AnimalHit(animal);
         m_Mark.ExclamationMark();
     }
+    #endregion
     #endregion
 
     #region エディターのシリアライズ変更

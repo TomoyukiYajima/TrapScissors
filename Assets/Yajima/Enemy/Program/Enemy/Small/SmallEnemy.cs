@@ -8,7 +8,7 @@ using UnityEditor;
 
 public class SmallEnemy : Enemy3D
 {
-
+    #region 変数
     #region シリアライズ変数
     //[SerializeField]
     //protected GameObject m_Canvas = null;               // キャンバス
@@ -27,7 +27,9 @@ public class SmallEnemy : Enemy3D
     private Dictionary<Transform, int> m_ResultPoints =
         new Dictionary<Transform, int>();   // 移動ポイントの評価
     #endregion
+    #endregion
 
+    #region 関数
     #region 基盤関数
     // Use this for initialization
     protected override void Start()
@@ -59,21 +61,13 @@ public class SmallEnemy : Enemy3D
         //var rotate = wall.transform.rotation.eulerAngles;
     }
 
-    //protected override void Idel(float deltaTime)
-    //{
-    //    // 逃げポイントの追加位置の変更
-    //    m_RunawayPoint.ChangeAddPosition(270 - this.transform.localRotation.eulerAngles.y);
-
-    //    base.Idel(deltaTime);
-    //}
-
     protected override void DiscoverPlayer(float deltaTime)
     {
         // 移動(通常の移動速度の数倍)
         Move(deltaTime, m_DiscoverSpeed);
         m_MoveLength += m_DiscoverSpeed * deltaTime;
         //base.DiscoverPlayer(deltaTime);]
-        ChangeMovePoint(m_RunawayPoint.gameObject.transform.position);
+        ChangeMovePoint(m_RunawayPoint.transform.position);
         // 壁を発見したとき
         GameObject wall = null;
         if (InWall(out wall, 2))
@@ -90,7 +84,7 @@ public class SmallEnemy : Enemy3D
         //Camera.
 
         // 一定距離移動したら、待機状態に遷移
-        GameObject obj = null;
+        //GameObject obj = null;
         // if (!InPlayer(out obj, 20.0f, true) || m_MoveLength > 20)
         if (m_MoveLength > 20)
         {
@@ -153,7 +147,8 @@ public class SmallEnemy : Enemy3D
         var vec = player.transform.position - this.transform.position;
         var angle = Mathf.Atan2(vec.z, vec.x);
         m_RunawayPoint.ChangeAddPosition(angle * Mathf.Rad2Deg - 180);
-        PointRunaway(player.transform);
+        //ChangeMovePoint(m_RunawayPoint.transform.position);
+        //PointRunaway(player.transform);
     }
 
     protected override void AnimalHit(GameObject animal)
@@ -225,6 +220,7 @@ public class SmallEnemy : Enemy3D
         CreateMeat(AnimalMeat.MeatNumber.SMALL_NUMBER);
     }
     #endregion
+    #endregion
 
     #region シリアライズ変更
 #if UNITY_EDITOR
@@ -247,7 +243,7 @@ public class SmallEnemy : Enemy3D
         {
             SmallEnemy enemy = target as SmallEnemy;
 
-            //EditorGUILayout.LabelField("〇小動物固有のステータス");
+            EditorGUILayout.LabelField("〇小動物固有のステータス");
             //// GameObject
             //MeatUI.objectReferenceValue = EditorGUILayout.ObjectField("お肉UIオブジェクト", enemy.m_MeatUI, typeof(GameObject), true);
             //CanvasObj.objectReferenceValue = EditorGUILayout.ObjectField("キャンパスオブジェクト", enemy.m_Canvas, typeof(GameObject), true);
