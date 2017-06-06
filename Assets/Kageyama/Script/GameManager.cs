@@ -332,7 +332,7 @@ public class GameManager : MonoBehaviour
     public void PutFoodSort()
     {
         int nullCheck = 0;
-        print("調べるよ");
+        print("餌の数を調べるよ");
         for(int i = 0; i < _putFood.Count; i++)
         {
             if(_putFood[i] == null)

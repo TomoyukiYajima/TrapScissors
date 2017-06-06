@@ -6,23 +6,37 @@ public class Food : MonoBehaviour {
     public enum Food_Kind
     {
         NULL,
-        Goat,
-        Tanuki,
-        Rabbit
+        Carrot,
+        Meat,
+        SmellMeat
     }
 
+    private float smellTime;
+
     public Sprite[] _sprite;
+
+    private FoodUIMove moveUI;
+    private GameObject _foodMoveUI;
 
     public Food_Kind food_Kind = Food_Kind.NULL;
 
     // Use this for initialization
     void Start () {
+        _foodMoveUI = GameObject.Find("FoodParent");
+        moveUI = _foodMoveUI.GetComponent<FoodUIMove>();
+        smellTime = 0.0f;
+
     }
 	
 	// Update is called once per frame
-	void Update () {    
-	    
-	}
+	void Update () {
+        smellTime += Time.deltaTime;
+
+        if (smellTime >= 30 && food_Kind == Food_Kind.Meat)
+        {
+            SelectFood(2);
+        }
+    }
 
     public void SelectFood(int food)
     {
@@ -33,15 +47,15 @@ public class Food : MonoBehaviour {
         }
         else if(food == 0)
         {
-            food_Kind = Food_Kind.Goat;
+            food_Kind = Food_Kind.Carrot;
         }
         else if (food == 1)
         {
-            food_Kind = Food_Kind.Tanuki;
+            food_Kind = Food_Kind.Meat;
         }
         else if (food == 2)
         {
-            food_Kind = Food_Kind.Rabbit;
+            food_Kind = Food_Kind.SmellMeat;
         }
         this.gameObject.GetComponent<SpriteRenderer>().sprite = _sprite[food];
     }

@@ -28,7 +28,7 @@ public class NavMeshPlayer : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
-        if (GameManager.gameManager.GameStateCheck() == GameManager.GameState.END) return;
+        if (GameManager.gameManager.GameStateCheck() != GameManager.GameState.PLAY || _mainCamera.GetComponent<CameraMove>().LockCheck() == true) return;
         Vector3 move = (Vector3.forward - Vector3.right)* Input.GetAxis("Vertical") + (Vector3.right + Vector3.forward)* Input.GetAxis("Horizontal");
         agent.Move(move * Time.deltaTime * playerSpeed);
 
@@ -38,7 +38,7 @@ public class NavMeshPlayer : MonoBehaviour {
 
     private void OnCollisionEnter(Collision col)
     {
-        if (GameManager.gameManager.GameStateCheck() == GameManager.GameState.END) return;
+        if (GameManager.gameManager.GameStateCheck() != GameManager.GameState.PLAY) return;
         if (col.gameObject.tag == "LargeEnemy")
         {
             GameManager.gameManager.GameStateSet(GameManager.GameState.END);

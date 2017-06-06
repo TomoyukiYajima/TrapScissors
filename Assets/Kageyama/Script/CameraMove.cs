@@ -52,13 +52,8 @@ public class CameraMove : MonoBehaviour
 
     void Update()
     {
-        if(GameManager.gameManager.GameStateCheck() == GameManager.GameState.START)
-        {
-            _playerMoveLock = true;
-        }
 
         if (_playerMoveLock == true || GameManager.gameManager.GameStateCheck() == GameManager.GameState.START)
-        //if (_playerMoveLock == true)
         {
             newPosition = transform.position;
             _moveDirection = (Vector3.forward - Vector3.right) * Input.GetAxis("Vertical") + (Vector3.forward + Vector3.right) * Input.GetAxis("Horizontal");
@@ -68,6 +63,11 @@ public class CameraMove : MonoBehaviour
                                          Mathf.Clamp(newPosition.z, _clampZ_min, _clampZ_max));
         }
 
+        if (GameManager.gameManager.GameStateCheck() == GameManager.GameState.START)
+        {
+            _playerMoveLock = true;
+            return;
+        }
 
         if (Input.GetAxis("Lock") >= 0.5f && _playerMoveLock == false)
         {
