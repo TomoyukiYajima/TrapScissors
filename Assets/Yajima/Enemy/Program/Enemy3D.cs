@@ -210,8 +210,8 @@ public class Enemy3D : MonoBehaviour
     // Update is called once per frame
     protected virtual void Update()
     {
-        // ゲームマネージャの状態が「END」だったら動かない
-        if (GameManager.gameManager.GameStateCheck() == GameManager.GameState.END)
+        // ゲームマネージャの状態が「PLAY」以外だったら動かない
+        if (GameManager.gameManager.GameStateCheck() != GameManager.GameState.PLAY)
         {
             // 自身の衝突判定をオフにする
             //var collider = gameObject.GetComponent<Collider>();
