@@ -70,11 +70,19 @@ public class SmallEnemy : Enemy3D
         ChangeMovePoint(m_RunawayPoint.transform.position);
         // 壁を発見したとき
         GameObject wall = null;
-        if (InWall(out wall, 2))
+        Vector3 point = Vector3.zero;
+        if (InWall(out wall, out point, 2))
         {
+            // 壁と衝突点との外積を求めて、角度を決める
+            var up = wall.transform.up;
+            var vec = point - wall.transform.position;
+            var cross = Vector3.Cross(up, vec);
+            var rotate = Mathf.Atan2(vec.z, vec.x);
+
+
             // 壁に沿うように逃げる
-            var rotate = wall.transform.rotation.eulerAngles;
-            m_RunawayPoint.ChangeAddPosition(rotate.y);
+            //var rotate = wall.transform.rotation.eulerAngles;
+            m_RunawayPoint.ChangeAddPosition(rotate);
             //print(rotate.y.ToString());
         }
 
@@ -109,11 +117,53 @@ public class SmallEnemy : Enemy3D
 
         // 壁を発見したとき
         GameObject wall = null;
-        if (InWall(out wall, 2))
+        Vector3 point = Vector3.zero;
+        if (InWall(out wall, out point, 2))
         {
+            var up = wall.transform.up;
+            //var vec = Vector3.zero;
+            //var cross = Vector3.zero;
+            var degree = 0.0f;
+
+            var wallCollider = wall.GetComponent<BoxCollider>();
+            // 壁がボックスコライダーの場合の計算
+            //if(wallCollider != null)
+            //{
+            //    // 対象とのベクトル
+            //    //var objDir = point - wall.transform.position;
+            //    // ポイントの左ベクトルを求める
+            //    //var left = //point.
+
+            //    // 対象の方向を向いた単位ベクトル
+            //    //var oneDir = DirectionOne(point);
+            //    // 壁 - point
+            //    //var vec1 = new Vector2(point.x, point.z) - new Vector2(wall.transform.position.x, wall.transform.position.z);
+            //    // ベクトル間の角度を計算(二次元)
+            //    //var vec1 = new Vector2(objDir.x, objDir.z);
+            //    //var vec2 = new Vector2(oneDir.x, oneDir.z);
+            //    //var angle = Vector2.Angle(vec1, vec2);
+            //    //var cross = Vector2.
+            //    //degree = Mathf.Atan2(vec2.y, vec2.x) * Mathf.Rad2Deg;
+            //}
+            //else
+            //{
+            //    var vec = point - wall.transform.position;
+            //    // 壁と衝突点との外積を求めて、角度を決める
+            //    var cross = Vector3.Cross(vec, up);
+            //    degree = Mathf.Atan2(vec.z, vec.x) * Mathf.Rad2Deg;
+            //}
+
+            var vec = point - wall.transform.position;
+            // 壁と衝突点との外積を求めて、角度を決める
+            var cross = Vector3.Cross(vec, up);
+            degree = Mathf.Atan2(vec.z, vec.x) * Mathf.Rad2Deg;
+
+            //print(degree);
+
             // 壁に沿うように逃げる
-            var rotate = wall.transform.rotation.eulerAngles;
-            m_RunawayPoint.ChangeAddPosition(rotate.y);
+            //var rotate = wall.transform.rotation.eulerAngles;
+            m_RunawayPoint.ChangeAddPosition(degree);
+
             //print(rotate.y.ToString());
         }
 

@@ -55,11 +55,22 @@ public class BoarEnemy : MiddleEnemy {
 
         // 壁を発見したとき
         GameObject wall = null;
-        if (InWall(out wall, 2))
+        Vector3 point = Vector3.zero;
+        if (InWall(out wall, out point, 2))
         {
+            // 壁と衝突点との外積を求めて、角度を決める
+            var up = wall.transform.up;
+            var vec = point - wall.transform.position;
+            var cross = Vector3.Cross(up, vec);
+            var rotate = Mathf.Atan2(vec.z, vec.x);
+
             // 壁に沿うように逃げる
-            var rotate = wall.transform.rotation.eulerAngles;
-            m_RunawayPoint.ChangeAddPosition(rotate.y);
+            //var rotate = wall.transform.rotation.eulerAngles;
+            m_RunawayPoint.ChangeAddPosition(rotate);
+
+            // 壁に沿うように逃げる
+            //var rotate = wall.transform.rotation.eulerAngles;
+            //m_RunawayPoint.ChangeAddPosition(rotate.y);
             //print(rotate.y.ToString());
         }
 
@@ -120,12 +131,12 @@ public class BoarEnemy : MiddleEnemy {
 
         //if (food == Food.Food_Kind.Goat || food == Food.Food_Kind.Rabbit) return true;
         //return base.IsFoodCheck(food);
-        return food == Food.Food_Kind.Goat || food == Food.Food_Kind.Rabbit;
+        return food == Food.Food_Kind.Carrot || food == Food.Food_Kind.SmellMeat;
     }
 
     protected override bool IsLikeFood(Food.Food_Kind food)
     {
-        return food == Food.Food_Kind.Tanuki;
+        return food == Food.Food_Kind.Meat;
     }
     #endregion
     #endregion

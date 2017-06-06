@@ -33,7 +33,7 @@ public class BearEnemy : LargeEnemy {
 
     protected override bool IsLikeFood(Food.Food_Kind food)
     {
-        return food == Food.Food_Kind.Goat || food == Food.Food_Kind.Tanuki;
+        return food == Food.Food_Kind.Carrot || food == Food.Food_Kind.Meat;
     }
     #endregion
 

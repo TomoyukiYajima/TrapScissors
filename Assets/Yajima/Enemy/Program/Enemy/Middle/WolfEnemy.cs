@@ -52,7 +52,7 @@ public class WolfEnemy : MiddleEnemy {
     protected override void EatFood()
     {
         // 臭い肉を食べた場合
-        if(m_EatFood == Food.Food_Kind.Rabbit)
+        if(m_EatFood == Food.Food_Kind.SmellMeat)
         {
             // プレイヤーを見つけていたら、追跡状態に遷移
             if(m_Player != null)
@@ -109,14 +109,14 @@ public class WolfEnemy : MiddleEnemy {
 
     protected override bool IsFoodCheck(Food.Food_Kind food)
     {
-        return food == Food.Food_Kind.Tanuki || food == Food.Food_Kind.Rabbit;
+        return food == Food.Food_Kind.Meat || food == Food.Food_Kind.SmellMeat;
     }
 
     protected override bool IsLikeFood(Food.Food_Kind food)
     {
         //return food == Food.Food_Kind.Tanuki;
         m_EatFood = food;
-        return food == Food.Food_Kind.Tanuki || food == Food.Food_Kind.Rabbit;
+        return food == Food.Food_Kind.Meat || food == Food.Food_Kind.SmellMeat;
     }
     #endregion
     #endregion

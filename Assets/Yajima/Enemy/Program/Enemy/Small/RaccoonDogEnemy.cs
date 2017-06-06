@@ -34,17 +34,26 @@ public class RaccoonDogEnemy : SmallEnemy {
         // 子オブジェクト
         foreach (Transform child in points.transform)
         {
-            // 各ポイント格納オブジェクトのポイントを取得
-            foreach (Transform childPoint in child)
-            {
-                var vec1 = new Vector2(childPoint.position.x, childPoint.position.z);
-                var vec2 = new Vector2(this.transform.position.x, this.transform.position.z);
-                var length = Vector2.Distance(vec1, vec2);
-                // 一定距離外なら返す
-                if (length > m_MoveRadius) continue;
-                // 一定距離内なら、ポインタに追加する
-                m_Points.Add(childPoint);
-            }
+            // ポイントの取得
+            var vec1 = new Vector2(child.position.x, child.position.z);
+            var vec2 = new Vector2(this.transform.position.x, this.transform.position.z);
+            var length = Vector2.Distance(vec1, vec2);
+            // 一定距離外なら返す
+            if (length > m_MoveRadius) continue;
+            // 一定距離内なら、ポインタに追加する
+            m_Points.Add(child);
+
+            //// 各ポイント格納オブジェクトのポイントを取得
+            //foreach (Transform childPoint in child)
+            //{
+            //    var vec1 = new Vector2(childPoint.position.x, childPoint.position.z);
+            //    var vec2 = new Vector2(this.transform.position.x, this.transform.position.z);
+            //    var length = Vector2.Distance(vec1, vec2);
+            //    // 一定距離外なら返す
+            //    if (length > m_MoveRadius) continue;
+            //    // 一定距離内なら、ポインタに追加する
+            //    m_Points.Add(childPoint);
+            //}
         }
         // 付近のポイントを取得したら、親のポイントに入れる
         ResizeMovePoints(m_Points.Count);
@@ -70,11 +79,11 @@ public class RaccoonDogEnemy : SmallEnemy {
         ChangeMovePoint(pos);
     }
 
-    protected override void TrapReleaseAction()
-    {
-        // 臭いお肉UIの生成
-        CreateMeat(AnimalMeat.MeatNumber.LARGE_NUMBER);
-    }
+    //protected override void TrapReleaseAction()
+    //{
+    //    // 臭いお肉UIの生成
+    //    CreateMeat(AnimalMeat.MeatNumber.LARGE_NUMBER);
+    //}
     #endregion
 
     protected override void DrawGizmos()

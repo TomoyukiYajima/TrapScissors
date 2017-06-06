@@ -210,6 +210,11 @@ public class Enemy3D : MonoBehaviour
     // Update is called once per frame
     protected virtual void Update()
     {
+        ////ビルボード
+        //Vector3 p = m_MainCamera.transform.localPosition;
+        ////transform.LookAt(p);
+        //m_Sprite.transform.LookAt(p);
+
         // ゲームマネージャの状態が「PLAY」以外だったら動かない
         if (GameManager.gameManager.GameStateCheck() != GameManager.GameState.PLAY)
         {
@@ -228,10 +233,6 @@ public class Enemy3D : MonoBehaviour
         UpdateState(Time.deltaTime);
 
         m_IsRendered = false;
-        //ビルボード
-        Vector3 p = m_MainCamera.transform.localPosition;
-        //transform.LookAt(p);
-        m_Sprite.transform.LookAt(p);
     }
     #endregion
 
@@ -833,7 +834,8 @@ public class Enemy3D : MonoBehaviour
         //var collider = gameObject.GetComponent<Collider>();
         //if (collider != null) collider.isTrigger = true;
         //collider.enabled = false;
-        m_Collider.enabled = false;
+        //m_Collider.enabled = false;
+        m_Collider.isTrigger = true;
         ChangeSpriteColor(Color.green);
         // エージェントを停止させる
         m_Agent.Stop();
@@ -851,7 +853,7 @@ public class Enemy3D : MonoBehaviour
     {
         //if (food == Food.Food_Kind.Goat) return true;
         //return false;
-        return food == Food.Food_Kind.Goat;
+        return food == Food.Food_Kind.Carrot;
     }
 
     // えさの判断を行います
@@ -889,7 +891,7 @@ public class Enemy3D : MonoBehaviour
     // 好きなえさ
     protected virtual bool IsLikeFood(Food.Food_Kind food)
     {
-        if (food == Food.Food_Kind.Goat) return true;
+        if (food == Food.Food_Kind.Carrot) return true;
         return false;
     }
 
@@ -1028,9 +1030,10 @@ public class Enemy3D : MonoBehaviour
     }
 
     // 前方に壁があるかを調べます
-    protected bool InWall(out GameObject hitObj, float length = 2.0f)
+    protected bool InWall(out GameObject hitObj, out Vector3 hitPoint, float length = 2.0f)
     {
         hitObj = null;
+        hitPoint = Vector3.zero;
         // レイポイントからオブジェクトの位置までのレイを伸ばす
         var point = m_RayPoint.position + this.transform.forward * length;
         var dir = point - m_RayPoint.position;
@@ -1044,6 +1047,7 @@ public class Enemy3D : MonoBehaviour
         if (hitInfo.distance > length) return false;
         // 当たった壁
         hitObj = hitInfo.collider.gameObject;
+        hitPoint = hitInfo.point;
         return true;
     }
 
@@ -1455,15 +1459,17 @@ public class Enemy3D : MonoBehaviour
     // プレイヤーとの向きを返します(単位ベクトル)
     protected Vector3 PlayerDirection()
     {
-        var player = GameObject.Find("Player");
-        // プレイヤーがいなければ、ゼロベクトルを返す
-        if (player != null) return Vector3.zero;
-        var direction = Vector3.one;
-        var dir = player.transform.position - this.transform.position;
-        if (dir.x < 0.0f) direction.x = -1.0f;
-        if (dir.y < 0.0f) direction.y = -1.0f;
-        if (dir.z < 0.0f) direction.z = -1.0f;
-        return direction;
+        var player = GameObject.Find("Player_2");
+
+        return ObjectDirectionOne(player);
+        //// プレイヤーがいなければ、ゼロベクトルを返す
+        //if (player != null) return Vector3.zero;
+        //var direction = Vector3.one;
+        //var dir = player.transform.position - this.transform.position;
+        //if (dir.x < 0.0f) direction.x = -1.0f;
+        //if (dir.y < 0.0f) direction.y = -1.0f;
+        //if (dir.z < 0.0f) direction.z = -1.0f;
+        //return direction;
     }
 
     // 対象との向きを取得します
@@ -1474,6 +1480,29 @@ public class Enemy3D : MonoBehaviour
         if (obj == null) return direction;
         direction = (obj.transform.position + addPosition) - this.transform.position;
         return direction.normalized;
+    }
+
+    // 対象との向きを取得します(単位ベクトル)
+    protected Vector3 ObjectDirectionOne(GameObject obj)
+    {
+        if (obj == null) return Vector3.zero;
+        return DirectionOne(obj.transform.position);
+        //var direction = Vector3.one;
+        //var dir = obj.transform.position - this.transform.position;
+        //if (dir.x < 0.0f) direction.x = -1.0f;
+        //if (dir.y < 0.0f) direction.y = -1.0f;
+        //if (dir.z < 0.0f) direction.z = -1.0f;
+        //return direction;
+    }
+
+    protected Vector3 DirectionOne(Vector3 position)
+    {
+        var direction = Vector3.one;
+        var dir = position - this.transform.position;
+        if (dir.x < 0.0f) direction.x = -1.0f;
+        if (dir.y < 0.0f) direction.y = -1.0f;
+        if (dir.z < 0.0f) direction.z = -1.0f;
+        return direction;
     }
 
     // 対象との距離を取得します
