@@ -52,7 +52,13 @@ public class CameraMove : MonoBehaviour
 
     void Update()
     {
-        if (_playerMoveLock == true)
+        if(GameManager.gameManager.GameStateCheck() == GameManager.GameState.START)
+        {
+            _playerMoveLock = true;
+        }
+
+        if (_playerMoveLock == true || GameManager.gameManager.GameStateCheck() == GameManager.GameState.START)
+        //if (_playerMoveLock == true)
         {
             newPosition = transform.position;
             _moveDirection = (Vector3.forward - Vector3.right) * Input.GetAxis("Vertical") + (Vector3.forward + Vector3.right) * Input.GetAxis("Horizontal");
@@ -91,5 +97,10 @@ public class CameraMove : MonoBehaviour
     public void MoveChenge(bool frag)
     {
         _moveFrag = frag;
+    }
+
+    public bool LockCheck()
+    {
+        return _playerMoveLock;
     }
 }
