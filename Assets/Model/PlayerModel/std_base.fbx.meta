@@ -1,0 +1,164 @@
+fileFormatVersion: 2
+guid: 4e385aa67a5f73245b13de05a75331f7
+timeCreated: 1496728141
+licenseType: Free
+ModelImporter:
+  serializedVersion: 19
+  fileIDToRecycleName:
+    100000: Chest
+    100002: Head
+    100004: HeadTopEnd
+    100006: Hips
+    100008: L_Arm
+    100010: L_Foot
+    100012: L_ForeArm
+    100014: L_Hand
+    100016: L_HandIndex1
+    100018: L_HandIndex2
+    100020: L_HandIndex3
+    100022: L_HandIndex4
+    100024: L_HandThumb1
+    100026: L_HandThumb2
+    100028: L_HandThumb3
+    100030: L_HandThumb4
+    100032: L_Leg
+    100034: L_Shoulder
+    100036: L_ToeEnd
+    100038: L_Toes
+    100040: L_UpLeg
+    100042: Neck
+    100044: Peasant_Man
+    100046: R_Arm
+    100048: R_Foot
+    100050: R_ForeArm
+    100052: R_Hand
+    100054: R_HandIndex1
+    100056: R_HandIndex2
+    100058: R_HandIndex3
+    100060: R_HandIndex4
+    100062: R_HandThumb1
+    100064: R_HandThumb2
+    100066: R_HandThumb3
+    100068: R_HandThumb4
+    100070: R_Leg
+    100072: R_Shoulder
+    100074: R_ToeEnd
+    100076: R_Toes
+    100078: R_UpLeg
+    100080: Spine
+    100082: Spine1
+    100084: //RootNode
+    400000: Chest
+    400002: Head
+    400004: HeadTopEnd
+    400006: Hips
+    400008: L_Arm
+    400010: L_Foot
+    400012: L_ForeArm
+    400014: L_Hand
+    400016: L_HandIndex1
+    400018: L_HandIndex2
+    400020: L_HandIndex3
+    400022: L_HandIndex4
+    400024: L_HandThumb1
+    400026: L_HandThumb2
+    400028: L_HandThumb3
+    400030: L_HandThumb4
+    400032: L_Leg
+    400034: L_Shoulder
+    400036: L_ToeEnd
+    400038: L_Toes
+    400040: L_UpLeg
+    400042: Neck
+    400044: Peasant_Man
+    400046: R_Arm
+    400048: R_Foot
+    400050: R_ForeArm
+    400052: R_Hand
+    400054: R_HandIndex1
+    400056: R_HandIndex2
+    400058: R_HandIndex3
+    400060: R_HandIndex4
+    400062: R_HandThumb1
+    400064: R_HandThumb2
+    400066: R_HandThumb3
+    400068: R_HandThumb4
+    400070: R_Leg
+    400072: R_Shoulder
+    400074: R_ToeEnd
+    400076: R_Toes
+    400078: R_UpLeg
+    400080: Spine
+    400082: Spine1
+    400084: //RootNode
+    4300000: Peasant_Man
+    7400000: take0
+    7400002: take1
+    7400004: take2
+    7400006: take3
+    9500000: //RootNode
+    13700000: Peasant_Man
+  materials:
+    importMaterials: 1
+    materialName: 0
+    materialSearch: 1
+  animations:
+    legacyGenerateAnimations: 4
+    bakeSimulation: 0
+    resampleCurves: 1
+    optimizeGameObjects: 0
+    motionNodeName: 
+    animationImportErrors: 
+    animationImportWarnings: 
+    animationRetargetingWarnings: 
+    animationDoRetargetingWarnings: 0
+    animationCompression: 1
+    animationRotationError: 0.5
+    animationPositionError: 0.5
+    animationScaleError: 0.5
+    animationWrapMode: 0
+    extraExposedTransformPaths: []
+    clipAnimations: []
+    isReadable: 1
+  meshes:
+    lODScreenPercentages: []
+    globalScale: 1
+    meshCompression: 0
+    addColliders: 0
+    importBlendShapes: 1
+    swapUVChannels: 0
+    generateSecondaryUV: 0
+    useFileUnits: 1
+    optimizeMeshForGPU: 1
+    keepQuads: 0
+    weldVertices: 1
+    secondaryUVAngleDistortion: 8
+    secondaryUVAreaDistortion: 15.000001
+    secondaryUVHardAngle: 88
+    secondaryUVPackMargin: 4
+    useFileScale: 1
+  tangentSpace:
+    normalSmoothAngle: 60
+    normalImportMode: 0
+    tangentImportMode: 3
+  importAnimation: 1
+  copyAvatar: 0
+  humanDescription:
+    human: []
+    skeleton: []
+    armTwist: 0.5
+    foreArmTwist: 0.5
+    upperLegTwist: 0.5
+    legTwist: 0.5
+    armStretch: 0.05
+    legStretch: 0.05
+    feetSpacing: 0
+    rootMotionBoneName: 
+    hasTranslationDoF: 0
+  lastHumanDescriptionAvatarSource: {instanceID: 0}
+  animationType: 2
+  humanoidOversampling: 1
+  additionalBone: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
