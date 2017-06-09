@@ -29,12 +29,12 @@ public class LoadMove : MonoBehaviour
         else if (_randX <= this.transform.localPosition.x)
         {
             _speed = (this.transform.localPosition.x - _randX) / 200.0f;
-            ToRotate(0);
+            ToRotate(180);
         }
         else
         {
             _speed = (_randX - this.transform.localPosition.x) / 200.0f;
-            ToRotate(180);
+            ToRotate(0);
         }
         LeanTween.move(_myrect, new Vector2(_randX, -195), _speed)
             .setOnComplete(() =>
