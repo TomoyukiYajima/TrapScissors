@@ -5,6 +5,7 @@ public class CameraMove : MonoBehaviour
 {
     private GameObject _player = null;
     private Vector3 _offset = Vector3.zero;
+    private Vector3 _offset_Move = Vector3.zero;
     [SerializeField, TooltipAttribute("スムーズに追いかけるかどうか")]
     private bool _lerpFrag;
     [SerializeField, TooltipAttribute("追尾させるかどうか")]
@@ -20,15 +21,18 @@ public class CameraMove : MonoBehaviour
     private float _clampX_max, _clampX_min;
     private float _clampZ_max, _clampZ_min;
     private Vector3 newPosition;
+    [SerializeField]
+    private GameObject _cameraMap;
 
     void Start()
     {
         _player = GameObject.FindGameObjectWithTag("Player");
         _offset = transform.position - _player.transform.position;
-        _clampX_max = GameManager.gameManager.ClampX_MAX();
-        _clampX_min = GameManager.gameManager.ClampX_MIN();
-        _clampZ_max = GameManager.gameManager.ClampZ_MAX();
-        _clampZ_min = GameManager.gameManager.ClampZ_MIN();
+        _offset_Move = transform.localPosition - _player.transform.localPosition;
+        _clampX_max = GameManager.gameManager.ClampX_MAX() + _offset_Move.x;
+        _clampX_min = GameManager.gameManager.ClampX_MIN() + _offset_Move.x;
+        _clampZ_max = GameManager.gameManager.ClampZ_MAX() + _offset_Move.z;
+        _clampZ_min = GameManager.gameManager.ClampZ_MIN() + _offset_Move.z;
         _playerMoveLock = false;
     }
 
@@ -72,11 +76,13 @@ public class CameraMove : MonoBehaviour
         if (Input.GetAxis("Lock") >= 0.5f && _playerMoveLock == false)
         {
             _playerReturnPos = transform.position;
+            _cameraMap.SetActive(true);
             _playerMoveLock = true;
         }
         else if(Input.GetAxis("Lock") < 0.5f && _playerMoveLock == true)
         {
             transform.position = _playerReturnPos;
+            _cameraMap.SetActive(false);
             _playerMoveLock = false;
         }
     }
@@ -102,5 +108,10 @@ public class CameraMove : MonoBehaviour
     public bool LockCheck()
     {
         return _playerMoveLock;
+    }
+
+    public Vector3 OffsetCheck()
+    {
+        return _offset_Move;
     }
 }
