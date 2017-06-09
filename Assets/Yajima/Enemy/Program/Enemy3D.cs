@@ -34,8 +34,10 @@ public class Enemy3D : MonoBehaviour
     protected Transform m_MouthPoint = null;            // 口ポイント
     [SerializeField]
     protected Transform[] m_MovePoints = null;          // 移動用ポイント配列
+    //[SerializeField]
+    //protected GameObject m_Sprite = null;               // スプライト
     [SerializeField]
-    protected GameObject m_Sprite = null;               // スプライト
+    protected GameObject m_Model = null;                // モデル
     [SerializeField]
     protected CameraMove m_MainCamera = null;           // メインカメラ
     [SerializeField]
@@ -48,6 +50,8 @@ public class Enemy3D : MonoBehaviour
     protected GameObject m_MeatUI = null;               // お肉UI
     [SerializeField]
     protected GameObject m_DiscoverUI = null;           // 発見時のUI
+    [SerializeField]
+    protected Animator m_Animator;                      // アニメーター
     #endregion
 
     #region protected変数
@@ -83,7 +87,10 @@ public class Enemy3D : MonoBehaviour
     protected NavMeshAgent m_Agent;                     // ナビメッシュエージェント  
 
     // モーション番号
-    protected int m_MotionNumber = (int)AnimationNumber.ANIME_IDEL_NUMBER;
+    protected int m_MotionNumber = (int)AnimatorNumber.ANIMATOR_IDEL_NUMBER;
+    // モーション配列
+    protected Dictionary<int, string> m_AnimatorStates =
+        new Dictionary<int, string>();
     #endregion
 
     #region private変数
@@ -155,15 +162,20 @@ public class Enemy3D : MonoBehaviour
         //TrapHit_Touch,  // トラバサミに挟まれ終わった状態
     }
 
-    protected enum AnimationNumber
+    // アニメーター番号
+    protected enum AnimatorNumber
     {
-        ANIME_IDEL_NUMBER = 0,
-        ANIME_CHASE_NUMBER = 1,
-        ANIME_DISCOVER_NUMBER = 2,
-        ANIME_TRAP_HIT_NUMBER = 3,
-        ANIME_TRAP_NUMBER = 4,
-        ANIME_RUNAWAY_NUMBER = 5,
-        ANIME_DEAD_NUMBER = 6
+        ANIMATOR_NULL = 0,
+        ANIMATOR_IDEL_NUMBER = 1,
+        ANIMATOR_DISCOVER_NUMBER = 2,
+        ANIMATOR_CHASE_NUMBER = 3,
+        ANIMATOR_ATTACK_NUMBER = 4,
+        ANIMATOR_LOST_NUMBER = 5,
+        ANIMATOR_TRAP_HIT_NUMBER = 6,
+        ANIMATOR_WALL_HIT_NUMBER = 7,
+        ANIMATOR_FAINT_NUMBER = 8,
+        ANIMATOR_DEAD_NUMBER = 9,
+        ANIMATOR_SLEEP_NUMBER = 10
     };
 
     // DiscoveredStateNumber
@@ -190,6 +202,9 @@ public class Enemy3D : MonoBehaviour
         CheckObject();
         // ナビメッシュエージェントの設定
         SetAgentStatus();
+        // アニメーターの設定
+        SetAnimator();
+        //m_Animator.CrossFade(m_AnimatorStates[(int)AnimatorNumber.ANIMATOR_IDEL_NUMBER], 0.1f, -1);
         // 移動配列に何も入っていなかった場合は通常移動
         //if(m_MovePoints.Length == 0)
 
@@ -277,7 +292,7 @@ public class Enemy3D : MonoBehaviour
     }
 
     // 状態の変更
-    protected void ChangeState(State state, AnimationNumber motion)
+    protected void ChangeState(State state, AnimatorNumber motion)
     {
         if (m_State == state) return;
         // 前回の状態を入れる
@@ -286,13 +301,16 @@ public class Enemy3D : MonoBehaviour
         m_State = state;
         m_MotionNumber = (int)motion;
         m_StateTimer = 0.0f;
+        // アニメーションの変更
+        if (motion == AnimatorNumber.ANIMATOR_NULL) return;
+        m_Animator.CrossFade(m_AnimatorStates[(int)motion], 0.1f, -1);
         // ナビメッシュエージェントの移動停止
         //m_Agent.Stop();
     }
 
     // トラップヒット状態の変更
     protected void ChangeTrapHitState(
-        TrapHitState thState, AnimationNumber motion = AnimationNumber.ANIME_TRAP_HIT_NUMBER)
+        TrapHitState thState, AnimatorNumber motion = AnimatorNumber.ANIMATOR_TRAP_HIT_NUMBER)
     {
         // 状態の変更
         ChangeState(State.TrapHit, motion);
@@ -342,7 +360,9 @@ public class Enemy3D : MonoBehaviour
     // 発見状態の変更
     protected void ChangeDiscoverState(DiscoverState state)
     {
-        ChangeState(State.Discover, AnimationNumber.ANIME_DISCOVER_NUMBER);
+        var motion = AnimatorNumber.ANIMATOR_DISCOVER_NUMBER;
+        if (state == DiscoverState.Discover_Food) motion = AnimatorNumber.ANIMATOR_NULL;
+        ChangeState(State.Discover, motion);
         // 同じ行動なら返す
         if (m_DState == state) return;
         m_DState = state;
@@ -354,6 +374,19 @@ public class Enemy3D : MonoBehaviour
         //Move(deltaTime, m_Speed * 2.0f);
         //m_Agent.destination = m_Player.transform.position;
         //Camera.
+
+        var time = m_Animator.GetCurrentAnimatorStateInfo((int)AnimatorNumber.ANIMATOR_DISCOVER_NUMBER).normalizedTime;
+        if (m_Animator.GetCurrentAnimatorStateInfo((int)AnimatorNumber.ANIMATOR_DISCOVER_NUMBER).normalizedTime < 1.0f)
+        {
+            m_Agent.Stop();
+            return;
+        }
+        else
+        {
+            // アニメーションの変更
+            m_Animator.CrossFade(m_AnimatorStates[(int)AnimatorNumber.ANIMATOR_CHASE_NUMBER], 0.1f, -1);
+            m_Agent.Resume();
+        }
 
         //m_Agent.destination = m_Player.transform.position;
 
@@ -369,6 +402,8 @@ public class Enemy3D : MonoBehaviour
 
             // 見失う状態に遷移
             ChangeDiscoverState(DiscoverState.Discover_Lost);
+            // アニメーションの変更
+            m_Animator.CrossFade(m_AnimatorStates[(int)AnimatorNumber.ANIMATOR_LOST_NUMBER], 0.1f, -1);
             ChangeSpriteColor(Color.cyan);
         };
     }
@@ -425,7 +460,7 @@ public class Enemy3D : MonoBehaviour
         // えさが無くなっていたら、待機状態に遷移
         if (m_FoodObj == null)
         {
-            ChangeState(State.Idel, AnimationNumber.ANIME_IDEL_NUMBER);
+            ChangeState(State.Idel, AnimatorNumber.ANIMATOR_IDEL_NUMBER);
             ChangeSpriteColor(Color.red);
         }
     }
@@ -457,7 +492,7 @@ public class Enemy3D : MonoBehaviour
         // えさがなかったら、待機状態に遷移
         if (m_SmallTrap == null)
         {
-            ChangeState(State.Idel, AnimationNumber.ANIME_IDEL_NUMBER);
+            ChangeState(State.Idel, AnimatorNumber.ANIMATOR_IDEL_NUMBER);
             ChangeMovePoint();
             m_Agent.Resume();
         }
@@ -468,8 +503,10 @@ public class Enemy3D : MonoBehaviour
         // えさが無くなっていたら、待機状態に遷移
         if (m_FoodObj == null)
         {
-            ChangeState(State.Idel, AnimationNumber.ANIME_IDEL_NUMBER);
-            ChangeSpriteColor(Color.red);
+            ChangeState(State.Idel, AnimatorNumber.ANIMATOR_IDEL_NUMBER);
+            // アニメーションの変更
+            m_Animator.CrossFade(m_AnimatorStates[(int)AnimatorNumber.ANIMATOR_IDEL_NUMBER], 0.1f, -1);
+            //ChangeSpriteColor(Color.red);
             m_Agent.Resume();
         }
 
@@ -501,13 +538,14 @@ public class Enemy3D : MonoBehaviour
         animalParent.transform.parent = m_MouthPoint;
         animalParent.transform.localPosition = Vector3.zero;
         animalParent.transform.localRotation = new Quaternion();
-        var sprite = m_Sprite.GetComponent<EnemySprite>();
-        animalParent.transform.localScale =
-            new Vector3(
-                animal.transform.localScale.x / sprite.GetSpriteScale().x,
-                animal.transform.localScale.y / sprite.GetSpriteScale().y,
-                animal.transform.localScale.z / sprite.GetSpriteScale().z
-                );
+        //var sprite = m_Sprite.GetComponent<EnemySprite>();
+        //animalParent.transform.localScale =
+        //    new Vector3(
+        //        animal.transform.localScale.x / sprite.GetSpriteScale().x,
+        //        animal.transform.localScale.y / sprite.GetSpriteScale().y,
+        //        animal.transform.localScale.z / sprite.GetSpriteScale().z
+        //        );
+        animalParent.transform.localScale = animal.transform.localScale;
         animal.transform.localPosition = Vector3.zero;
         animal.transform.localRotation = new Quaternion();
 
@@ -530,7 +568,7 @@ public class Enemy3D : MonoBehaviour
             );
         // 移動ポイントに到達したら消える
         if (length > m_Speed) return;
-        ChangeState(State.DeadIdel, AnimationNumber.ANIME_DEAD_NUMBER);
+        ChangeState(State.DeadIdel, AnimatorNumber.ANIMATOR_DEAD_NUMBER);
 
         // 持ち上げた動物の初期化
         //// 動物を持ち上げる
@@ -567,7 +605,7 @@ public class Enemy3D : MonoBehaviour
         // トラバサミを見つけたか
         if (!InObject(TRAP_NAME, out obj))
         {
-            ChangeState(State.Idel, AnimationNumber.ANIME_IDEL_NUMBER);
+            ChangeState(State.Idel, AnimatorNumber.ANIMATOR_IDEL_NUMBER);
             m_Agent.Resume();
             ChangeSpriteColor(Color.red);
         }
@@ -581,8 +619,10 @@ public class Enemy3D : MonoBehaviour
         {
             // 追跡状態に遷移
             ChangeDiscoverState(DiscoverState.Discover_Player);
+            // アニメーションの変更
+            m_Animator.CrossFade(m_AnimatorStates[(int)AnimatorNumber.ANIMATOR_CHASE_NUMBER], 0.1f, -1);
             //m_Mark.ExclamationMark();
-            ChangeSpriteColor(Color.blue);
+            //ChangeSpriteColor(Color.blue);
             return;
         }
 
@@ -596,7 +636,7 @@ public class Enemy3D : MonoBehaviour
         // 見失ったポイントに移動してもいなかったら、待機状態に遷移
         if (length < 2.0f)
         {
-            ChangeState(State.Idel, AnimationNumber.ANIME_IDEL_NUMBER);
+            ChangeState(State.Idel, AnimatorNumber.ANIMATOR_IDEL_NUMBER);
             m_Agent.Resume();
             // 移動速度を変える
             m_Agent.speed = m_Speed;
@@ -611,7 +651,7 @@ public class Enemy3D : MonoBehaviour
     {
         if (m_StateTimer < 2.0f) return;
         // 待機状態に遷移
-        ChangeState(State.Idel, AnimationNumber.ANIME_IDEL_NUMBER);
+        ChangeState(State.Idel, AnimatorNumber.ANIMATOR_IDEL_NUMBER);
         ChangeSpriteColor(Color.red);
         m_Agent.Resume();
     }
@@ -622,7 +662,7 @@ public class Enemy3D : MonoBehaviour
         // 一定時間経過まで動かない
         if (m_StateTimer < 3.0f) return;
         // 待機状態に遷移
-        ChangeState(State.Idel, AnimationNumber.ANIME_IDEL_NUMBER);
+        ChangeState(State.Idel, AnimatorNumber.ANIMATOR_IDEL_NUMBER);
         ChangeMovePoint();
         m_Agent.Resume();
         ChangeSpriteColor(Color.red);
@@ -671,7 +711,7 @@ public class Enemy3D : MonoBehaviour
         if (m_WChackPoint.IsWallHit())
         {
             // 気絶状態に遷移
-            ChangeState(State.Faint, AnimationNumber.ANIME_IDEL_NUMBER);
+            ChangeState(State.Faint, AnimatorNumber.ANIMATOR_IDEL_NUMBER);
             // 付属しているトラバサミの削除
             DeleteTrap();
             ChangeSpriteColor(Color.gray);
@@ -691,7 +731,7 @@ public class Enemy3D : MonoBehaviour
         if (hitInfo.transform.name.IndexOf("StageOutPlane") < 0) return;
 
         // 逃げ状態に遷移
-        ChangeState(State.Runaway, AnimationNumber.ANIME_RUNAWAY_NUMBER);
+        ChangeState(State.Runaway, AnimatorNumber.ANIMATOR_FAINT_NUMBER);
         ChangeSpriteColor(Color.green);
         // 自身の衝突判定のトリガーをオンにする
         //var collider = gameObject.GetComponent<Collider>();
@@ -727,7 +767,7 @@ public class Enemy3D : MonoBehaviour
         // 持っている肉が無かったら、死亡待機状態に遷移
         var meat = this.transform.FindChild("Food(Clone)");
         if (meat != null) return;
-        ChangeState(State.DeadIdel, AnimationNumber.ANIME_DEAD_NUMBER);
+        ChangeState(State.DeadIdel, AnimatorNumber.ANIMATOR_DEAD_NUMBER);
         // ステータスの初期化
         InitState();
     }
@@ -738,7 +778,7 @@ public class Enemy3D : MonoBehaviour
         // 外部からアクティブ状態に変更されたら、待機状態に遷移
         if (!gameObject.activeSelf) return;
         gameObject.SetActive(true);
-        ChangeState(State.Idel, AnimationNumber.ANIME_IDEL_NUMBER);
+        ChangeState(State.Idel, AnimatorNumber.ANIMATOR_IDEL_NUMBER);
         // 最初のポイントに移動
         ChangeMovePoint(m_MovePointPosition);
         m_Agent.Resume();
@@ -800,8 +840,8 @@ public class Enemy3D : MonoBehaviour
         //var rotate = wall.transform.rotation.eulerAngles;
         // オブジェクトの回転
         //transform.Rotate(transform.up, m_RotateDegree);
-        // スプライトの回転
-        m_Sprite.transform.Rotate(Vector3.up, m_RotateDegree);
+        //// スプライトの回転
+        //m_Sprite.transform.Rotate(Vector3.up, m_RotateDegree);
         // 壁捜索ポイントの方向変更
         m_WChackPoint.ChangeDirection();
     }
@@ -828,7 +868,7 @@ public class Enemy3D : MonoBehaviour
         // トラップ化状態に遷移
         ChangeTrapHitState(
             TrapHitState.TrapHit_Change,
-            AnimationNumber.ANIME_TRAP_NUMBER
+            AnimatorNumber.ANIMATOR_DEAD_NUMBER
             );
         // 自身の衝突判定をオフにする
         //var collider = gameObject.GetComponent<Collider>();
@@ -836,7 +876,7 @@ public class Enemy3D : MonoBehaviour
         //collider.enabled = false;
         //m_Collider.enabled = false;
         m_Collider.isTrigger = true;
-        ChangeSpriteColor(Color.green);
+        //ChangeSpriteColor(Color.green);
         // エージェントを停止させる
         m_Agent.Stop();
         m_Agent.enabled = false;
@@ -878,7 +918,7 @@ public class Enemy3D : MonoBehaviour
     protected virtual void EatFood()
     {
         // えさを食べ終わったら、待機状態に遷移
-        ChangeState(State.Idel, AnimationNumber.ANIME_IDEL_NUMBER);
+        ChangeState(State.Idel, AnimatorNumber.ANIMATOR_IDEL_NUMBER);
         ChangeSpriteColor(Color.red);
         m_Agent.Resume();
         // えさの削除
@@ -886,6 +926,8 @@ public class Enemy3D : MonoBehaviour
         m_FoodObj = null;
         // ゲームマネージャ側の減算処理を呼ぶ
         GameManager.gameManager.FoodCountSub();
+        //// アニメーションの変更
+        m_Animator.CrossFade(m_AnimatorStates[(int)AnimatorNumber.ANIMATOR_IDEL_NUMBER], 0.1f, -1);
     }
 
     // 好きなえさ
@@ -1146,7 +1188,7 @@ public class Enemy3D : MonoBehaviour
     protected virtual void InitState()
     {
         // 待機状態に変更
-        ChangeState(State.Idel, AnimationNumber.ANIME_IDEL_NUMBER);
+        ChangeState(State.Idel, AnimatorNumber.ANIMATOR_IDEL_NUMBER);
         ChangeSpriteColor(Color.red);
         // トラバサミを空っぽにする
         //m_TrapObj = null;
@@ -1162,6 +1204,7 @@ public class Enemy3D : MonoBehaviour
         //if (collider != null) collider.isTrigger = true;
         //collider.enabled = true;
         m_Collider.enabled = true;
+        m_Model.SetActive(true);
 
         // 初期位置に変更
         this.transform.localPosition = Vector3.zero;
@@ -1173,7 +1216,7 @@ public class Enemy3D : MonoBehaviour
     protected void DeadAnimal()
     {
         // 死亡待機状態に遷移
-        ChangeState(State.DeadIdel, AnimationNumber.ANIME_DEAD_NUMBER);
+        ChangeState(State.DeadIdel, AnimatorNumber.ANIMATOR_DEAD_NUMBER);
         
         // ステータスの初期化
         InitState();
@@ -1242,7 +1285,7 @@ public class Enemy3D : MonoBehaviour
         if (!m_Agent.enabled) m_Agent.enabled = true;
         if (m_Agent.enabled) m_Agent.destination = m_MovePointPosition;
         //m_Agent.Resume();
-        ChangeSpriteAngle();
+        //ChangeSpriteAngle();
     }
     // プレイヤーを見つけた時の処理です
     protected virtual void ChangePlayerHitMove(GameObject player)
@@ -1263,35 +1306,35 @@ public class Enemy3D : MonoBehaviour
         // 移動ポイントの変更
         m_Agent.Resume();
         //SoundNotice(m_DiscoverPlayer);
-        ChangeSpriteColor(Color.blue);
+        //ChangeSpriteColor(Color.blue);
     }
     //スプライトの角度の変更を行います
-    private void ChangeSpriteAngle()
-    {
-        // スプライトの角度変更
-        var v = new Vector2(-1.0f, 1.0f).normalized;
-        var pointV = m_MovePointPosition - this.transform.position;
-        var dir = new Vector2(pointV.x, pointV.z).normalized;
-        var angle = Vector2.Angle(v, dir);
-        // 一定角度なら画像を変える
-        var cAnagle = 30.0f;
-        var num = 1;
-        if (Mathf.Abs(angle) < cAnagle) num = 2;
-        else if (Mathf.Abs(angle) < 180.0f - cAnagle) num = 0;
-        //else m_EnemySprite.ChangeSprite(1);
-        // 右ベクトルとの角度を求める
-        // クォータービュー上に左右を分断する線を引いて、
-        // 移動ベクトルとの角度を求めるイメージ
-        var rightV = new Vector2(1.0f, 1.0f).normalized;
-        var x = 1.0f;
-        if (Vector2.Angle(rightV, dir) >= 90.0f) x = -1;
-        m_EnemySprite.ChangeSprite(num, x);
-    }
+    //private void ChangeSpriteAngle()
+    //{
+    //    // スプライトの角度変更
+    //    var v = new Vector2(-1.0f, 1.0f).normalized;
+    //    var pointV = m_MovePointPosition - this.transform.position;
+    //    var dir = new Vector2(pointV.x, pointV.z).normalized;
+    //    var angle = Vector2.Angle(v, dir);
+    //    // 一定角度なら画像を変える
+    //    var cAnagle = 30.0f;
+    //    var num = 1;
+    //    if (Mathf.Abs(angle) < cAnagle) num = 2;
+    //    else if (Mathf.Abs(angle) < 180.0f - cAnagle) num = 0;
+    //    //else m_EnemySprite.ChangeSprite(1);
+    //    // 右ベクトルとの角度を求める
+    //    // クォータービュー上に左右を分断する線を引いて、
+    //    // 移動ベクトルとの角度を求めるイメージ
+    //    var rightV = new Vector2(1.0f, 1.0f).normalized;
+    //    var x = 1.0f;
+    //    if (Vector2.Angle(rightV, dir) >= 90.0f) x = -1;
+    //    m_EnemySprite.ChangeSprite(num, x);
+    //}
     // オブジェクトの確認を行います
     private void CheckObject()
     {
-        // スプライトの確認
-        CheckSprite();
+        //// モデルの確認
+        CheckModel();
         // 生成ボックスの確認
         CheckCreateBox();
         // メインカメラの確認
@@ -1418,22 +1461,22 @@ public class Enemy3D : MonoBehaviour
             //ビルボード
             Vector3 p = m_MainCamera.transform.localPosition;
             //transform.LookAt(p);
-            m_Sprite.transform.LookAt(p);
+            //m_Sprite.transform.LookAt(p);
         }
     }
-    // スプライトの確認を行います
-    private void CheckSprite()
+    // モデルの確認を行います
+    private void CheckModel()
     {
         // スプライトがなかった場合
-        if (m_Sprite == null)
+        if (m_Model == null)
         {
-            var obj = this.transform.FindChild("EnemySprite");
+            var obj = this.transform.FindChild("Model");
             if (obj == null) return;
-            m_Sprite = obj.gameObject;
+            m_Model = obj.gameObject;
         }
-        // エネミースプライトの取得
-        m_EnemySprite = m_Sprite.GetComponent<EnemySprite>();
-        m_EnemySprite.ChackRender();
+        //// エネミースプライトの取得
+        //m_EnemySprite = m_Sprite.GetComponent<EnemySprite>();
+        //m_EnemySprite.ChackRender();
     }
 
     // エージェントの設定を行います
@@ -1443,6 +1486,21 @@ public class Enemy3D : MonoBehaviour
         m_Agent.speed = m_Speed;
         m_Agent.acceleration = m_Speed * 10;
         m_Agent.autoBraking = false;
+    }
+
+    // アニメーターの設定を行います
+    protected virtual void SetAnimator()
+    {
+        // 待機アニメーション
+        m_AnimatorStates[(int)AnimatorNumber.ANIMATOR_IDEL_NUMBER] = "Wait";
+        // 発見アニメーション
+        m_AnimatorStates[(int)AnimatorNumber.ANIMATOR_DISCOVER_NUMBER] = "Discover";
+        //// 走るアニメーション
+        //m_AnimatorStates[(int)AnimatorNumber.ANIMATOR_CHASE_NUMBER] = "Chase";
+        // 見失いアニメーション
+        m_AnimatorStates[(int)AnimatorNumber.ANIMATOR_LOST_NUMBER] = "Lost";
+        // 死亡アニメーション
+        m_AnimatorStates[(int)AnimatorNumber.ANIMATOR_DEAD_NUMBER] = "Death";
     }
 
     // 敵のスプライトカラーの変更
@@ -1589,6 +1647,8 @@ public class Enemy3D : MonoBehaviour
     protected virtual void AnimalHit(GameObject animal)
     {
         ChangeDiscoverState(DiscoverState.Discover_Animal);
+        // アニメーションの変更
+        m_Animator.CrossFade(m_AnimatorStates[(int)AnimatorNumber.ANIMATOR_CHASE_NUMBER], 0.1f, -1);
         m_TargetAnimal = animal;
     }
 
@@ -1676,7 +1736,7 @@ public class Enemy3D : MonoBehaviour
         if (camera == null) return;
         var mainCamera = camera.GetComponent<Camera>();
         // スプライトの位置に生成
-        meat.SetObjPosition(m_Sprite.transform.position, mainCamera);
+        meat.SetObjPosition(this.transform.position, mainCamera);
         meat.transform.localScale = Vector3.one;
     }
 
@@ -1710,7 +1770,7 @@ public class Enemy3D : MonoBehaviour
         //if (player != null) return;
         if (player != null)
         {
-            ChangeState(State.Idel, AnimationNumber.ANIME_IDEL_NUMBER);
+            ChangeState(State.Idel, AnimatorNumber.ANIMATOR_IDEL_NUMBER);
             return;
         }
         // 移動ポイントの変更
@@ -1733,7 +1793,7 @@ public class Enemy3D : MonoBehaviour
     // 敵を待機状態にさせます
     public void ChangeWait()
     {
-        ChangeState(State.Idel, AnimationNumber.ANIME_IDEL_NUMBER);
+        ChangeState(State.Idel, AnimatorNumber.ANIMATOR_IDEL_NUMBER);
         ChangeSpriteColor(Color.red);
     }
 
@@ -1743,7 +1803,7 @@ public class Enemy3D : MonoBehaviour
         // 暴れ状態に遷移
         ChangeTrapHitState(
             TrapHitState.TrapHit_TakeIn,
-            AnimationNumber.ANIME_TRAP_HIT_NUMBER
+            AnimatorNumber.ANIMATOR_TRAP_HIT_NUMBER
             );
     }
 
@@ -1801,7 +1861,7 @@ public class Enemy3D : MonoBehaviour
     public void ChangeMeat()
     {
         if (m_State == State.Meat) return;
-        ChangeState(State.Meat, AnimationNumber.ANIME_IDEL_NUMBER);
+        ChangeState(State.Meat, AnimatorNumber.ANIMATOR_IDEL_NUMBER);
         // お肉の作成
         //m_Meat
         var meat = GameObject.Instantiate(m_Meat);
@@ -1816,8 +1876,12 @@ public class Enemy3D : MonoBehaviour
         // エージェントの停止
         m_Agent.Stop();
         m_Agent.enabled = false;
-        // 画像を表示しない
-        m_Sprite.SetActive(false);
+        //// 画像を表示しない
+        //m_Sprite.SetActive(false);
+        m_Model.SetActive(false);
+
+        // モデルの表示をオフにする
+
     }
 
     // 敵を持ち上げられたことにします
@@ -2002,7 +2066,8 @@ public class Enemy3D : MonoBehaviour
         SerializedProperty RayPoint;
         SerializedProperty MouthPoint;
         SerializedProperty MovePoints;
-        SerializedProperty Sprite;
+        //SerializedProperty Sprite;
+        SerializedProperty Model;
         SerializedProperty MainCamera;
         SerializedProperty WChackPoint;
         SerializedProperty RotateDegree;
@@ -2010,6 +2075,7 @@ public class Enemy3D : MonoBehaviour
         SerializedProperty Meat;
         SerializedProperty MeatUI;
         SerializedProperty DiscoverUI;
+        SerializedProperty AnimalAnimator;
 
         protected List<SerializedProperty> m_Serializes = new List<SerializedProperty>();
         protected List<string> m_SerializeNames = new List<string>();
@@ -2032,7 +2098,8 @@ public class Enemy3D : MonoBehaviour
             RayPoint = serializedObject.FindProperty("m_RayPoint");
             MovePoints = serializedObject.FindProperty("m_MovePoints");
             MouthPoint = serializedObject.FindProperty("m_MouthPoint");
-            Sprite = serializedObject.FindProperty("m_Sprite");
+            //Sprite = serializedObject.FindProperty("m_Sprite");
+            Model = serializedObject.FindProperty("m_Model");
             MainCamera = serializedObject.FindProperty("m_MainCamera");
             WChackPoint = serializedObject.FindProperty("m_WChackPoint");
             RotateDegree = serializedObject.FindProperty("m_RotateDegree");
@@ -2040,6 +2107,7 @@ public class Enemy3D : MonoBehaviour
             Meat = serializedObject.FindProperty("m_Meat");
             MeatUI = serializedObject.FindProperty("m_MeatUI");
             DiscoverUI = serializedObject.FindProperty("m_DiscoverUI");
+            AnimalAnimator = serializedObject.FindProperty("m_Animator");
 
             OnChildEnable();
         }
@@ -2089,7 +2157,8 @@ public class Enemy3D : MonoBehaviour
 
             EditorGUILayout.Space();
             EditorGUILayout.LabelField("〇各種オブジェクトのオブジェクト設定");
-            Sprite.objectReferenceValue = EditorGUILayout.ObjectField("敵の画像", enemy.m_Sprite, typeof(GameObject), true);
+            Model.objectReferenceValue = EditorGUILayout.ObjectField("モデル", enemy.m_Model, typeof(GameObject), true);
+            //Sprite.objectReferenceValue = EditorGUILayout.ObjectField("敵の画像", enemy.m_Sprite, typeof(GameObject), true);
             MainCamera.objectReferenceValue = EditorGUILayout.ObjectField("メインカメラ", enemy.m_MainCamera, typeof(CameraMove), true);
             WChackPoint.objectReferenceValue = EditorGUILayout.ObjectField("壁捜索ポイント", enemy.m_WChackPoint, typeof(WallChackPoint), true);
             // GameObject
@@ -2097,6 +2166,8 @@ public class Enemy3D : MonoBehaviour
             MeatUI.objectReferenceValue = EditorGUILayout.ObjectField("お肉UIオブジェクト", enemy.m_MeatUI, typeof(GameObject), true);
             DiscoverUI.objectReferenceValue = EditorGUILayout.ObjectField("発見UIオブジェクト", enemy.m_DiscoverUI, typeof(GameObject), true);
             CanvasObj.objectReferenceValue = EditorGUILayout.ObjectField("キャンパスオブジェクト", enemy.m_Canvas, typeof(GameObject), true);
+            // m_Animator
+            AnimalAnimator.objectReferenceValue = EditorGUILayout.ObjectField("アニメーター", enemy.m_Animator, typeof(Animator), true);
 
             EditorGUILayout.Space();
 

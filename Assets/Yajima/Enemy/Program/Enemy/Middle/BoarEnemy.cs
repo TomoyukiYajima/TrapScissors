@@ -78,7 +78,7 @@ public class BoarEnemy : MiddleEnemy {
         if (m_MoveLength > 20)
         {
             // 待機状態に遷移
-            ChangeState(State.Idel, AnimationNumber.ANIME_IDEL_NUMBER);
+            ChangeState(State.Idel, AnimatorNumber.ANIMATOR_IDEL_NUMBER);
             m_MoveLength = 0.0f;
             // 移動速度を変える
             m_Agent.speed = m_Speed;

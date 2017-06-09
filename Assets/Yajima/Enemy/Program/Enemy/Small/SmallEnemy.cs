@@ -97,7 +97,7 @@ public class SmallEnemy : Enemy3D
         if (m_MoveLength > 20)
         {
             // 待機状態に遷移
-            ChangeState(State.Idel, AnimationNumber.ANIME_IDEL_NUMBER);
+            ChangeState(State.Idel, AnimatorNumber.ANIMATOR_IDEL_NUMBER);
             m_Agent.Resume();
             m_Player = null;
             // 移動速度を変える
@@ -171,7 +171,7 @@ public class SmallEnemy : Enemy3D
         if (m_MoveLength > 20)
         {
             // 待機状態に遷移
-            ChangeState(State.Idel, AnimationNumber.ANIME_IDEL_NUMBER);
+            ChangeState(State.Idel, AnimatorNumber.ANIMATOR_IDEL_NUMBER);
             m_MoveLength = 0.0f;
             // 移動速度を変える
             m_Agent.speed = m_Speed;
@@ -199,6 +199,13 @@ public class SmallEnemy : Enemy3D
         m_RunawayPoint.ChangeAddPosition(angle * Mathf.Rad2Deg - 180);
         //ChangeMovePoint(m_RunawayPoint.transform.position);
         //PointRunaway(player.transform);
+    }
+
+    protected override void SetAnimator()
+    {
+        base.SetAnimator();
+        // 逃げアニメーション
+        m_AnimatorStates[(int)AnimatorNumber.ANIMATOR_CHASE_NUMBER] = "Run";
     }
 
     protected override void AnimalHit(GameObject animal)

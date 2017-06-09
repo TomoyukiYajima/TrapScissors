@@ -12,4 +12,11 @@ public class LargeEnemy : MiddleEnemy {
     //void Update () {
 
     //}
+
+    protected override void SetAnimator()
+    {
+        base.SetAnimator();
+        // 睡眠アニメーション
+        m_AnimatorStates[(int)AnimatorNumber.ANIMATOR_SLEEP_NUMBER] = "Sleep";
+    }
 }

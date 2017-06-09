@@ -51,7 +51,7 @@ public class BearEnemy : LargeEnemy {
         // (乱数値 >= 反応するまでの値)
         if (value1 > value2) return;
 
-        ChangeState(State.Idel, AnimationNumber.ANIME_IDEL_NUMBER);
+        ChangeState(State.Idel, AnimatorNumber.ANIMATOR_IDEL_NUMBER);
         // 視界の描画をONにする
         if (!m_RayPoint.gameObject.activeSelf)
             m_RayPoint.gameObject.SetActive(true);

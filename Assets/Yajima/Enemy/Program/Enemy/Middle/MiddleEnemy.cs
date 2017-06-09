@@ -110,6 +110,20 @@ public class MiddleEnemy : Enemy3D {
     #endregion
 
     #region override関数
+    protected override void SetAnimator()
+    {
+        base.SetAnimator();
+        // 攻撃アニメーション
+        m_AnimatorStates[(int)AnimatorNumber.ANIMATOR_ATTACK_NUMBER] = "Attack";
+        // トラバサミ衝突時のアニメーション
+        m_AnimatorStates[(int)AnimatorNumber.ANIMATOR_TRAP_HIT_NUMBER] = "SmallTrapHit";
+        // 追跡アニメーション
+        m_AnimatorStates[(int)AnimatorNumber.ANIMATOR_CHASE_NUMBER] = "Chase";
+        // 壁衝突時のアニメーション
+        m_AnimatorStates[(int)AnimatorNumber.ANIMATOR_WALL_HIT_NUMBER] = "WallHit";
+        // ぴよりアニメーション
+        m_AnimatorStates[(int)AnimatorNumber.ANIMATOR_FAINT_NUMBER] = "Faint";
+    }
     public override void SoundNotice(Transform point)
     {
         base.SoundNotice(point);
