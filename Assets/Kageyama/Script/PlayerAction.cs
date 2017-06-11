@@ -41,12 +41,21 @@ public class PlayerAction : MonoBehaviour
     private GameObject _bear;
     #endregion
 
+
+    Animator m_Animetor;
+    NavMeshPlayer m_NavMeshPlayer;
+    public float setCount;
+    //public bool playerStop = false;
+
     [SerializeField]
     private GameObject _bigTrap;
     private BigTrap _trap;
     // Use this for initialization
-    void Start ()
+    void Start()
     {
+        m_Animetor = GetComponent<Animator>();
+        m_NavMeshPlayer = transform.parent.GetComponent<NavMeshPlayer>();
+
         _onTrapFlag = false;
         _foodNumber = 0;
         _trapMax = GameManager.gameManager.TrapNumber();
@@ -56,20 +65,34 @@ public class PlayerAction : MonoBehaviour
         _foodNumber = _foodUIMove.SelectFoodNumber();
         _trap = _bigTrap.GetComponent<BigTrap>();
     }
-	
-	// Update is called once per frame
-	void Update ()
+
+    // Update is called once per frame
+    void Update()
     {
+        print(setCount);
+
         //大型トラップが何かを捕まえた、もしくはゲームが終了していたらアクションをできないようにする
         if (_trap.FlgTarget() == true || GameManager.gameManager.GameStateCheck() == GameManager.GameState.END) return;
+
+        if (m_NavMeshPlayer._AState == NavMeshPlayer.AnimationState.Set)
+        {
+            setCount++;
+        }
+
         Action();
-	}
+
+        if (setCount >= 360)
+        {
+            m_NavMeshPlayer._AState = NavMeshPlayer.AnimationState.Idle;
+            setCount = 0;
+        }
+    }
 
     //プレイヤーのボタン操作
     void Action()
     {
         //トラップの設置、回収
-        if (Input.GetButtonDown("Trap"))
+        if (Input.GetButtonDown("Trap") && m_NavMeshPlayer._AState != NavMeshPlayer.AnimationState.Set)
         {
             if (_onTrapFlag == false && _trapCount < _trapMax)
             {
@@ -77,13 +100,24 @@ public class PlayerAction : MonoBehaviour
                 GameObject traps = GameObject.Find("Traps");
                 if (traps != null)
                 {
+                    if (m_NavMeshPlayer._AState != NavMeshPlayer.AnimationState.Set)
+                    {
+                        m_NavMeshPlayer._AState = NavMeshPlayer.AnimationState.Set;
+                        //m_Animetor.Play("Set");
+                        m_Animetor.CrossFade("Set", 0.1f, -1);
+
+                        print("罠を設置");
+                    }
+
                     Vector3 pos = new Vector3(this.transform.position.x,
-                                                       this.transform.position.y - 1.5f,
-                                                       this.transform.position.z);
+                               this.transform.position.y - 1.5f,
+                               this.transform.position.z);
+
                     Instantiate(
                         _trapObje, pos,
                         traps.transform.rotation, traps.transform
                         );
+
                     _trapCount++;
                 }
             }
@@ -91,19 +125,29 @@ public class PlayerAction : MonoBehaviour
             {
                 Destroy(_recovery);
                 _onTrapFlag = false;
+
+                if (m_NavMeshPlayer._AState != NavMeshPlayer.AnimationState.Set)
+                {
+                    m_NavMeshPlayer._AState = NavMeshPlayer.AnimationState.Set;
+                    m_Animetor.CrossFade("Set", 0.1f, -1);
+                    print("罠を撤去");
+                }
+
                 _trapCount--;
             }
         }
 
 
         //餌をまく
-        if (Input.GetButtonDown("Food"))
+        if (Input.GetButtonDown("Food") && m_NavMeshPlayer._AState != NavMeshPlayer.AnimationState.Set)
         {
+            m_Animetor.CrossFade("Set", 0.1f, -1);
+            m_NavMeshPlayer._AState = NavMeshPlayer.AnimationState.Set;
             FoodCheck();
         }
 
         //音を鳴らす
-        if(Input.GetButtonDown("Whistle"))
+        if (Input.GetButtonDown("Whistle"))
         {
             SoundManger.Instance.PlaySE(0);
             StartCoroutine(WhistleActive());
@@ -136,7 +180,7 @@ public class PlayerAction : MonoBehaviour
             GameManager.gameManager.FoodCountAdd();
             _bear.GetComponent<BearEnemy>().CheckFood();
             GameManager.gameManager.PutFoodAdd(_foodObj);
-            
+
         }
         else if (_onFoodFlag == true)
         {
@@ -199,6 +243,4 @@ public class PlayerAction : MonoBehaviour
             else if (_onFoodFlag == false) _recovery = null;
         }
     }
-
-
 }
