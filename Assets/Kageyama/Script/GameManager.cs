@@ -130,11 +130,6 @@ public class GameManager : MonoBehaviour
         if (_timeCheck == true && _gameTime > 0)
         {
             _timeCount += Time.deltaTime;
-            //if (_timeCount >= _gameTime)
-            //{
-            //    _gameState = GameState.END;
-            //    SceneManagerScript.sceneManager.FadeBlack();
-            //}
         }
     }
 

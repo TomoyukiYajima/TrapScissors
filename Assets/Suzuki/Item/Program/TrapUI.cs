@@ -6,22 +6,21 @@ public class TrapUI : MonoBehaviour
 {
     [SerializeField]
     private GameObject _traps;
-    [SerializeField]
-    private RectTransform _text;
-    private int _trapMax;   //最大のtrap    
-    private int _trapCount; //現在のtrap    
+    private Text _text;
+    private int _trapMax;   //最大のtrap  
     public int _trapRe;     //残りのtrap
 
     // Use this for initialization
     void Start()
     {
         _trapMax = GameManager.gameManager.TrapNumber();
+        _text = this.GetComponent<Text>();
     }
 
     void Update()
     {
         CheackTrap();
-        _text.GetComponent<Text>().text = _trapRe.ToString();
+        _text.text = _trapRe.ToString();
 
     }
     void CheackTrap()

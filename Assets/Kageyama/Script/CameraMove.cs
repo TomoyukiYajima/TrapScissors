@@ -3,6 +3,7 @@ using System.Collections;
 
 public class CameraMove : MonoBehaviour
 {
+    #region プレイヤー追尾に必要な変数
     private GameObject _player = null;
     private Vector3 _offset = Vector3.zero;
     private Vector3 _offset_Move = Vector3.zero;
@@ -10,19 +11,21 @@ public class CameraMove : MonoBehaviour
     private bool _lerpFrag;
     [SerializeField, TooltipAttribute("追尾させるかどうか")]
     private bool _moveFrag;
-
+    #endregion
+    #region カメラだけで動くときに使用する変数
     //プレイヤーの移動を固定して、カメラで全体を見渡せるようにする
     [SerializeField]
-    private bool _playerMoveLock;
+    private bool _playerMoveLock;   //動ける状態かどうかのフラグ
     private Vector3 _playerReturnPos;
     [SerializeField, TooltipAttribute("カメラの移動速度")]
     private float _speed;
     private Vector3 _moveDirection = Vector3.zero;
-    private float _clampX_max, _clampX_min;
-    private float _clampZ_max, _clampZ_min;
+    private float _clampX_max, _clampX_min; //X座標のクランプ
+    private float _clampZ_max, _clampZ_min; //Z座標のクランプ
+    #endregion
     private Vector3 newPosition;
     [SerializeField]
-    private GameObject _cameraMap;
+    private GameObject _cameraMap;  //ミニマップのカメラUI
 
     void Start()
     {
