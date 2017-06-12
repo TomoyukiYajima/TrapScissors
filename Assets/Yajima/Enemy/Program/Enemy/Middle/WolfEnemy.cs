@@ -43,7 +43,7 @@ public class WolfEnemy : MiddleEnemy {
         if (m_StateTimer < 2.0f) return;
         // 待機状態に遷移
         ChangeState(State.Idel, AnimatorNumber.ANIMATOR_IDEL_NUMBER);
-        ChangeSpriteColor(Color.red);
+        //ChangeSpriteColor(Color.red);
         m_Agent.Resume();
         // 攻撃判定を非アクティブ状態に変更
         m_AttackCollider.SetActive(false);
@@ -85,9 +85,9 @@ public class WolfEnemy : MiddleEnemy {
         var otherCol = m_TargetAnimal.GetComponent<BoxCollider>();
         var scale = m_TargetAnimal.transform.localScale.z * otherCol.size.z;
         if (length > scale + 1.0f) return;
-        ChangeState(State.Attack, AnimatorNumber.ANIMATOR_IDEL_NUMBER);
+        ChangeState(State.Attack, AnimatorNumber.ANIMATOR_ATTACK_NUMBER);
         // アニメーションの変更
-        m_Animator.CrossFade(m_AnimatorStates[(int)AnimatorNumber.ANIMATOR_ATTACK_NUMBER], 0.1f, -1);
+        //m_Animator.CrossFade(m_AnimatorStates[(int)AnimatorNumber.ANIMATOR_ATTACK_NUMBER], 0.1f, -1);
         m_Agent.Stop();
     }
 

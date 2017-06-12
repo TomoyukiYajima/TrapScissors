@@ -132,6 +132,7 @@ public class Enemy3D : MonoBehaviour
         DeadIdel = 8,       // 死亡待機状態
         Runaway = 9,        // 逃亡状態
     }
+
     // 発見状態
     protected enum DiscoverState
     {
@@ -204,7 +205,7 @@ public class Enemy3D : MonoBehaviour
         SetAgentStatus();
         // アニメーターの設定
         SetAnimator();
-        //m_Animator.CrossFade(m_AnimatorStates[(int)AnimatorNumber.ANIMATOR_IDEL_NUMBER], 0.1f, -1);
+        //m_Animator.CrossFade(m_AnimatorStates[(int)AnimatorNumber.ANIMATOR_IDEL_NUMBER], 0.1f, -1, 0.1f);
         // 移動配列に何も入っていなかった場合は通常移動
         //if(m_MovePoints.Length == 0)
 
@@ -225,6 +226,7 @@ public class Enemy3D : MonoBehaviour
     // Update is called once per frame
     protected virtual void Update()
     {
+        
         ////ビルボード
         //Vector3 p = m_MainCamera.transform.localPosition;
         ////transform.LookAt(p);
@@ -240,8 +242,15 @@ public class Enemy3D : MonoBehaviour
             m_Collider.enabled = false;
             // エージェントの停止
             if (m_Agent.enabled) m_Agent.Stop();
+            m_Animator.enabled = false;
+            //m_Animator.Stop();
             //gameObject.SetActive(false);
             return;
+        }
+        else
+        {
+            m_Animator.enabled = true;
+            //m_Animator.Play();
         }
 
         // 状態の更新
@@ -303,7 +312,7 @@ public class Enemy3D : MonoBehaviour
         m_StateTimer = 0.0f;
         // アニメーションの変更
         if (motion == AnimatorNumber.ANIMATOR_NULL) return;
-        m_Animator.CrossFade(m_AnimatorStates[(int)motion], 0.1f, -1);
+        m_Animator.CrossFade(m_AnimatorStates[(int)motion], 0.1f, 0);
         // ナビメッシュエージェントの移動停止
         //m_Agent.Stop();
     }
@@ -327,7 +336,8 @@ public class Enemy3D : MonoBehaviour
         SearchTrap();
         // 反応する動物の捜索
         SearchAnimal();
-
+        // アニメーションの変更
+        //m_Animator.CrossFade(m_AnimatorStates[(int)AnimatorNumber.ANIMATOR_IDEL_NUMBER], 0.1f, -1);
         GameObject obj = null;
         // プレイヤーを見つけた場合
         if (InPlayer(out obj))
@@ -505,7 +515,7 @@ public class Enemy3D : MonoBehaviour
         {
             ChangeState(State.Idel, AnimatorNumber.ANIMATOR_IDEL_NUMBER);
             // アニメーションの変更
-            m_Animator.CrossFade(m_AnimatorStates[(int)AnimatorNumber.ANIMATOR_IDEL_NUMBER], 0.1f, -1);
+            //m_Animator.CrossFade(m_AnimatorStates[(int)AnimatorNumber.ANIMATOR_IDEL_NUMBER], 0.1f, -1);
             //ChangeSpriteColor(Color.red);
             m_Agent.Resume();
         }
@@ -652,7 +662,8 @@ public class Enemy3D : MonoBehaviour
         if (m_StateTimer < 2.0f) return;
         // 待機状態に遷移
         ChangeState(State.Idel, AnimatorNumber.ANIMATOR_IDEL_NUMBER);
-        ChangeSpriteColor(Color.red);
+        //ChangeSpriteColor(Color.red);
+        m_Animator.CrossFade(m_AnimatorStates[(int)AnimatorNumber.ANIMATOR_IDEL_NUMBER], 0.1f, -1);
         m_Agent.Resume();
     }
 
