@@ -45,7 +45,7 @@ public class PlayerAction : MonoBehaviour
     Animator m_Animetor;
     NavMeshPlayer m_NavMeshPlayer;
     public float setCount;
-    //public bool playerStop = false;
+    private bool setTrap = false;
 
     [SerializeField]
     private GameObject _bigTrap;
@@ -76,12 +76,39 @@ public class PlayerAction : MonoBehaviour
 
         if (m_NavMeshPlayer._AState == NavMeshPlayer.AnimationState.Set)
         {
-            setCount++;
+            //setCount++;
+            setCount += 1 * Time.deltaTime;
         }
 
         Action();
 
-        if (setCount >= 360)
+        // 生成カウントに加算
+        GameObject traps = GameObject.Find("Traps");
+        if (traps != null)
+        {
+
+            if (setCount > 4f && setTrap != true)
+            {
+                setTrap = true;
+
+                Vector3 pos = new Vector3(this.transform.position.x,
+                           this.transform.position.y - 0.5f,
+                           this.transform.position.z);
+
+                Instantiate(
+                    _trapObje, pos,
+                    traps.transform.rotation, traps.transform
+                    );
+            }
+
+            //_onTrapFlag = true;
+
+        }
+
+
+
+
+        if (setCount >= 6)
         {
             m_NavMeshPlayer._AState = NavMeshPlayer.AnimationState.Idle;
             setCount = 0;
@@ -96,30 +123,16 @@ public class PlayerAction : MonoBehaviour
         {
             if (_onTrapFlag == false && _trapCount < _trapMax)
             {
-                // 生成カウントに加算
-                GameObject traps = GameObject.Find("Traps");
-                if (traps != null)
+                if (m_NavMeshPlayer._AState != NavMeshPlayer.AnimationState.Set)
                 {
-                    if (m_NavMeshPlayer._AState != NavMeshPlayer.AnimationState.Set)
-                    {
-                        m_NavMeshPlayer._AState = NavMeshPlayer.AnimationState.Set;
-                        //m_Animetor.Play("Set");
-                        m_Animetor.CrossFade("Set", 0.1f, -1);
+                    m_NavMeshPlayer._AState = NavMeshPlayer.AnimationState.Set;
+                    //m_Animetor.Play("Set");
+                    m_Animetor.CrossFade("Set", 0.1f, -1);
 
-                        print("罠を設置");
-                    }
-
-                    Vector3 pos = new Vector3(this.transform.position.x,
-                               this.transform.position.y - 1.5f,
-                               this.transform.position.z);
-
-                    Instantiate(
-                        _trapObje, pos,
-                        traps.transform.rotation, traps.transform
-                        );
-
-                    _trapCount++;
+                    print("罠を設置");
                 }
+
+                _trapCount++;
             }
             else if (_onTrapFlag == true)
             {
@@ -213,10 +226,12 @@ public class PlayerAction : MonoBehaviour
 
     void OnTriggerExit(Collider col)
     {
-        //罠から離れたら、Trapを置けるようにする
-        TrapFlagChenge(col, false);
         //餌から離れたら、Trapを置けるようにする
         FoodFlagChenge(col, false);
+
+        if (col.tag != "Trap") return;
+        //罠から離れたら、Trapを置けるようにする
+        TrapFlagChenge(col, false);
     }
 
     /// <summary>

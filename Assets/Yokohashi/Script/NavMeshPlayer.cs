@@ -65,6 +65,7 @@ public class NavMeshPlayer : MonoBehaviour {
         if (GameManager.gameManager.GameStateCheck() != GameManager.GameState.PLAY) return;
         if (col.gameObject.tag == "LargeEnemy")
         {
+            m_Animator.CrossFade("Down", 0.1f, -1);
             GameManager.gameManager.GameStateSet(GameManager.GameState.END);
             _gameOver.SetActive(true);
         }
