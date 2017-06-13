@@ -80,14 +80,17 @@ public class PlayerAction : MonoBehaviour
             setCount += 1 * Time.deltaTime;
         }
 
-        Action();
+
+        if (GameManager.gameManager.GameStateCheck() == GameManager.GameState.PLAY)
+        {
+            Action();
+        }
 
         // 生成カウントに加算
         GameObject traps = GameObject.Find("Traps");
         if (traps != null)
         {
-
-            if (setCount > 4f && setTrap != true)
+            if (setCount > 3.7f && setTrap != true)
             {
                 setTrap = true;
 
@@ -108,10 +111,11 @@ public class PlayerAction : MonoBehaviour
 
 
 
-        if (setCount >= 6)
+        if (setCount >= 4.7)
         {
             m_NavMeshPlayer._AState = NavMeshPlayer.AnimationState.Idle;
             setCount = 0;
+            //setTrap = false;
         }
     }
 
@@ -123,10 +127,13 @@ public class PlayerAction : MonoBehaviour
         {
             if (_onTrapFlag == false && _trapCount < _trapMax)
             {
+                if(setTrap == true)
+                {
+                    setTrap = false;
+                }
                 if (m_NavMeshPlayer._AState != NavMeshPlayer.AnimationState.Set)
                 {
                     m_NavMeshPlayer._AState = NavMeshPlayer.AnimationState.Set;
-                    //m_Animetor.Play("Set");
                     m_Animetor.CrossFade("Set", 0.1f, -1);
 
                     print("罠を設置");
