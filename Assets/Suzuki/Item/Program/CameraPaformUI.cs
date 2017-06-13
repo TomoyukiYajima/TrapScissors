@@ -7,6 +7,8 @@ public class CameraPaformUI : MonoBehaviour
     //点滅スピード調整
     [SerializeField]
     private float _speed = 0.03f;
+    [SerializeField]
+    private Image _TargetCamera;
 
     // Update is called once per frame
     void Update()
@@ -20,6 +22,9 @@ public class CameraPaformUI : MonoBehaviour
         if (Input.GetButtonDown("Trap"))
         {
             gameObject.SetActive(false);
+           _TargetCamera.gameObject.SetActive(false);
+           
+            
         }
     }
 }
