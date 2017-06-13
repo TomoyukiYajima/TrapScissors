@@ -28,12 +28,18 @@ public class TutorialStage : MonoBehaviour {
         //    m_TextBox.SetActive(false);
         //}
 
-        if (Input.GetButtonDown("Trap"))
-        {
-            Input.ResetInputAxes();
-        }
+        //if (Input.GetButtonDown("Trap"))
+        //{
+        //    Input.ResetInputAxes();
+        //}
 
         //print(Input.GetAxis("Vertical"));
+    }
+
+    public void DrawTextBox()
+    {
+        // テキストボックスを表示する
+        m_TextBox.SetActive(true);
     }
 
     #region シリアライズ変更

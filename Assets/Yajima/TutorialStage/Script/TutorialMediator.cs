@@ -3,6 +3,9 @@ using System.Collections;
 
 public class TutorialMediator : MonoBehaviour {
 
+    public TutorialStage m_TutorialStage;
+    public TutorialText m_TutorialText;
+
     private int m_ControllCount = 0;            // コントロールカウント
 
     private static TutorialMediator instance;   // インスタンス
@@ -24,8 +27,8 @@ public class TutorialMediator : MonoBehaviour {
         if (instance == null)
         {
             instance = (TutorialMediator)FindObjectOfType(typeof(TutorialMediator));
-            // インスタンスが無かった場合、ログの表示
-            if (instance == null) Debug.LogError("TutorialMediator Instance Error");
+            //// インスタンスが無かった場合、ログの表示
+            //if (instance == null) Debug.LogError("TutorialMediator Instance Error");
         }
 
         return instance;
@@ -43,4 +46,15 @@ public class TutorialMediator : MonoBehaviour {
     {
         m_ControllCount++;
     }
+
+    public void NextDrawText(string text)
+    {
+        // 一旦停止する
+        GameManager.gameManager.GameStateSet(GameManager.GameState.PAUSE);
+        // テキストボックスの表示
+        m_TutorialText.NextText(text);
+        m_TutorialStage.DrawTextBox();
+    }
+
+    public bool IsTextDrawEnd() { return m_TutorialText.IsDrawEnd(); }
 }

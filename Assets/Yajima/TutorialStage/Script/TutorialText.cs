@@ -26,6 +26,8 @@ public class TutorialText : MonoBehaviour {
 
     private float m_AddTextTime = 0.0f; // 文字追加時間
     private int m_Count = 0;            // 現在の表示カウント
+    private string m_InitTextName;
+    private bool m_IsDrawEnd = false;
 
     private List<string> m_DrawTexts = 
         new List<string>();             // 表示する文字列リスト
@@ -34,6 +36,8 @@ public class TutorialText : MonoBehaviour {
 	void Start () {
         m_Text = GetComponent<Text>();
         m_Text.text = "";
+
+        m_InitTextName = m_TextName;
 
         ReadTextFile();
 	}
@@ -59,10 +63,14 @@ public class TutorialText : MonoBehaviour {
             // 表示するテキストがなければ、終了
             if (m_DrawTextNumber > m_DrawTexts.Count - 1)
             {
+                m_DrawTextNumber = 0;
+                m_IsDrawEnd = true;
                 this.transform.parent.gameObject.SetActive(false);
                 GameManager.gameManager.GameStateSet(GameManager.GameState.PLAY);
                 m_ClearChackBox.SetActive(true);
-                return;
+                // テキストを空にする
+                //m_Text.text = "";
+                //return;
             }
             // テキストを空にする
             m_Text.text = "";
@@ -81,16 +89,29 @@ public class TutorialText : MonoBehaviour {
     // テキストファイルの読み込みを行います
     private void ReadTextFile()
     {
+        m_IsDrawEnd = false;
         var text = "";
+        // テキストを空にする
+        m_Count = 0;
+        m_Text.text = "";
         // FileReadTest.txtファイルを読み込む
         // Application.dataPath Assetファイルまでのパスの取得
-        FileInfo file = new FileInfo(Application.dataPath + "/Text/" + m_TextName + ".txt");
+        var path = Application.dataPath;
+        if(Application.platform == RuntimePlatform.WindowsPlayer)
+        {
+            var str = Application.productName + "_Data";
+            path = path.Substring(0, path.Length - str.Length);
+            //path = "Text";
+        }
+        FileInfo file = new FileInfo(path + "/Text/" + m_TextName + ".txt");
         try
         {
             // 一行毎読み込み
-            // 既定の状態だと、日本語は文字化けしてしまう
-            // ->エンコードの設定をデフォルトにする
-            using (StreamReader sr = new StreamReader(file.OpenRead(), Encoding.Default))
+            // テキストフォルダをUnicodeに設定する
+            //// 既定の状態だと、日本語は文字化けしてしまう
+            //// ->エンコードの設定をデフォルトにする
+            //var enc = Encoding.Default;
+            using (StreamReader sr = new StreamReader(file.OpenRead(), Encoding.Unicode))
             {
                 text = sr.ReadToEnd();
                 // テキストリストに追加
@@ -101,6 +122,7 @@ public class TutorialText : MonoBehaviour {
         {
             // 改行コード
             text += SetDefaultText();
+            m_Text.text = path;
         }
 
         // 読み込んだテキストを表示する
@@ -140,6 +162,17 @@ public class TutorialText : MonoBehaviour {
             }
         }
     }
+
+    public void NextText(string text)
+    {
+        m_TextName = m_InitTextName + text;
+        // 配列の初期化
+        m_DrawTexts.Clear();
+        // 再読み込み
+        ReadTextFile();
+    }
+
+    public bool IsDrawEnd() { return m_IsDrawEnd; }
 
     // 改行コード処理
     private string SetDefaultText()

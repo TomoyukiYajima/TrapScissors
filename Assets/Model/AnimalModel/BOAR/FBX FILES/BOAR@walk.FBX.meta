@@ -1,7 +1,7 @@
 fileFormatVersion: 2
 guid: 8f5e89a962da4714b87d1d1bdb34b830
 ModelImporter:
-  serializedVersion: 18
+  serializedVersion: 19
   fileIDToRecycleName:
     100000: //RootNode
     100002: BOAR_
@@ -63,7 +63,7 @@ ModelImporter:
     400054: BOAR_ R UpperArm
     400056: BOAR_ Spine
     400058: BOAR_ Spine1
-    7400000: Take 001
+    7400000: walk
     9500000: //RootNode
     11100000: //RootNode
   materials:
@@ -73,19 +73,127 @@ ModelImporter:
   animations:
     legacyGenerateAnimations: 4
     bakeSimulation: 0
+    resampleCurves: 1
     optimizeGameObjects: 0
     motionNodeName: 
+    animationImportErrors: 
+    animationImportWarnings: 
+    animationRetargetingWarnings: 
+    animationDoRetargetingWarnings: 0
     animationCompression: 3
-    animationRotationError: .5
-    animationPositionError: .5
-    animationScaleError: .5
+    animationRotationError: 0.5
+    animationPositionError: 0.5
+    animationScaleError: 0.5
     animationWrapMode: 2
     extraExposedTransformPaths: []
-    clipAnimations: []
+    clipAnimations:
+    - serializedVersion: 16
+      name: walk
+      takeName: Take 001
+      firstFrame: 0
+      lastFrame: 30
+      wrapMode: 0
+      orientationOffsetY: 0
+      level: 0
+      cycleOffset: 0
+      loop: 0
+      hasAdditiveReferencePose: 0
+      loopTime: 1
+      loopBlend: 0
+      loopBlendOrientation: 0
+      loopBlendPositionY: 0
+      loopBlendPositionXZ: 0
+      keepOriginalOrientation: 0
+      keepOriginalPositionY: 1
+      keepOriginalPositionXZ: 0
+      heightFromFeet: 0
+      mirror: 0
+      bodyMask: 01000000010000000100000001000000010000000100000001000000010000000100000001000000010000000100000001000000
+      curves: []
+      events: []
+      transformMask:
+      - path: 
+        weight: 1
+      - path: BOAR_
+        weight: 1
+      - path: BOAR_/BOAR_ Pelvis
+        weight: 1
+      - path: BOAR_/BOAR_ Pelvis/BOAR_ Spine
+        weight: 1
+      - path: BOAR_/BOAR_ Pelvis/BOAR_ Spine/BOAR_ L Thigh
+        weight: 1
+      - path: BOAR_/BOAR_ Pelvis/BOAR_ Spine/BOAR_ L Thigh/BOAR_ L Calf
+        weight: 1
+      - path: BOAR_/BOAR_ Pelvis/BOAR_ Spine/BOAR_ L Thigh/BOAR_ L Calf/BOAR_ L HorseLink
+        weight: 1
+      - path: BOAR_/BOAR_ Pelvis/BOAR_ Spine/BOAR_ L Thigh/BOAR_ L Calf/BOAR_ L HorseLink/BOAR_
+          L Foot
+        weight: 1
+      - path: BOAR_/BOAR_ Pelvis/BOAR_ Spine/BOAR_ R Thigh
+        weight: 1
+      - path: BOAR_/BOAR_ Pelvis/BOAR_ Spine/BOAR_ R Thigh/BOAR_ R Calf
+        weight: 1
+      - path: BOAR_/BOAR_ Pelvis/BOAR_ Spine/BOAR_ R Thigh/BOAR_ R Calf/BOAR_ R HorseLink
+        weight: 1
+      - path: BOAR_/BOAR_ Pelvis/BOAR_ Spine/BOAR_ R Thigh/BOAR_ R Calf/BOAR_ R HorseLink/BOAR_
+          R Foot
+        weight: 1
+      - path: BOAR_/BOAR_ Pelvis/BOAR_ Spine/BOAR_ Spine1
+        weight: 1
+      - path: BOAR_/BOAR_ Pelvis/BOAR_ Spine/BOAR_ Spine1/BOAR_ Neck
+        weight: 1
+      - path: BOAR_/BOAR_ Pelvis/BOAR_ Spine/BOAR_ Spine1/BOAR_ Neck/BOAR_ L Clavicle
+        weight: 1
+      - path: BOAR_/BOAR_ Pelvis/BOAR_ Spine/BOAR_ Spine1/BOAR_ Neck/BOAR_ L Clavicle/BOAR_
+          L UpperArm
+        weight: 1
+      - path: BOAR_/BOAR_ Pelvis/BOAR_ Spine/BOAR_ Spine1/BOAR_ Neck/BOAR_ L Clavicle/BOAR_
+          L UpperArm/BOAR_ L Forearm
+        weight: 1
+      - path: BOAR_/BOAR_ Pelvis/BOAR_ Spine/BOAR_ Spine1/BOAR_ Neck/BOAR_ L Clavicle/BOAR_
+          L UpperArm/BOAR_ L Forearm/BOAR_ L Hand
+        weight: 1
+      - path: BOAR_/BOAR_ Pelvis/BOAR_ Spine/BOAR_ Spine1/BOAR_ Neck/BOAR_ L Clavicle/BOAR_
+          L UpperArm/BOAR_ L Forearm/BOAR_ L Hand/BOAR_ L Finger0
+        weight: 1
+      - path: BOAR_/BOAR_ Pelvis/BOAR_ Spine/BOAR_ Spine1/BOAR_ Neck/BOAR_ L Clavicle/BOAR_
+          L UpperArm/BOAR_ L Forearm/BOAR_ L Hand/BOAR_ L Finger0/BOAR_ L Finger0Nub
+        weight: 1
+      - path: BOAR_/BOAR_ Pelvis/BOAR_ Spine/BOAR_ Spine1/BOAR_ Neck/BOAR_ Neck1
+        weight: 1
+      - path: BOAR_/BOAR_ Pelvis/BOAR_ Spine/BOAR_ Spine1/BOAR_ Neck/BOAR_ Neck1/BOAR_
+          Neck2
+        weight: 1
+      - path: BOAR_/BOAR_ Pelvis/BOAR_ Spine/BOAR_ Spine1/BOAR_ Neck/BOAR_ Neck1/BOAR_
+          Neck2/BOAR_ Head
+        weight: 1
+      - path: BOAR_/BOAR_ Pelvis/BOAR_ Spine/BOAR_ Spine1/BOAR_ Neck/BOAR_ Neck1/BOAR_
+          Neck2/BOAR_ Head/BOAR_ Queue de cheval 1
+        weight: 1
+      - path: BOAR_/BOAR_ Pelvis/BOAR_ Spine/BOAR_ Spine1/BOAR_ Neck/BOAR_ R Clavicle
+        weight: 1
+      - path: BOAR_/BOAR_ Pelvis/BOAR_ Spine/BOAR_ Spine1/BOAR_ Neck/BOAR_ R Clavicle/BOAR_
+          R UpperArm
+        weight: 1
+      - path: BOAR_/BOAR_ Pelvis/BOAR_ Spine/BOAR_ Spine1/BOAR_ Neck/BOAR_ R Clavicle/BOAR_
+          R UpperArm/BOAR_ R Forearm
+        weight: 1
+      - path: BOAR_/BOAR_ Pelvis/BOAR_ Spine/BOAR_ Spine1/BOAR_ Neck/BOAR_ R Clavicle/BOAR_
+          R UpperArm/BOAR_ R Forearm/BOAR_ R Hand
+        weight: 1
+      - path: BOAR_/BOAR_ Pelvis/BOAR_ Spine/BOAR_ Spine1/BOAR_ Neck/BOAR_ R Clavicle/BOAR_
+          R UpperArm/BOAR_ R Forearm/BOAR_ R Hand/BOAR_ R Finger0
+        weight: 1
+      - path: BOAR_/BOAR_ Pelvis/BOAR_ Spine/BOAR_ Spine1/BOAR_ Neck/BOAR_ R Clavicle/BOAR_
+          R UpperArm/BOAR_ R Forearm/BOAR_ R Hand/BOAR_ R Finger0/BOAR_ R Finger0Nub
+        weight: 1
+      maskType: 0
+      maskSource: {instanceID: 0}
+      additiveReferencePoseFrame: 0
     isReadable: 1
   meshes:
     lODScreenPercentages: []
-    globalScale: .00999999978
+    globalScale: 0.01
     meshCompression: 0
     addColliders: 0
     importBlendShapes: 1
@@ -102,24 +210,25 @@ ModelImporter:
     useFileScale: 0
   tangentSpace:
     normalSmoothAngle: 60
-    splitTangentsAcrossUV: 1
     normalImportMode: 0
-    tangentImportMode: 1
+    tangentImportMode: 4
   importAnimation: 1
   copyAvatar: 0
   humanDescription:
     human: []
     skeleton: []
-    armTwist: .5
-    foreArmTwist: .5
-    upperLegTwist: .5
-    legTwist: .5
-    armStretch: .0500000007
-    legStretch: .0500000007
+    armTwist: 0.5
+    foreArmTwist: 0.5
+    upperLegTwist: 0.5
+    legTwist: 0.5
+    armStretch: 0.05
+    legStretch: 0.05
     feetSpacing: 0
     rootMotionBoneName: 
+    hasTranslationDoF: 0
   lastHumanDescriptionAvatarSource: {instanceID: 0}
   animationType: 2
+  humanoidOversampling: 1
   additionalBone: 0
   userData: 
   assetBundleName: 

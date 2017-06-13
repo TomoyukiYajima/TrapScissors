@@ -13,34 +13,28 @@ public class ClearChacker : MonoBehaviour
     private GameObject m_ChackBox;      // チェックボックス
     #endregion
 
-    private Toggle m_Toggle;            // トグル
+    protected Toggle m_Toggle;            // トグル
 
     // Use this for initialization
-    void Start()
+    public virtual void Start()
     {
         // トグルの設定
         m_Toggle = m_ChackBox.GetComponent<Toggle>();
     }
 
     // Update is called once per frame
-    void Update()
+    public virtual void Update()
     {
 
     }
 
-    public void OnCollisionEnter(Collision collision)
+    public void TutorialClear()
     {
-        // collision.transform.tag == "Player"
-        if (collision.transform.name == "PlayerSprite")
-        {
-            // ゲームクリア
-            GameManager.gameManager.GameStateSet(GameManager.GameState.END);
-            ResultManager.resultManager.ClearPopUpActiveEnd();
-            // チェックボックスをオンにする
-            m_Toggle.isOn = true;
-            //ResultManager.resultManager.ClearSetActive(true);
-            //_gameOver.SetActive(true);
-        }
+        // ゲームクリア
+        GameManager.gameManager.GameStateSet(GameManager.GameState.END);
+        ResultManager.resultManager.ClearPopUpActiveEnd();
+        // チェックボックスをオンにする
+        m_Toggle.isOn = true;
     }
 
     #region シリアライズ変更
@@ -54,7 +48,11 @@ public class ClearChacker : MonoBehaviour
         public void OnEnable()
         {
             ChackBox = serializedObject.FindProperty("m_ChackBox");
+
+            OnChildEnable();
         }
+
+        protected virtual void OnChildEnable() { }
 
         public override void OnInspectorGUI()
         {
@@ -66,9 +64,15 @@ public class ClearChacker : MonoBehaviour
             EditorGUILayout.LabelField("〇クリアチェッカーの設定");
             ChackBox.objectReferenceValue = EditorGUILayout.ObjectField("チェックボックス", chacker.m_ChackBox, typeof(GameObject), true);
 
+            EditorGUILayout.Space();
+
+            OnChildInspectorGUI();
+
             // Unity画面での変更を更新する(これがないとUnity画面で変更できなくなる)
             serializedObject.ApplyModifiedProperties();
         }
+
+        protected virtual void OnChildInspectorGUI() { }
     }
 #endif
     #endregion
