@@ -10,9 +10,12 @@ public class GameStart : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
-	    if(Input.GetButtonDown("Submit"))
+        if (GameManager.gameManager.GameStateCheck() == GameManager.GameState.START)
         {
-            GameManager.gameManager.GameStateSet(GameManager.GameState.PLAY);
+            if (Input.GetButtonDown("Submit"))
+            {
+                GameManager.gameManager.GameStateSet(GameManager.GameState.PLAY);
+            }
         }
 	}
 }
