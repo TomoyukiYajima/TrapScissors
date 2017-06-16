@@ -2,7 +2,6 @@
 using System.Collections;
 using UnityEngine.UI;
 
-
 public class BigTrap : MonoBehaviour
 {
     public enum TrapState
@@ -10,7 +9,6 @@ public class BigTrap : MonoBehaviour
         WAIT,       //動物が掛かるのを待っている状態
         CAPTURE,    //動物を捕まえている状態
     }
-    private int _time;
     public TrapState _state;
     [SerializeField, TooltipAttribute("Resultで表示されるオブジェクト")]
     private GameObject _result;
@@ -20,12 +18,13 @@ public class BigTrap : MonoBehaviour
     [SerializeField]
     private GameObject _targetAnimal;
     #endregion
-    private SceneManagerScript _scene;
 
-    //スタートよりも前に動く変数
-    void Awake()
-    { 
-    }
+    #region 火花が散るための変数
+    [SerializeField, TooltipAttribute("火花")]
+    public GameObject _traphit;
+    [SerializeField, TooltipAttribute("火花の位置")]
+    public GameObject _instance;
+    #endregion
 
     // Use this for initialization
     void Start()
@@ -34,12 +33,6 @@ public class BigTrap : MonoBehaviour
         _state = TrapState.WAIT;
         _flg = false;
     }
-
-    // Update is called once per frame
-    void Update()
-    {
-    }
-
     //当たっている最中も取得する当たり判定
     void OnTriggerEnter(Collider col)
     {
@@ -50,6 +43,7 @@ public class BigTrap : MonoBehaviour
             ChengeState(TrapState.CAPTURE);
             _targetAnimal = col.gameObject;
 
+            Instantiate(_traphit, _instance.transform.position, Quaternion.identity);
             _flg = true;
             _result.SetActive(true);
             GameManager.gameManager.HuntCountAdd();
