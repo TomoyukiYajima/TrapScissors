@@ -69,8 +69,6 @@ public class PlayerAction : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        print(setCount);
-
         //大型トラップが何かを捕まえた、もしくはゲームが終了していたらアクションをできないようにする
         if (_trap.FlgTarget() == true || GameManager.gameManager.GameStateCheck() == GameManager.GameState.END) return;
 
@@ -122,6 +120,11 @@ public class PlayerAction : MonoBehaviour
     //プレイヤーのボタン操作
     void Action()
     {
+        //// チュートリアル時のアクション
+        //int actionCount = 10;
+        //var mediator = TutorialMediator.GetInstance();
+        //if (mediator != null) actionCount = mediator.ActionCount;
+
         //トラップの設置、回収
         if (Input.GetButtonDown("Trap") && m_NavMeshPlayer._AState != NavMeshPlayer.AnimationState.Set)
         {

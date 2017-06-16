@@ -63,22 +63,26 @@ public class SmallEnemy : Enemy3D
 
     protected override void DiscoverPlayer(float deltaTime)
     {
-        //var state = m_Animator.GetCurrentAnimatorStateInfo(0);
-        //var layer = m_Animator.GetLayerIndex("Discover");
-        //var state = m_Animator.GetCurrentAnimatorStateInfo(0);
-        ////var par = m_Animator.GetParameter((int)AnimatorNumber.ANIMATOR_DISCOVER_NUMBER);
-        //var time = state.normalizedTime;
-        //if (time < 1.0f)
-        //{
-        //    m_Agent.Stop();
-        //    return;
-        //}
-        //else
-        //{
-        //    // アニメーションの変更
-        //    m_Animator.CrossFade(m_AnimatorStates[(int)AnimatorNumber.ANIMATOR_CHASE_NUMBER], 0.1f, -1);
-        //    m_Agent.Resume();
-        //}
+        // 発見アニメーションの場合
+        if (m_MotionNumber == (int)AnimatorNumber.ANIMATOR_DISCOVER_NUMBER)
+        {
+            var layer = m_Animator.GetLayerIndex("Base Layer");
+            var state = m_Animator.GetCurrentAnimatorStateInfo(layer);
+            //var nTime = state.normalizedTime % 1.0f;
+            var time = state.normalizedTime;
+            // アニメーションの再生が完了したら、次のアニメーションに変更
+            if (time < 1.0f)
+            {
+                m_Agent.Stop();
+                return;
+            }
+            else
+            {
+                // アニメーションの変更
+                m_Animator.CrossFade(m_AnimatorStates[(int)AnimatorNumber.ANIMATOR_CHASE_NUMBER], 0.1f, -1);
+                m_Agent.Resume();
+            }
+        }
 
         // 移動(通常の移動速度の数倍)
         Move(deltaTime, m_DiscoverSpeed);

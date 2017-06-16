@@ -6,7 +6,7 @@ public class TutorialMediator : MonoBehaviour {
     public TutorialStage m_TutorialStage;
     public TutorialText m_TutorialText;
 
-    private int m_ControllCount = 0;            // コントロールカウント
+    private int m_ActionCount = 0;              // プレイヤーのアクションカウント
 
     private static TutorialMediator instance;   // インスタンス
 
@@ -27,24 +27,24 @@ public class TutorialMediator : MonoBehaviour {
         if (instance == null)
         {
             instance = (TutorialMediator)FindObjectOfType(typeof(TutorialMediator));
-            //// インスタンスが無かった場合、ログの表示
-            //if (instance == null) Debug.LogError("TutorialMediator Instance Error");
+            // インスタンスが無かった場合、ログの表示
+            if (instance == null) Debug.LogError("TutorialMediator Instance Error");
         }
 
         return instance;
     }
 
     // コントロールカウントの取得・変更を行います
-    public int ControllCount
+    public int ActionCount
     {
-        set { m_ControllCount = value; }
-        get { return this.m_ControllCount; }
+        set { m_ActionCount = value; }
+        get { return this.m_ActionCount; }
     }
 
     // コントロールカウントの加算を行います
-    public void AddControllCount()
+    public void AddActionCount()
     {
-        m_ControllCount++;
+        m_ActionCount++;
     }
 
     public void NextDrawText(string text)

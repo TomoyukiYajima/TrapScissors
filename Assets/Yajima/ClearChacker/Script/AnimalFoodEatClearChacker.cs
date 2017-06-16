@@ -40,6 +40,8 @@ public class AnimalFoodEatClearChacker : ClearChacker
         if (m_Eat)
         {
             if (m_IsDrawEnd) return;
+            var mediator = GameObject.Find("TutorialMediator");
+            if (mediator == null) return;
 
             if (TutorialMediator.GetInstance().IsTextDrawEnd())
             {

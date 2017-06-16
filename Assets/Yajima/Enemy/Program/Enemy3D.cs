@@ -239,9 +239,9 @@ public class Enemy3D : MonoBehaviour
         // 衝突時の移動量を消す
         m_Rigidbody.velocity = Vector3.zero;
 
-        //var animeState = m_Animator.GetCurrentAnimatorStateInfo(0);
-        //var time = animeState.normalizedTime;
-        //print(time.ToString());
+        //var layer = m_Animator.GetLayerIndex("Base Layer");
+        //var state = m_Animator.GetCurrentAnimatorStateInfo(layer);
+        //var nTime = state.normalizedTime % 1.0f;
 
         // ゲームマネージャの状態が「PLAY」以外だったら動かない
         if (m_GameState != GameManager.gameManager.GameStateCheck())
@@ -267,7 +267,7 @@ public class Enemy3D : MonoBehaviour
             else
             {
                 m_Animator.enabled = true;
-                if (m_Agent.enabled) m_Agent.Resume();
+                if (m_Agent.enabled && m_State != State.Sleep) m_Agent.Resume();
                 //m_Animator.Play();
             }            
         }
@@ -359,8 +359,8 @@ public class Enemy3D : MonoBehaviour
         // 反応する動物の捜索
         SearchAnimal();
         // アニメーションの変更
-        //m_Animator.CrossFade(m_AnimatorStates[(int)AnimatorNumber.ANIMATOR_IDEL_NUMBER], 0.1f, -1);
-        if(TutorialMediator.GetInstance() == null)
+        var mediator = GameObject.Find("TutorialMediator");
+        if (mediator == null)
         {
             GameObject obj = null;
             // プレイヤーを見つけた場合
@@ -371,6 +371,11 @@ public class Enemy3D : MonoBehaviour
                 return;
             };
         }
+        //m_Animator.CrossFade(m_AnimatorStates[(int)AnimatorNumber.ANIMATOR_IDEL_NUMBER], 0.1f, -1);
+        //if (TutorialMediator.GetInstance() == null)
+        //{
+            
+        //}
 
         // 移動
         PointMove(deltaTime);
@@ -395,7 +400,7 @@ public class Enemy3D : MonoBehaviour
     // 発見状態の変更
     protected void ChangeDiscoverState(DiscoverState state)
     {
-        var motion = AnimatorNumber.ANIMATOR_CHASE_NUMBER; //AnimatorNumber.ANIMATOR_DISCOVER_NUMBER;
+        var motion = AnimatorNumber.ANIMATOR_CHASE_NUMBER;
         if (state == DiscoverState.Discover_Food) motion = AnimatorNumber.ANIMATOR_NULL;
         ChangeState(State.Discover, motion);
         // 同じ行動なら返す
@@ -410,18 +415,26 @@ public class Enemy3D : MonoBehaviour
         //m_Agent.destination = m_Player.transform.position;
         //Camera.
 
-        //var time = m_Animator.GetCurrentAnimatorStateInfo((int)AnimatorNumber.ANIMATOR_DISCOVER_NUMBER).normalizedTime;
-        //if (m_Animator.GetCurrentAnimatorStateInfo((int)AnimatorNumber.ANIMATOR_DISCOVER_NUMBER).normalizedTime < 1.0f)
-        //{
-        //    m_Agent.Stop();
-        //    return;
-        //}
-        //else
-        //{
-        //    // アニメーションの変更
-        //    m_Animator.CrossFade(m_AnimatorStates[(int)AnimatorNumber.ANIMATOR_CHASE_NUMBER], 0.1f, -1);
-        //    m_Agent.Resume();
-        //}
+        // 発見アニメーションの場合
+        if(m_MotionNumber == (int)AnimatorNumber.ANIMATOR_DISCOVER_NUMBER)
+        {
+            var layer = m_Animator.GetLayerIndex("Base Layer");
+            var state = m_Animator.GetCurrentAnimatorStateInfo(layer);
+            //var nTime = state.normalizedTime % 1.0f;
+            var time = state.normalizedTime;
+            // アニメーションの再生が完了したら、次のアニメーションに変更
+            if (time < 1.0f)
+            {
+                m_Agent.Stop();
+                return;
+            }
+            else
+            {
+                // アニメーションの変更
+                m_Animator.CrossFade(m_AnimatorStates[(int)AnimatorNumber.ANIMATOR_CHASE_NUMBER], 0.1f, -1);
+                m_Agent.Resume();
+            }
+        }
 
         //m_Agent.destination = m_Player.transform.position;
 
@@ -538,8 +551,12 @@ public class Enemy3D : MonoBehaviour
         // えさが無くなっていたら、待機状態に遷移
         if (m_FoodObj == null)
         {
-            // チュートリアルなら動かないようにする
-            if (TutorialMediator.GetInstance() != null) return;
+            var mediator = GameObject.Find("TutorialMediator");
+            if (mediator != null)
+            {
+                // チュートリアルなら動かないようにする
+                if (TutorialMediator.GetInstance() != null) return;
+            }
 
             ChangeState(State.Idel, AnimatorNumber.ANIMATOR_IDEL_NUMBER);
             // アニメーションの変更
