@@ -47,6 +47,7 @@ public class HuntCountText : MonoBehaviour
             else if (_skipFlag == false)
             {
                 _huntCount++;
+                SoundManger.Instance.PlaySE(15);
                 _myText.text = _huntCount.ToString();
                 yield return new WaitForSecondsRealtime(0.02f);
             }

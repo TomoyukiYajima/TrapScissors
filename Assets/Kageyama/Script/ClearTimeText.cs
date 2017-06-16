@@ -19,13 +19,13 @@ public class ClearTimeText : MonoBehaviour
         _myText = this.GetComponent<Text>();
         _myText.text = "00分00秒";
         _skipFlag = false;
-        _clearTime = GameManager.gameManager.GameTime();
-        StartCoroutine(CountAddStart());
     }
     
     // Use this for initialization
     void Start()
     {
+        _clearTime = GameManager.gameManager.GameTime();
+        StartCoroutine(CountAddStart());
     }
 
     // Update is called once per frame
@@ -60,6 +60,7 @@ public class ClearTimeText : MonoBehaviour
             else if (_skipFlag == false)
             {
                 _clearTimeCount++;
+                SoundManger.Instance.PlaySE(15);
                 if (_clearTimeCount >= 60)
                 {
                     _clearTimeCount = 0;

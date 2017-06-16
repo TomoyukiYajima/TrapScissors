@@ -45,6 +45,7 @@ public class StageSelectMove : MonoBehaviour
     {
         if (_positionNumber >= _toPosition.Length - 1 || _moveflag == true) return;
         _moveflag = true;
+        SoundManger.Instance.PlaySE(6);
         _positionNumber++;
         ArrowCollarChange(0);
         ButtonSelect();
@@ -61,6 +62,7 @@ public class StageSelectMove : MonoBehaviour
     {
         if (_positionNumber <= 0 || _moveflag == true) return;
         _moveflag = true;
+        SoundManger.Instance.PlaySE(6);
         _positionNumber--;
         ArrowCollarChange(1);
         ButtonSelect();
