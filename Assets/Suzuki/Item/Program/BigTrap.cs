@@ -22,8 +22,8 @@ public class BigTrap : MonoBehaviour
     #region 火花が散るための変数
     [SerializeField, TooltipAttribute("火花")]
     public GameObject _traphit;
-    [SerializeField, TooltipAttribute("火花の位置")]
-    public GameObject _instance;
+    //[SerializeField, TooltipAttribute("火花の位置")]
+    //public GameObject _HibanaIti;
     #endregion
 
     // Use this for initialization
@@ -32,6 +32,7 @@ public class BigTrap : MonoBehaviour
         _targetAnimal = null;
         _state = TrapState.WAIT;
         _flg = false;
+        
     }
     //当たっている最中も取得する当たり判定
     void OnTriggerEnter(Collider col)
@@ -43,7 +44,7 @@ public class BigTrap : MonoBehaviour
             ChengeState(TrapState.CAPTURE);
             _targetAnimal = col.gameObject;
 
-            Instantiate(_traphit, _instance.transform.position, Quaternion.identity);
+            Instantiate(_traphit, this.transform.position, Quaternion.identity);
             _flg = true;
             _result.SetActive(true);
             GameManager.gameManager.HuntCountAdd();
