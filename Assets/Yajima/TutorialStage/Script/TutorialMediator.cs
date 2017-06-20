@@ -52,7 +52,7 @@ public class TutorialMediator : MonoBehaviour {
         // 一旦停止する
         GameManager.gameManager.GameStateSet(GameManager.GameState.PAUSE);
         // テキストボックスの表示
-        m_TutorialText.NextText(text);
+        m_TutorialText.NextText("_" + text);
         m_TutorialStage.DrawTextBox();
     }
 

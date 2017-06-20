@@ -243,11 +243,12 @@ public class Enemy3D : MonoBehaviour
         //var state = m_Animator.GetCurrentAnimatorStateInfo(layer);
         //var nTime = state.normalizedTime % 1.0f;
 
-        // ゲームマネージャの状態が「PLAY」以外だったら動かない
+        // ゲームマネージャの状態が変更された場合
         if (m_GameState != GameManager.gameManager.GameStateCheck())
         {
             m_GameState = GameManager.gameManager.GameStateCheck();
 
+            // ゲームプレイでない場合
             if (GameManager.gameManager.GameStateCheck() != GameManager.GameState.PLAY)
             {
                 // 自身の衝突判定をオフにする
@@ -257,7 +258,7 @@ public class Enemy3D : MonoBehaviour
                 m_Collider.enabled = false;
                 // エージェントの停止
                 m_Agent.velocity = Vector3.zero;
-
+                // ゲームマネージャの状態が「PLAY」以外だったら動かない
                 if (m_Agent.enabled) m_Agent.Stop();
                 m_Animator.enabled = false;
                 //m_Animator.Stop();
@@ -268,6 +269,7 @@ public class Enemy3D : MonoBehaviour
             {
                 m_Animator.enabled = true;
                 if (m_Agent.enabled && m_State != State.Sleep) m_Agent.Resume();
+                m_Collider.enabled = true;
                 //m_Animator.Play();
             }            
         }
@@ -1081,9 +1083,10 @@ public class Enemy3D : MonoBehaviour
         // 当たったオブジェクト
         hitObj = hitInfo.collider.gameObject;
         // プレイヤーとの距離を求める
-        var length = Vector3.Distance(
-            m_RayPoint.position,
-            obj.transform.position
+        //var length = Vector3.Distance(m_RayPoint.position, obj.transform.position);
+        var length = Vector2.Distance(
+            new Vector2(m_RayPoint.position.x, m_RayPoint.position.z),
+            new Vector2(obj.transform.position.x, obj.transform.position.z)
             );
         // 可視距離から離れていれば返す
         //print("距離調査");
