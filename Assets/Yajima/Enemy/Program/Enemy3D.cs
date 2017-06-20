@@ -26,8 +26,8 @@ public class Enemy3D : MonoBehaviour
     protected float m_ViewLength = 10.0f;               // プレイヤーが見える距離
     [SerializeField]
     protected float m_ViewAngle = 30.0f;                // プレイヤーが見える角度
-    [SerializeField]
-    protected Transform m_GroundPoint = null;           // 接地ポイント
+    //[SerializeField]
+    //protected Transform m_GroundPoint = null;           // 接地ポイント
     [SerializeField]
     protected Transform m_RayPoint = null;              // レイポイント
     [SerializeField]
@@ -937,6 +937,7 @@ public class Enemy3D : MonoBehaviour
         //collider.enabled = false;
         //m_Collider.enabled = false;
         m_Collider.isTrigger = true;
+        m_Collider.enabled = false;
         //ChangeSpriteColor(Color.green);
         // エージェントを停止させる
         m_Agent.Stop();
@@ -2057,31 +2058,31 @@ public class Enemy3D : MonoBehaviour
 
     #region ギズモ関数
     // ギズモの描画
-    public void OnDrawGizmos()
-    {
-        DrawGizmos();
+    //public void OnDrawGizmos()
+    //{
+    //    DrawGizmos();
 
-        //DrawObjLine("PlayerSprite");
-        ////// 視野角の右端の描画
-        ////Gizmos.DrawRay(m_RayPoint.position, Quaternion.Euler(0, m_ViewAngle, 0) * forward);
-        ////// 視野角の左端の描画
-        ////Gizmos.DrawRay(m_RayPoint.position, Quaternion.Euler(0, -m_ViewAngle, 0) * forward);
-        //var color = Color.green;
-        //color.a = 0.2f;
-        //Gizmos.color = color;
-        ////DrawObjLine(m_MovePoints[m_CurrentMovePoint].name);
-        //var pos = m_SmallTrap.transform.position;
-        //Gizmos.DrawSphere(pos, 1.0f);
+    //    //DrawObjLine("PlayerSprite");
+    //    ////// 視野角の右端の描画
+    //    ////Gizmos.DrawRay(m_RayPoint.position, Quaternion.Euler(0, m_ViewAngle, 0) * forward);
+    //    ////// 視野角の左端の描画
+    //    ////Gizmos.DrawRay(m_RayPoint.position, Quaternion.Euler(0, -m_ViewAngle, 0) * forward);
+    //    //var color = Color.green;
+    //    //color.a = 0.2f;
+    //    //Gizmos.color = color;
+    //    ////DrawObjLine(m_MovePoints[m_CurrentMovePoint].name);
+    //    //var pos = m_SmallTrap.transform.position;
+    //    //Gizmos.DrawSphere(pos, 1.0f);
 
-        //// 移動の描画
-        //for(int i = 0; i != m_MovePoints.Length; i++)
-        //{
-        //    Gizmos.DrawLine(
-        //        m_MovePoints[i].transform.position, 
-        //        m_MovePoints[(i + 1) % m_MovePoints.Length].transform.position
-        //        );
-        //}
-    }
+    //    //// 移動の描画
+    //    //for(int i = 0; i != m_MovePoints.Length; i++)
+    //    //{
+    //    //    Gizmos.DrawLine(
+    //    //        m_MovePoints[i].transform.position, 
+    //    //        m_MovePoints[(i + 1) % m_MovePoints.Length].transform.position
+    //    //        );
+    //    //}
+    //}
 
     protected virtual void DrawGizmos()
     {
@@ -2130,7 +2131,7 @@ public class Enemy3D : MonoBehaviour
         SerializedProperty ReRageTime;
         SerializedProperty ViewLength;
         SerializedProperty ViewAngle;
-        SerializedProperty GroundPoint;
+        //SerializedProperty GroundPoint;
         SerializedProperty RayPoint;
         SerializedProperty MouthPoint;
         SerializedProperty MovePoints;
@@ -2162,7 +2163,7 @@ public class Enemy3D : MonoBehaviour
             ReRageTime = serializedObject.FindProperty("m_ReRageTime");
             ViewLength = serializedObject.FindProperty("m_ViewLength");
             ViewAngle = serializedObject.FindProperty("m_ViewAngle");
-            GroundPoint = serializedObject.FindProperty("m_GroundPoint");
+            //GroundPoint = serializedObject.FindProperty("m_GroundPoint");
             RayPoint = serializedObject.FindProperty("m_RayPoint");
             MovePoints = serializedObject.FindProperty("m_MovePoints");
             MouthPoint = serializedObject.FindProperty("m_MouthPoint");
@@ -2216,7 +2217,7 @@ public class Enemy3D : MonoBehaviour
             EditorGUILayout.Space();
             EditorGUILayout.LabelField("〇各種オブジェクトの位置ベクトル");
             // Transform
-            GroundPoint.objectReferenceValue = EditorGUILayout.ObjectField("接地ポイント", enemy.m_GroundPoint, typeof(Transform), true);
+            //GroundPoint.objectReferenceValue = EditorGUILayout.ObjectField("接地ポイント", enemy.m_GroundPoint, typeof(Transform), true);
             RayPoint.objectReferenceValue = EditorGUILayout.ObjectField("レイポイント", enemy.m_RayPoint, typeof(Transform), true);
             MouthPoint.objectReferenceValue = EditorGUILayout.ObjectField("口ポイント", enemy.m_MouthPoint, typeof(Transform), true);
             // 配列

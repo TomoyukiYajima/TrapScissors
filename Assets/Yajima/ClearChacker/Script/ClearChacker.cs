@@ -11,6 +11,12 @@ public class ClearChacker : MonoBehaviour
     #region シリアライズ変数
     [SerializeField]
     private GameObject m_ChackBox;      // チェックボックス
+    [SerializeField]
+    protected bool m_IsChangeToggle;
+    [SerializeField]
+    protected bool m_IsEnd;
+    [SerializeField]
+    protected string m_AddText;        // 動物スクリプト
     #endregion
 
     protected Toggle m_Toggle;            // トグル
@@ -44,10 +50,16 @@ public class ClearChacker : MonoBehaviour
     public class ClearChackerEditor : Editor
     {
         SerializedProperty ChackBox;
+        SerializedProperty IsChangeToggle;
+        SerializedProperty IsEnd;
+        SerializedProperty AddText;
 
         public void OnEnable()
         {
             ChackBox = serializedObject.FindProperty("m_ChackBox");
+            IsChangeToggle = serializedObject.FindProperty("m_IsChangeToggle");
+            IsEnd = serializedObject.FindProperty("m_IsEnd");
+            AddText = serializedObject.FindProperty("m_AddText");
 
             OnChildEnable();
         }
@@ -63,6 +75,11 @@ public class ClearChacker : MonoBehaviour
 
             EditorGUILayout.LabelField("〇クリアチェッカーの設定");
             ChackBox.objectReferenceValue = EditorGUILayout.ObjectField("チェックボックス", chacker.m_ChackBox, typeof(GameObject), true);
+            // bool
+            IsChangeToggle.boolValue = EditorGUILayout.Toggle("トグル変更をおこなうか", chacker.m_IsChangeToggle);
+            IsEnd.boolValue = EditorGUILayout.Toggle("終了処置をおこなうか", chacker.m_IsEnd);
+
+            AddText.stringValue = EditorGUILayout.TextField("表示する追加テキストファイル名", chacker.m_AddText);
 
             EditorGUILayout.Space();
 

@@ -8,12 +8,12 @@ using UnityEditor;
 public class AnimalFoodEatClearChacker : ClearChacker
 {
     #region シリアライズ変数
-    [SerializeField]
-    private bool m_IsChangeToggle;
-    [SerializeField]
-    private bool m_IsEnd;
-    [SerializeField]
-    private string m_AddText;        // 動物スクリプト
+    //[SerializeField]
+    //private bool m_IsChangeToggle;
+    //[SerializeField]
+    //private bool m_IsEnd;
+    //[SerializeField]
+    //private string m_AddText;        // 動物スクリプト
     [SerializeField]
     private GameObject m_Animal;    // 動物オブジェクト
     [SerializeField]
@@ -75,17 +75,17 @@ public class AnimalFoodEatClearChacker : ClearChacker
     [CanEditMultipleObjects]
     public class AnimalFoodEatClearChackerEditor : ClearChackerEditor
     {
-        SerializedProperty IsChangeToggle;
-        SerializedProperty IsEnd;
-        SerializedProperty AddText;
+        //SerializedProperty IsChangeToggle;
+        //SerializedProperty IsEnd;
+        //SerializedProperty AddText;
         SerializedProperty Animal;
         SerializedProperty AnimalCreate;
 
         protected override void OnChildEnable()
         {
-            IsChangeToggle = serializedObject.FindProperty("m_IsChangeToggle");
-            IsEnd = serializedObject.FindProperty("m_IsEnd");
-            AddText = serializedObject.FindProperty("m_AddText");
+            //IsChangeToggle = serializedObject.FindProperty("m_IsChangeToggle");
+            //IsEnd = serializedObject.FindProperty("m_IsEnd");
+            //AddText = serializedObject.FindProperty("m_AddText");
             Animal = serializedObject.FindProperty("m_Animal");
             AnimalCreate = serializedObject.FindProperty("m_AnimalCreate");
         }
@@ -95,13 +95,13 @@ public class AnimalFoodEatClearChacker : ClearChacker
             AnimalFoodEatClearChacker chacker = target as AnimalFoodEatClearChacker;
 
             EditorGUILayout.LabelField("〇動物クリアチェッカーの設定");
-            // bool
-            IsChangeToggle.boolValue = EditorGUILayout.Toggle("トグル変更をおこなうか", chacker.m_IsChangeToggle);
-            IsEnd.boolValue = EditorGUILayout.Toggle("終了処置をおこなうか", chacker.m_IsEnd);
+            //// bool
+            //IsChangeToggle.boolValue = EditorGUILayout.Toggle("トグル変更をおこなうか", chacker.m_IsChangeToggle);
+            //IsEnd.boolValue = EditorGUILayout.Toggle("終了処置をおこなうか", chacker.m_IsEnd);
 
-            AddText.stringValue = EditorGUILayout.TextField("表示する追加テキストファイル名", chacker.m_AddText);
-            Animal.objectReferenceValue = EditorGUILayout.ObjectField("動物オブジェクト", chacker.m_Animal, typeof(GameObject), true);
-            AnimalCreate.objectReferenceValue = EditorGUILayout.ObjectField("オオカミ生成オブジェクト", chacker.m_AnimalCreate, typeof(GameObject), true);
+            //AddText.stringValue = EditorGUILayout.TextField("表示する追加テキストファイル名", chacker.m_AddText);
+            Animal.objectReferenceValue = EditorGUILayout.ObjectField("参照する動物", chacker.m_Animal, typeof(GameObject), true);
+            AnimalCreate.objectReferenceValue = EditorGUILayout.ObjectField("生成する動物", chacker.m_AnimalCreate, typeof(GameObject), true);
         }
     }
 #endif

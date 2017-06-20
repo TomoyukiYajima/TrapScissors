@@ -10,8 +10,20 @@ public class RayCircularSector : MonoBehaviour {
     private int m_TriangleCount = 5;        // 生成する三角形の数
     private MeshFilter m_MeshFilter;        // 編集するメッシュ
 
+    private Vector3 m_ParentLossyScale;
+    //private Vector3 m_LocalScale;
+
     // Use this for initialization
     void Start () {
+        m_ParentLossyScale = this.transform.parent.lossyScale;
+        var localScale = this.transform.localScale;
+        this.transform.localScale = 
+            new Vector3(
+            localScale.x / m_ParentLossyScale.x,
+            localScale.y / m_ParentLossyScale.y,
+            localScale.z / m_ParentLossyScale.z
+            );
+
         // 
         var obj = this.transform.parent.parent;
         var animal = obj.GetComponent<Enemy3D>();
@@ -29,8 +41,6 @@ public class RayCircularSector : MonoBehaviour {
         // メッシュの生成
         m_MeshFilter = m_MeshObject.GetComponent<MeshFilter>();
         m_MeshFilter.mesh = CreateSolidArcMesh();
-
-        //this.transform.localScale = this.transform.lossyScale;
     }
 
     // Update is called once per frame
@@ -96,7 +106,7 @@ public class RayCircularSector : MonoBehaviour {
             float x = Mathf.Cos(rad + angle + addRad);
             float z = Mathf.Sin(rad + angle + addRad);
             // 二次元の頂点を設定する
-            var vec = new Vector3(x * m_Radius * 2, 0.0f, z * m_Radius * 2);
+            var vec = new Vector3(x * m_Radius, 0.0f, z * m_Radius);
 
             var point = vec + this.transform.position;
             // レイポイントからオブジェクトの位置までのレイを伸ばす
@@ -110,8 +120,8 @@ public class RayCircularSector : MonoBehaviour {
                 if (hitInfo.distance < m_Radius)
                 {
                     vec = new Vector3(
-                    x * (hitInfo.distance * 2),
-                    0.0f, z * (hitInfo.distance * 2));
+                    x * (hitInfo.distance),
+                    0.0f, z * (hitInfo.distance));
                 }
             }
             vertices[i + 1] = vec;

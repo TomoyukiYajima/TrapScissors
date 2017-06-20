@@ -25,7 +25,13 @@ public class AnimalClearChacker : ClearChacker
     public override void Update()
     {
         // 動物がトラバサミにかかったら、チュートリアルクリア
-        if (m_Enemy.IsTrapHit()) TutorialClear();
+        if (m_Enemy.IsTrapHit())
+        {
+            if (TutorialMediator.GetInstance().IsTextDrawEnd())
+            {
+                TutorialClear();
+            }
+        }
     }
 
     #region シリアライズ変更
