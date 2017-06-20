@@ -29,6 +29,8 @@ public class RayCircularSector : MonoBehaviour {
         // メッシュの生成
         m_MeshFilter = m_MeshObject.GetComponent<MeshFilter>();
         m_MeshFilter.mesh = CreateSolidArcMesh();
+
+        //this.transform.localScale = this.transform.lossyScale;
     }
 
     // Update is called once per frame

@@ -58,7 +58,7 @@ public class AnimalFoodEatClearChacker : ClearChacker
         //if (m_Enemy.IsTrapHit()) TutorialClear();
         if(m_Enemy.IsEatFood())
         {
-            TutorialMediator.GetInstance().NextDrawText("_" + m_AddText);
+            TutorialMediator.GetInstance().NextDrawText(m_AddText);
             m_IsDraw = true;
             // チェックボックスをオンにする
             if (m_IsChangeToggle) m_Toggle.isOn = true;
