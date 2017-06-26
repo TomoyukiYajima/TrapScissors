@@ -45,6 +45,8 @@ public class PlayerAction : MonoBehaviour
     Animator m_Animetor;
     NavMeshPlayer m_NavMeshPlayer;
     public float setCount;
+    private float foodCount;
+    private float trapCount; 
     private bool setTrap = false;
 
     [SerializeField]
@@ -74,10 +76,31 @@ public class PlayerAction : MonoBehaviour
 
         if (m_NavMeshPlayer._AState == NavMeshPlayer.AnimationState.Set)
         {
-            //setCount++;
+            //m_NavMeshPlayer.move
             setCount += 1 * Time.deltaTime;
         }
+        if (m_NavMeshPlayer._AState == NavMeshPlayer.AnimationState.Food)
+        {
+            //m_NavMeshPlayer.move
+            foodCount += 1 * Time.deltaTime;
 
+            if(foodCount >= 2.2f)
+            {
+                m_NavMeshPlayer._AState = NavMeshPlayer.AnimationState.Idle;
+                foodCount = 0;
+            }
+        }
+
+        //餌をまく
+        if (Input.GetButtonDown("Food") && m_NavMeshPlayer._AState != NavMeshPlayer.AnimationState.Set && m_NavMeshPlayer._AState != NavMeshPlayer.AnimationState.Food)
+        {
+            if (_foodUIMove.FoodCountCheck(_foodNumber) > 0)
+            {
+                m_NavMeshPlayer._AState = NavMeshPlayer.AnimationState.Food;
+                m_Animetor.CrossFade("Set", 0.1f, -1);
+            }
+            FoodCheck();
+        }
 
         if (GameManager.gameManager.GameStateCheck() == GameManager.GameState.PLAY)
         {
@@ -88,60 +111,63 @@ public class PlayerAction : MonoBehaviour
         GameObject traps = GameObject.Find("Traps");
         if (traps != null)
         {
-            if (setCount > 3.7f && setTrap != true)
+            if (setCount > 1.3f && setTrap != false)
             {
-                setTrap = true;
+                if (setTrap != false)
+                {
+                    setTrap = false;
 
-                Vector3 pos = new Vector3(this.transform.position.x,
-                           this.transform.position.y - 0.5f,
-                           this.transform.position.z);
+                    Vector3 pos = new Vector3(this.transform.position.x,
+                               this.transform.position.y - 0.5f,
+                               this.transform.position.z);
 
-                Instantiate(
-                    _trapObje, pos,
-                    traps.transform.rotation, traps.transform
-                    );
+                    Instantiate(
+                        _trapObje, pos,
+                        traps.transform.rotation, traps.transform
+                        );
+                }
             }
-
-            //_onTrapFlag = true;
-
         }
+        //else if (_onTrapFlag == true && Input.GetButtonDown("Trap"))
+        //{
+        //    if (m_NavMeshPlayer._AState != NavMeshPlayer.AnimationState.Set)
+        //    {
+        //        m_NavMeshPlayer._AState = NavMeshPlayer.AnimationState.Set;
+        //        m_Animetor.CrossFade("Set", 0.1f, -1);
+        //    }
+        //    if(setCount > 1.3f)
+        //    {
+        //        Destroy(_recovery);
+        //        _onTrapFlag = false;
+        //    }
 
+        //    _trapCount--;
+        //}
 
-
-
-        if (setCount >= 4.7)
+        if (setCount >= 2.2f)
         {
             m_NavMeshPlayer._AState = NavMeshPlayer.AnimationState.Idle;
             setCount = 0;
-            //setTrap = false;
         }
     }
 
     //プレイヤーのボタン操作
     void Action()
     {
-        //// チュートリアル時のアクション
-        //int actionCount = 10;
-        //var mediator = TutorialMediator.GetInstance();
-        //if (mediator != null) actionCount = mediator.ActionCount;
-
         //トラップの設置、回収
         if (Input.GetButtonDown("Trap") && m_NavMeshPlayer._AState != NavMeshPlayer.AnimationState.Set)
         {
             if (_onTrapFlag == false && _trapCount < _trapMax)
             {
-                if(setTrap == true)
+                if(setTrap != true)
                 {
-                    setTrap = false;
+                    setTrap = true;
                 }
                 if (m_NavMeshPlayer._AState != NavMeshPlayer.AnimationState.Set)
                 {
                     m_NavMeshPlayer._AState = NavMeshPlayer.AnimationState.Set;
                     m_Animetor.CrossFade("Set", 0.1f, -1);
-
-                    print("罠を設置");
                 }
-
                 _trapCount++;
             }
             else if (_onTrapFlag == true)
@@ -153,7 +179,6 @@ public class PlayerAction : MonoBehaviour
                 {
                     m_NavMeshPlayer._AState = NavMeshPlayer.AnimationState.Set;
                     m_Animetor.CrossFade("Set", 0.1f, -1);
-                    print("罠を撤去");
                 }
 
                 _trapCount--;
@@ -161,13 +186,17 @@ public class PlayerAction : MonoBehaviour
         }
 
 
-        //餌をまく
-        if (Input.GetButtonDown("Food") && m_NavMeshPlayer._AState != NavMeshPlayer.AnimationState.Set)
-        {
-            m_Animetor.CrossFade("Set", 0.1f, -1);
-            m_NavMeshPlayer._AState = NavMeshPlayer.AnimationState.Set;
-            FoodCheck();
-        }
+        ////餌をまく
+        //if (Input.GetButtonDown("Food"))
+        //{
+
+        //    if (_foodUIMove.FoodCountCheck(_foodNumber) > 0)
+        //    {
+        //        m_Animetor.CrossFade("Set", 0.1f, -1);
+        //        m_NavMeshPlayer._AState = NavMeshPlayer.AnimationState.Set;
+        //    }
+        //    FoodCheck();
+        //}
 
         //音を鳴らす
         if (Input.GetButtonDown("Whistle"))
@@ -268,4 +297,10 @@ public class PlayerAction : MonoBehaviour
             else if (_onFoodFlag == false) _recovery = null;
         }
     }
+
+    //IEnumerator A()
+    //{
+
+    //    yield return null;
+    //}
 }

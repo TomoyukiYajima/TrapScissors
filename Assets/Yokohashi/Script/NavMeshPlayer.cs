@@ -9,6 +9,7 @@ public class NavMeshPlayer : MonoBehaviour {
         Idle,
         Move,
         Set,
+        Food,
         Down
     }
 
@@ -18,6 +19,7 @@ public class NavMeshPlayer : MonoBehaviour {
     public GameObject _mainCamera;
     public GameObject _gameOver;
 
+    public Vector3 move;
     public float playerSpeed = 5; 
     NavMeshAgent agent;
     private GameObject _targetAnimal;
@@ -41,18 +43,35 @@ public class NavMeshPlayer : MonoBehaviour {
 	// Update is called once per frame
 	void Update () {
 
-        if (GameManager.gameManager.GameStateCheck() != GameManager.GameState.PLAY || _mainCamera.GetComponent<CameraMove>().LockCheck() == true || _AState == AnimationState.Set) return;
-        Vector3 move = (Vector3.forward - Vector3.right)* Input.GetAxis("Vertical") + (Vector3.right + Vector3.forward)* Input.GetAxis("Horizontal");
+        if (GameManager.gameManager.GameStateCheck() != GameManager.GameState.PLAY || _mainCamera.GetComponent<CameraMove>().LockCheck() == true || _AState == AnimationState.Set || _AState == AnimationState.Food) return;
+        move = (Vector3.forward - Vector3.right)* Input.GetAxis("Vertical") + (Vector3.right + Vector3.forward)* Input.GetAxis("Horizontal");
         agent.Move(move * Time.deltaTime * playerSpeed);
 
-        //print("agent" + move.magnitude);
+        //Vector3 move = (Vector3.forward - Vector3.right) * Input.GetAxis("Vertical") + (Vector3.right + Vector3.forward) * Input.GetAxis("Horizontal");
+        //agent.Move(move * Time.deltaTime * playerSpeed);
+
+
+        if (_AState == AnimationState.Set)
+        {
+            move.x = 0;
+            move.y = 0;
+            move.z = 0;
+        }
 
         m_Animator.SetFloat("Move", move.magnitude);
 
         move.y = 0;
         if(move.magnitude > 0)
         {
+            if (_AState == AnimationState.Idle)
+            {
+                _AState = AnimationState.Move;
+            }
             transform.rotation = Quaternion.LookRotation(move);
+        }
+        else
+        {
+            _AState = AnimationState.Idle;    
         }
 
         //ビルボード
