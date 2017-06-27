@@ -1,11 +1,15 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class GameStart : MonoBehaviour {
+public class GameStart : MonoBehaviour
+{
+    [SerializeField]
+    private GameObject _mainCamera;
 
 	// Use this for initialization
-	void Start () {
-	
+	void Start ()
+    {
+        if (_mainCamera == null) _mainCamera = GameObject.Find("Main Camera");
 	}
 	
 	// Update is called once per frame
@@ -15,6 +19,7 @@ public class GameStart : MonoBehaviour {
             if (Input.GetButtonDown("Submit"))
             {
                 GameManager.gameManager.GameStateSet(GameManager.GameState.PLAY);
+                _mainCamera.GetComponent<CameraMove>()._modeSkipFlag = true;
             }
         }
 	}

@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
+using System.Collections.Generic;
 
 public class CameraMove : MonoBehaviour
 {
@@ -9,11 +10,20 @@ public class CameraMove : MonoBehaviour
     private Vector3 _offset_Move = Vector3.zero;
     [SerializeField, TooltipAttribute("スムーズに追いかけるかどうか")]
     private bool _lerpFrag;
-    [SerializeField, TooltipAttribute("追尾させるかどうか")]
-    private bool _moveFrag;
+    #endregion
+    #region ゲーム開始時にステージを見渡すときに使用する変数
+    [System.NonSerialized]
+    public bool _openingMoveflag;
+    [SerializeField]
+    private Vector3 _cameraPosition;
+    [SerializeField]
+    private List<Vector3> _movePoint = new List<Vector3>();
+    [SerializeField]
+    private List<float> _moveTime = new List<float>();
+    [System.NonSerialized]
+    public bool _modeSkipFlag;
     #endregion
     #region カメラだけで動くときに使用する変数
-    //プレイヤーの移動を固定して、カメラで全体を見渡せるようにする
     [SerializeField]
     private bool _playerMoveLock;   //動ける状態かどうかのフラグ
     private Vector3 _playerReturnPos;
@@ -29,24 +39,28 @@ public class CameraMove : MonoBehaviour
 
     void Start()
     {
+        _modeSkipFlag = false;
         _player = GameObject.FindGameObjectWithTag("Player");
-        _offset = transform.position - _player.transform.position;
-        _offset_Move = transform.localPosition - _player.transform.localPosition;
+        _offset = _cameraPosition - _player.transform.position;
+        _offset_Move = _cameraPosition - _player.transform.localPosition;
+        //独立して動くときの移動できる範囲を計算
         _clampX_max = GameManager.gameManager.ClampX_MAX() + _offset_Move.x;
         _clampX_min = GameManager.gameManager.ClampX_MIN() + _offset_Move.x;
         _clampZ_max = GameManager.gameManager.ClampZ_MAX() + _offset_Move.z;
         _clampZ_min = GameManager.gameManager.ClampZ_MIN() + _offset_Move.z;
+        
         _playerMoveLock = false;
+        _openingMoveflag = true;
+        StartCoroutine(OpningExpansion());
+
     }
 
     void LateUpdate()
     {
         newPosition = transform.position;
         //プレイヤーと一緒に動く
-        if (_playerMoveLock == false)
+        if (_playerMoveLock == false && _openingMoveflag == false)
         {
-            if (_moveFrag == false) return;
-
             newPosition.x = _player.transform.position.x + _offset.x;
             newPosition.y = _player.transform.position.y + _offset.y;
             newPosition.z = _player.transform.position.z + _offset.z;
@@ -59,8 +73,10 @@ public class CameraMove : MonoBehaviour
 
     void Update()
     {
-
-        if (_playerMoveLock == true || GameManager.gameManager.GameStateCheck() == GameManager.GameState.START)
+        //ポーズ中は、カメラは何も変わらないようにする
+        if (GameManager.gameManager.GameStateCheck() == GameManager.GameState.PAUSE) return;
+        //ロック中はカメラだけで自由に移動できるようにする
+        if (_playerMoveLock == true)
         {
             newPosition = transform.position;
             _moveDirection = (Vector3.forward - Vector3.right) * Input.GetAxis("Vertical") + (Vector3.forward + Vector3.right) * Input.GetAxis("Horizontal");
@@ -70,24 +86,75 @@ public class CameraMove : MonoBehaviour
                                          Mathf.Clamp(newPosition.z, _clampZ_min, _clampZ_max));
         }
 
+        //スタート時は強制的にロックする
         if (GameManager.gameManager.GameStateCheck() == GameManager.GameState.START)
         {
             _playerMoveLock = true;
             return;
         }
 
+        //ロックする
         if (Input.GetAxis("Lock") >= 0.5f && _playerMoveLock == false)
         {
             _playerReturnPos = transform.position;
             _cameraMap.SetActive(true);
             _playerMoveLock = true;
         }
+        //ロックを外す
         else if(Input.GetAxis("Lock") < 0.5f && _playerMoveLock == true)
         {
+            print(_playerReturnPos);
             transform.position = _playerReturnPos;
             _cameraMap.SetActive(false);
             _playerMoveLock = false;
         }
+    }
+
+    /// <summary>
+    /// ゲーム開始時に拡大していく
+    /// </summary>
+    IEnumerator OpningExpansion()
+    {
+        float _size = this.GetComponent<Camera>().orthographicSize;
+        while (_size > 7 && _modeSkipFlag == false)
+        {
+            _size -= 4;
+            this.GetComponent<Camera>().orthographicSize = _size;
+            yield return null;
+        }
+        if(_size != 7)
+        {
+            _size = 7;
+            this.GetComponent<Camera>().orthographicSize = _size;
+        }
+        OpningMove(0);
+
+    }
+
+    /// <summary>
+    /// ゲーム開始時に動く
+    /// </summary>
+    /// <param name="num"></param>
+    void OpningMove(int num)
+    {
+        if(_modeSkipFlag == true)
+        {
+            _openingMoveflag = false;
+            return;
+        }
+        if (_openingMoveflag != true) return;
+        LeanTween.move(gameObject, _movePoint[num], _moveTime[num])
+            .setOnComplete(() =>
+            {
+                num++;
+                if (num >= _movePoint.Count)
+                {
+                    num = 0;
+                    _openingMoveflag = false;
+                    return;
+                }
+                OpningMove(num);
+            });
     }
 
     /// <summary>
@@ -98,21 +165,20 @@ public class CameraMove : MonoBehaviour
     {
         _lerpFrag = frag;
     }
-
+    
     /// <summary>
-    /// カメラを追尾させるかどうか(trueなら追尾させる、falseなら追尾させない)
+    /// プレイヤーに追尾しないで、カメラ単独で動ける状態かどうか調べる
     /// </summary>
-    /// <param name="frag">追尾させるかどうか</param>
-    public void MoveChenge(bool frag)
-    {
-        _moveFrag = frag;
-    }
-
+    /// <returns></returns>
     public bool LockCheck()
     {
         return _playerMoveLock;
     }
 
+    /// <summary>
+    /// カメラが単独で動くときの座標の取得
+    /// </summary>
+    /// <returns></returns>
     public Vector3 OffsetCheck()
     {
         return _offset_Move;

@@ -78,9 +78,4 @@ public class ClearTimeText : MonoBehaviour
         }
         _huntCountText.GetComponent<HuntCountText>().CountStart();
     }
-
-    void CountAdd()
-    {
-
-    }
 }
