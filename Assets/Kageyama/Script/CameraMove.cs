@@ -51,7 +51,7 @@ public class CameraMove : MonoBehaviour
         
         _playerMoveLock = false;
         _openingMoveflag = true;
-        StartCoroutine(OpningExpansion());
+        OpningMove(0);
 
     }
 
@@ -127,7 +127,7 @@ public class CameraMove : MonoBehaviour
             _size = 7;
             this.GetComponent<Camera>().orthographicSize = _size;
         }
-        OpningMove(0);
+        _openingMoveflag = false;
 
     }
 
@@ -150,7 +150,7 @@ public class CameraMove : MonoBehaviour
                 if (num >= _movePoint.Count)
                 {
                     num = 0;
-                    _openingMoveflag = false;
+                    StartCoroutine(OpningExpansion());
                     return;
                 }
                 OpningMove(num);
