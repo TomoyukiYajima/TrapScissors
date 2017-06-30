@@ -140,6 +140,7 @@ public class CameraMove : MonoBehaviour
         if(_modeSkipFlag == true)
         {
             _openingMoveflag = false;
+            StartCoroutine(OpningExpansion());
             return;
         }
         if (_openingMoveflag != true) return;
