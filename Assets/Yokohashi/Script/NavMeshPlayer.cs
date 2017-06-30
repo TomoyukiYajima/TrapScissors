@@ -50,14 +50,6 @@ public class NavMeshPlayer : MonoBehaviour {
         //Vector3 move = (Vector3.forward - Vector3.right) * Input.GetAxis("Vertical") + (Vector3.right + Vector3.forward) * Input.GetAxis("Horizontal");
         //agent.Move(move * Time.deltaTime * playerSpeed);
 
-
-        if (_AState == AnimationState.Set)
-        {
-            move.x = 0;
-            move.y = 0;
-            move.z = 0;
-        }
-
         m_Animator.SetFloat("Move", move.magnitude);
 
         move.y = 0;

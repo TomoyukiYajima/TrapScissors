@@ -42,11 +42,11 @@ public class PlayerAction : MonoBehaviour
     #endregion
 
 
-    Animator m_Animetor;
+    Animator m_Animator;
     NavMeshPlayer m_NavMeshPlayer;
-    public float setCount;
+    private float setCount;
     private float foodCount;
-    private float trapCount; 
+    public float setTime = 1f;
     private bool setTrap = false;
 
     [SerializeField]
@@ -55,11 +55,10 @@ public class PlayerAction : MonoBehaviour
     // Use this for initialization
     void Start()
     {
-        m_Animetor = GetComponent<Animator>();
+        m_Animator = GetComponent<Animator>();
         m_NavMeshPlayer = transform.parent.GetComponent<NavMeshPlayer>();
 
         _onTrapFlag = false;
-        _foodNumber = 0;
         _trapMax = GameManager.gameManager.TrapNumber();
         _foodMax = GameManager.gameManager.FoodNumber();
         _foodUIMove = _foodUI.GetComponent<FoodUIMove>();
@@ -74,6 +73,9 @@ public class PlayerAction : MonoBehaviour
         //大型トラップが何かを捕まえた、もしくはゲームが終了していたらアクションをできないようにする
         if (_trap.FlgTarget() == true || GameManager.gameManager.GameStateCheck() == GameManager.GameState.END) return;
 
+        //print("set" + setCount);
+        //print("food" + foodCount);
+
         if (m_NavMeshPlayer._AState == NavMeshPlayer.AnimationState.Set)
         {
             //m_NavMeshPlayer.move
@@ -83,125 +85,62 @@ public class PlayerAction : MonoBehaviour
         {
             //m_NavMeshPlayer.move
             foodCount += 1 * Time.deltaTime;
-
-            if(foodCount >= 2.2f)
-            {
-                m_NavMeshPlayer._AState = NavMeshPlayer.AnimationState.Idle;
-                foodCount = 0;
-            }
         }
 
-        //餌をまく
-        if (Input.GetButtonDown("Food") && m_NavMeshPlayer._AState != NavMeshPlayer.AnimationState.Set && m_NavMeshPlayer._AState != NavMeshPlayer.AnimationState.Food)
-        {
-            if (_foodUIMove.FoodCountCheck(_foodNumber) > 0)
-            {
-                m_NavMeshPlayer._AState = NavMeshPlayer.AnimationState.Food;
-                m_Animetor.CrossFade("Set", 0.1f, -1);
-            }
-            FoodCheck();
-        }
-
-        if (GameManager.gameManager.GameStateCheck() == GameManager.GameState.PLAY)
+        if (GameManager.gameManager.GameStateCheck() == GameManager.GameState.PLAY && setCount == 0.0f && foodCount == 0.0f)
         {
             Action();
         }
 
-        // 生成カウントに加算
-        GameObject traps = GameObject.Find("Traps");
-        if (traps != null)
-        {
-            if (setCount > 1.3f && setTrap != false)
-            {
-                if (setTrap != false)
-                {
-                    setTrap = false;
-
-                    Vector3 pos = new Vector3(this.transform.position.x,
-                               this.transform.position.y - 0.5f,
-                               this.transform.position.z);
-
-                    Instantiate(
-                        _trapObje, pos,
-                        traps.transform.rotation, traps.transform
-                        );
-                }
-            }
-        }
-        //else if (_onTrapFlag == true && Input.GetButtonDown("Trap"))
-        //{
-        //    if (m_NavMeshPlayer._AState != NavMeshPlayer.AnimationState.Set)
-        //    {
-        //        m_NavMeshPlayer._AState = NavMeshPlayer.AnimationState.Set;
-        //        m_Animetor.CrossFade("Set", 0.1f, -1);
-        //    }
-        //    if(setCount > 1.3f)
-        //    {
-        //        Destroy(_recovery);
-        //        _onTrapFlag = false;
-        //    }
-
-        //    _trapCount--;
-        //}
-
-        if (setCount >= 2.2f)
+        if (setCount >= 1.3f)
         {
             m_NavMeshPlayer._AState = NavMeshPlayer.AnimationState.Idle;
             setCount = 0;
+        }
+        if (foodCount >= 1.3f)
+        {
+            m_NavMeshPlayer._AState = NavMeshPlayer.AnimationState.Idle;
+            foodCount = 0;
         }
     }
 
     //プレイヤーのボタン操作
     void Action()
     {
+
         //トラップの設置、回収
-        if (Input.GetButtonDown("Trap") && m_NavMeshPlayer._AState != NavMeshPlayer.AnimationState.Set)
+        if (Input.GetButtonDown("Trap") && m_NavMeshPlayer._AState != NavMeshPlayer.AnimationState.Set && m_NavMeshPlayer._AState != NavMeshPlayer.AnimationState.Food)
         {
-            if (_onTrapFlag == false && _trapCount < _trapMax)
+            if (setTrap != true)
             {
-                if(setTrap != true)
-                {
-                    setTrap = true;
-                }
-                if (m_NavMeshPlayer._AState != NavMeshPlayer.AnimationState.Set)
-                {
-                    m_NavMeshPlayer._AState = NavMeshPlayer.AnimationState.Set;
-                    m_Animetor.CrossFade("Set", 0.1f, -1);
-                }
-                _trapCount++;
+                setTrap = true;
             }
-            else if (_onTrapFlag == true)
+            if (m_NavMeshPlayer._AState != NavMeshPlayer.AnimationState.Set && _trapCount < _trapMax)
             {
-                Destroy(_recovery);
-                _onTrapFlag = false;
-
-                if (m_NavMeshPlayer._AState != NavMeshPlayer.AnimationState.Set)
-                {
-                    m_NavMeshPlayer._AState = NavMeshPlayer.AnimationState.Set;
-                    m_Animetor.CrossFade("Set", 0.1f, -1);
-                }
-
-                _trapCount--;
+                StartCoroutine(TrapIns(setTime));
+                SoundManger.Instance.PlaySE(9);
+                m_NavMeshPlayer._AState = NavMeshPlayer.AnimationState.Set;
+                m_Animator.CrossFade("Set", 0.1f, -1);
             }
         }
 
-
-        ////餌をまく
-        //if (Input.GetButtonDown("Food"))
-        //{
-
-        //    if (_foodUIMove.FoodCountCheck(_foodNumber) > 0)
-        //    {
-        //        m_Animetor.CrossFade("Set", 0.1f, -1);
-        //        m_NavMeshPlayer._AState = NavMeshPlayer.AnimationState.Set;
-        //    }
-        //    FoodCheck();
-        //}
+        //餌をまく
+        if (Input.GetButtonDown("Food") && m_NavMeshPlayer._AState != NavMeshPlayer.AnimationState.Set && m_NavMeshPlayer._AState != NavMeshPlayer.AnimationState.Food)
+        {
+            //今選んでいる餌を調べる
+            _foodNumber = _foodUIMove.SelectFoodNumber();
+            FoodCheck();
+            if (_foodUIMove.FoodCountCheck(_foodNumber) > 0)
+            {
+                m_Animator.CrossFade("Set", 0.1f, -1);
+                m_NavMeshPlayer._AState = NavMeshPlayer.AnimationState.Food;
+            }
+        }
 
         //音を鳴らす
         if (Input.GetButtonDown("Whistle"))
         {
-            SoundManger.Instance.PlaySE(0);
+            SoundManger.Instance.PlaySE(18);
             StartCoroutine(WhistleActive());
         }
 
@@ -215,32 +154,16 @@ public class PlayerAction : MonoBehaviour
     {
         if (_onFoodFlag == false)
         {
-            //今選んでいる餌を調べる
-            _foodNumber = _foodUIMove.SelectFoodNumber();
             //選んでいる餌が所持数0以下なら、何もしない
             if (_foodUIMove.FoodCountCheck(_foodNumber) <= 0) return;
-            _foodUIMove.FoodCountSub(_foodNumber);
 
-            Vector3 pos = new Vector3(this.transform.position.x,
-                                                           this.transform.position.y,
-                                                           this.transform.position.z);
-            //餌を生成
-            GameObject _foodObj = Instantiate(_food);
-            _foodObj.transform.localPosition = pos;
-            _foodObj.GetComponent<Food>().SelectFood(_foodNumber);
-            //撒かれた餌のカウント
-            GameManager.gameManager.FoodCountAdd();
-            _bear.GetComponent<BearEnemy>().CheckFood();
-            GameManager.gameManager.PutFoodAdd(_foodObj);
+            StartCoroutine(FoodIns(setTime));
 
         }
         else if (_onFoodFlag == true)
         {
             if (_foodUIMove.FoodCountCheck(_foodNumber) >= 5) return;
-            Destroy(_foodRecovery);
-            _onFoodFlag = false;
-            _foodUIMove.FoodCountAdd(_foodNumber);
-            GameManager.gameManager.FoodCountSub();
+            StartCoroutine(FoodDestroy(setTime));
         }
     }
 
@@ -298,9 +221,67 @@ public class PlayerAction : MonoBehaviour
         }
     }
 
-    //IEnumerator A()
-    //{
+    IEnumerator TrapIns(float time)
+    {
+        yield return new WaitForSecondsRealtime(time);
 
-    //    yield return null;
-    //}
+        GameObject traps = GameObject.Find("Traps");
+
+        if (_onTrapFlag == false && _trapCount < _trapMax)
+        {
+            Vector3 pos = new Vector3(this.transform.position.x,
+           this.transform.position.y - 0.5f,
+           this.transform.position.z);
+
+            Instantiate(
+                    _trapObje, pos,
+                    traps.transform.rotation, traps.transform
+                    );
+
+            _trapCount++;
+        }
+        else if (_onTrapFlag == true)
+        {
+            Destroy(_recovery);
+            _onTrapFlag = false;
+
+            if (m_NavMeshPlayer._AState != NavMeshPlayer.AnimationState.Set)
+            {
+                m_NavMeshPlayer._AState = NavMeshPlayer.AnimationState.Set;
+                m_Animator.CrossFade("Set", 0.1f, -1);
+            }
+
+            _trapCount--;
+        }
+
+    }
+
+
+    IEnumerator FoodIns(float time)
+    {
+        yield return new WaitForSecondsRealtime(time);
+
+        _foodUIMove.FoodCountSub(_foodNumber);
+
+        Vector3 pos = new Vector3(this.transform.position.x,
+                                 this.transform.position.y,
+                                 this.transform.position.z);
+        //餌を生成
+        GameObject _foodObj = Instantiate(_food);
+        _foodObj.transform.localPosition = pos;
+        _foodObj.GetComponent<Food>().SelectFood(_foodNumber);
+        SoundManger.Instance.PlaySE(8);
+        //撒かれた餌のカウント
+        GameManager.gameManager.FoodCountAdd();
+        _bear.GetComponent<BearEnemy>().CheckFood();
+        GameManager.gameManager.PutFoodAdd(_foodObj);
+    }
+    IEnumerator FoodDestroy(float time)
+    {
+        yield return new WaitForSecondsRealtime(time);
+        Destroy(_foodRecovery);
+        _onFoodFlag = false;
+        _foodUIMove.FoodCountAdd(_foodNumber);
+        GameManager.gameManager.FoodCountSub();
+    }
 }
