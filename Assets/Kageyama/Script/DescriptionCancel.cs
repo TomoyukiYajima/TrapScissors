@@ -16,6 +16,7 @@ public class DescriptionCancel : MonoBehaviour
     {
         if(Input.anyKeyDown)
         {
+            SoundManger.Instance.PlaySE(1);
             _eventSystem.GetComponent<EventSystem>().sendNavigationEvents = true; 
             this.gameObject.SetActive(false);
         }

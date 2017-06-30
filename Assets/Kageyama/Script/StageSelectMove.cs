@@ -18,6 +18,17 @@ public class StageSelectMove : MonoBehaviour
 	// Use this for initialization
 	void Start ()
     {
+        GameObject _stageCheck = GameObject.Find("OpenStage");
+        int _opennumber = _stageCheck.GetComponent<OpenStage>().OpenStageCheck();
+        if(_stageCheck != null)
+        {
+            for(int i = 0; i < _chilButton.Length; i++)
+            {
+                if(i > _opennumber) _chilButton[i].GetComponent<Button>().interactable = false;
+                else _chilButton[i].GetComponent<Button>().interactable = true;
+            }
+        }
+
         _positionNumber = 0;
         _myRect = this.GetComponent<RectTransform>();
         //ButtonSelect();

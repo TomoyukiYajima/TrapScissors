@@ -14,6 +14,7 @@ public class BackTitle : MonoBehaviour
     {
         if (Input.GetButtonDown("Trap"))
         {
+            SoundManger.Instance.PlaySE(1);
             SceneManagerScript.sceneManager.FadeOut("Title");
         }
     }
