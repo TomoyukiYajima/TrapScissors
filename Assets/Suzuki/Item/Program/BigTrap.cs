@@ -10,29 +10,26 @@ public class BigTrap : MonoBehaviour
         CAPTURE,    //動物を捕まえている状態
     }
     public TrapState _state;
+    public bool _Istutorial;
     [SerializeField, TooltipAttribute("Resultで表示されるオブジェクト")]
     private GameObject _result;
     private bool _flg;
-    #region 挟むときに必要な変数
-    //鋏んでいるオブジェクトを入れる
     [SerializeField]
     private GameObject _targetAnimal;
-    #endregion
+    private Animator _animator;
 
-    #region 火花が散るための変数
-    [SerializeField, TooltipAttribute("火花")]
     public GameObject _traphit;
-    //[SerializeField, TooltipAttribute("火花の位置")]
-    //public GameObject _HibanaIti;
-    #endregion
 
     // Use this for initialization
     void Start()
     {
+        _animator = GetComponent<Animator>();
         _targetAnimal = null;
         _state = TrapState.WAIT;
         _flg = false;
-        
+        _animator.SetBool("Close", false);
+        _Istutorial = false;
+
     }
     //当たっている最中も取得する当たり判定
     void OnTriggerEnter(Collider col)
@@ -43,12 +40,19 @@ public class BigTrap : MonoBehaviour
             animal.ChangeTrap(gameObject);
             ChengeState(TrapState.CAPTURE);
             _targetAnimal = col.gameObject;
+            Instantiate(_traphit, new Vector3(this.transform.position.x,
+                                             this.transform.position.y * -5f,
+                                             this.transform.position.z), Quaternion.identity);
+            _animator.SetBool("Close", true);
 
-            Instantiate(_traphit, this.transform.position, Quaternion.identity);
             _flg = true;
-            _result.SetActive(true);
+
             GameManager.gameManager.HuntCountAdd();
-            GameManager.gameManager.GameStateSet(GameManager.GameState.END);
+            if (_Istutorial == false)
+            {
+                _result.SetActive(true);
+                GameManager.gameManager.GameStateSet(GameManager.GameState.END);
+            }
         }
     }
 
@@ -60,5 +64,6 @@ public class BigTrap : MonoBehaviour
     {
         return _flg;
     }
+
 
 }
