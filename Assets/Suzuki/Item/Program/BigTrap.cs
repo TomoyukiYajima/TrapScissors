@@ -10,7 +10,8 @@ public class BigTrap : MonoBehaviour
         CAPTURE,    //動物を捕まえている状態
     }
     public TrapState _state;
-    public bool _Istutorial;
+    public bool _istutorial=false;
+    public int _stagenum;
     [SerializeField, TooltipAttribute("Resultで表示されるオブジェクト")]
     private GameObject _result;
     private bool _flg;
@@ -28,7 +29,6 @@ public class BigTrap : MonoBehaviour
         _state = TrapState.WAIT;
         _flg = false;
         _animator.SetBool("Close", false);
-        _Istutorial = false;
 
     }
     //当たっている最中も取得する当たり判定
@@ -40,19 +40,20 @@ public class BigTrap : MonoBehaviour
             animal.ChangeTrap(gameObject);
             ChengeState(TrapState.CAPTURE);
             _targetAnimal = col.gameObject;
-            Instantiate(_traphit, new Vector3(this.transform.position.x,
-                                             this.transform.position.y * -5f,
-                                             this.transform.position.z), Quaternion.identity);
+            Instantiate(_traphit,this.transform.position, Quaternion.identity);
             _animator.SetBool("Close", true);
 
             _flg = true;
 
             GameManager.gameManager.HuntCountAdd();
-            if (_Istutorial == false)
+            if (_istutorial == false)
             {
+                
                 _result.SetActive(true);
                 GameManager.gameManager.GameStateSet(GameManager.GameState.END);
             }
+            GameObject _openstage = GameObject.Find("OpenStage");
+            _openstage.GetComponent<OpenStage>().StageSet(_stagenum);
         }
     }
 
