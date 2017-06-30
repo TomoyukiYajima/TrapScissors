@@ -5,13 +5,25 @@ public class OpenStage : MonoBehaviour
 {
     //どのシーンまでクリアしたか保存する値
     private string _openStage = "OpenStage";
+    [SerializeField]
+    private bool _check, _reset;
 
     void Awake()
     {
+#if UNITY_EDITOR
+        if (_reset == true)
+        {
+            PlayerPrefs.SetInt(_openStage, 0);
+        }
+        else if (_check == true)
+        {
+            PlayerPrefs.SetInt(_openStage, 3);
+        }
+#endif
         //他に同じオブジェクトがあれば、自分を削除する
         if (GameObject.Find("OpenStage") != this.gameObject) Destroy(gameObject);
-        //クリアしたステージが0以下もしくは数字ではなけらば、0を保存する
-        if (PlayerPrefs.GetInt(_openStage) >= 0) PlayerPrefs.SetInt(_openStage, 0);
+        //クリアしたステージが0未満もしくは数字ではなけらば、0を保存する
+        if (PlayerPrefs.GetInt(_openStage) < 0) PlayerPrefs.SetInt(_openStage, 0);
     }
 
     void Start()
@@ -36,6 +48,7 @@ public class OpenStage : MonoBehaviour
     /// <returns></returns>
     public int OpenStageCheck()
     {
+        print(PlayerPrefs.GetInt(_openStage));
         return PlayerPrefs.GetInt(_openStage);
     }
 }
