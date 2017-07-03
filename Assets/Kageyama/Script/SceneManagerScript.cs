@@ -115,6 +115,7 @@ public class SceneManagerScript : MonoBehaviour
         //何かボタンを押して移動するなら下の処理を行う
         if (_anyButtonMove == true && Input.anyKeyDown)
         {
+            SoundManger.Instance.PlaySE(0);
             FadeOut(_anyButtonMoveName);
             return;
         }

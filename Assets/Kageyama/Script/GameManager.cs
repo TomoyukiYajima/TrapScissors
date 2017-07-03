@@ -120,6 +120,7 @@ public class GameManager : MonoBehaviour
         //ゲームを止める
         if (Input.GetButtonDown("Pause"))
         {
+            SoundManger.Instance.PlaySE(16);
             SceneManagerScript.sceneManager.FadeBlack();
             _gameState = GameState.PAUSE;
             _pauseUI.SetActive(true);
@@ -148,6 +149,7 @@ public class GameManager : MonoBehaviour
     public void Restart()
     {
         _pauseUI.SetActive(false);
+        SoundManger.Instance.PlaySE(17);
         SceneManagerScript.sceneManager.FadeWhite();
         _gameState = GameState.PLAY;
     }
