@@ -48,6 +48,8 @@ public class PlayerAction : MonoBehaviour
     private float foodCount;
     public float setTime = 1f;
     private bool setTrap = false;
+    // アクション制限
+    //private bool isTutorialAction = false;
 
     [SerializeField]
     private GameObject _bigTrap;
@@ -111,6 +113,8 @@ public class PlayerAction : MonoBehaviour
         //トラップの設置、回収
         if (Input.GetButtonDown("Trap") && m_NavMeshPlayer._AState != NavMeshPlayer.AnimationState.Set && m_NavMeshPlayer._AState != NavMeshPlayer.AnimationState.Food)
         {
+            // チュートリアルシーンでの特定のフィールド内で無ければ、アクションを行わない
+            if (TutorialMediator.GetInstance().IsTutorialAction(1, 2, 3, 4)) return;
             if (setTrap != true)
             {
                 setTrap = true;
@@ -127,6 +131,8 @@ public class PlayerAction : MonoBehaviour
         //餌をまく
         if (Input.GetButtonDown("Food") && m_NavMeshPlayer._AState != NavMeshPlayer.AnimationState.Set && m_NavMeshPlayer._AState != NavMeshPlayer.AnimationState.Food)
         {
+            // チュートリアルシーンでの特定のフィールド内で無ければ、アクションを行わない
+            if (TutorialMediator.GetInstance().IsTutorialAction(1, 2, 4)) return;
             //今選んでいる餌を調べる
             _foodNumber = _foodUIMove.SelectFoodNumber();
             FoodCheck();
@@ -140,6 +146,8 @@ public class PlayerAction : MonoBehaviour
         //音を鳴らす
         if (Input.GetButtonDown("Whistle"))
         {
+            // チュートリアルシーンでの特定のフィールド内で無ければ、アクションを行わない
+            if (TutorialMediator.GetInstance().IsTutorialAction(1, 2, 3)) return;
             SoundManger.Instance.PlaySE(18);
             StartCoroutine(WhistleActive());
         }
