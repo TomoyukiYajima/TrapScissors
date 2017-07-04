@@ -10,8 +10,9 @@ public class BigTrap : MonoBehaviour
         CAPTURE,    //動物を捕まえている状態
     }
     public TrapState _state;
-    public bool _istutorial=false;
-    public int _stagenum;
+    public bool _istutorial = false;
+    public int _stagenum=0;
+    public GameObject _traphit;
     [SerializeField, TooltipAttribute("Resultで表示されるオブジェクト")]
     private GameObject _result;
     private bool _flg;
@@ -19,7 +20,6 @@ public class BigTrap : MonoBehaviour
     private GameObject _targetAnimal;
     private Animator _animator;
 
-    public GameObject _traphit;
 
     // Use this for initialization
     void Start()
@@ -36,24 +36,27 @@ public class BigTrap : MonoBehaviour
     {
         if (col.tag == "LargeEnemy")
         {
+            SoundManger.Instance.PlaySE(10);
             Enemy3D animal = col.gameObject.GetComponent<Enemy3D>();
             animal.ChangeTrap(gameObject);
             ChengeState(TrapState.CAPTURE);
             _targetAnimal = col.gameObject;
-            Instantiate(_traphit,this.transform.position, Quaternion.identity);
+            Instantiate(_traphit, this.transform.position, Quaternion.identity);
             _animator.SetBool("Close", true);
-
             _flg = true;
-
+            _animator.CrossFade("Hit", 0.1f, -1);
+            //this.gameObject.transform.localScale = new Vector3(5,5,5);
             GameManager.gameManager.HuntCountAdd();
             if (_istutorial == false)
             {
-                
                 _result.SetActive(true);
                 GameManager.gameManager.GameStateSet(GameManager.GameState.END);
             }
-            GameObject _openstage = GameObject.Find("OpenStage");
-            _openstage.GetComponent<OpenStage>().StageSet(_stagenum);
+            if (_stagenum == null)
+            {
+                GameObject _openstage = GameObject.Find("OpenStage");
+                _openstage.GetComponent<OpenStage>().StageSet(_stagenum);
+            }
         }
     }
 
@@ -68,3 +71,4 @@ public class BigTrap : MonoBehaviour
 
 
 }
+//効果音素材：ポケットサウンド – http://pocket-se.info/
