@@ -15,13 +15,11 @@ public class BigTrap : MonoBehaviour
     public GameObject _traphit;
     [SerializeField, TooltipAttribute("Resultで表示されるオブジェクト")]
     private GameObject _result;
-    private bool _flg;
     [SerializeField]
     private GameObject _targetAnimal;
+    private bool _flg;
     private Animator _animator;
 
-
-    // Use this for initialization
     void Start()
     {
         _animator = GetComponent<Animator>();
@@ -29,7 +27,6 @@ public class BigTrap : MonoBehaviour
         _state = TrapState.WAIT;
         _flg = false;
         _animator.SetBool("Close", false);
-
     }
     //当たっている最中も取得する当たり判定
     void OnTriggerEnter(Collider col)
@@ -45,7 +42,6 @@ public class BigTrap : MonoBehaviour
             _animator.SetBool("Close", true);
             _flg = true;
             _animator.CrossFade("Hit", 0.1f, -1);
-            //this.gameObject.transform.localScale = new Vector3(5,5,5);
             GameManager.gameManager.HuntCountAdd();
             if (_istutorial == false)
             {
@@ -59,7 +55,6 @@ public class BigTrap : MonoBehaviour
             }
         }
     }
-
     public void ChengeState(TrapState state)
     {
         _state = state;
@@ -68,7 +63,5 @@ public class BigTrap : MonoBehaviour
     {
         return _flg;
     }
-
-
 }
 //効果音素材：ポケットサウンド – http://pocket-se.info/
