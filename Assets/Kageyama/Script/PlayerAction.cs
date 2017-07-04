@@ -172,6 +172,7 @@ public class PlayerAction : MonoBehaviour
         else if (_onFoodFlag == true)
         {
             if (_foodUIMove.FoodCountCheck(_foodNumber) >= 5) return;
+            _foodUIMove.FoodCountAdd(_foodNumber);
             StartCoroutine(FoodDestroy(setTime));
         }
     }
@@ -290,7 +291,7 @@ public class PlayerAction : MonoBehaviour
         yield return new WaitForSecondsRealtime(time);
         Destroy(_foodRecovery);
         _onFoodFlag = false;
-        _foodUIMove.FoodCountAdd(_foodNumber);
+        //_foodUIMove.FoodCountAdd(_foodNumber);
         GameManager.gameManager.FoodCountSub();
     }
 }
