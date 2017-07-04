@@ -9,7 +9,10 @@ public class TutorialStage : MonoBehaviour {
 
     #region シリアライズ変数
     [SerializeField]
-    private GameObject m_TextBox;    // テキストボックス
+    private GameObject m_TextBox;               // テキストボックス
+    [SerializeField]
+    private GameManager.GameState m_GameState = 
+        GameManager.GameState.PAUSE;            // 最初のテキスト表示後のゲームの状態
     #endregion
 
     // Use this for initialization
@@ -18,6 +21,7 @@ public class TutorialStage : MonoBehaviour {
         m_TextBox.SetActive(true);
         // 一旦停止する
         GameManager.gameManager.GameStateSet(GameManager.GameState.PAUSE);
+        TutorialMediator.GetInstance().SetDrawEndGameState(m_GameState);
     }
 	
 	// Update is called once per frame
@@ -49,10 +53,12 @@ public class TutorialStage : MonoBehaviour {
     public class TutorialStageEditor : Editor
     {
         SerializedProperty TextBox;
+        SerializedProperty GameState;
 
         public void OnEnable()
         {
             TextBox = serializedObject.FindProperty("m_TextBox");
+            GameState = serializedObject.FindProperty("m_GameState");
         }
 
         public override void OnInspectorGUI()
@@ -64,6 +70,9 @@ public class TutorialStage : MonoBehaviour {
 
             EditorGUILayout.LabelField("〇チュートリアルステージの設定");
             TextBox.objectReferenceValue = EditorGUILayout.ObjectField("テキストボックス", tutorial.m_TextBox, typeof(GameObject), true);
+
+            // 列挙クラスの表示
+            EditorGUILayout.PropertyField(GameState, new GUIContent("テキスト表示後のゲームの状態"));
 
             // Unity画面での変更を更新する(これがないとUnity画面で変更できなくなる)
             serializedObject.ApplyModifiedProperties();

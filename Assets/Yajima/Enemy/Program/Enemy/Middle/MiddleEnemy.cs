@@ -94,26 +94,27 @@ public class MiddleEnemy : Enemy3D {
 
     protected override void DiscoverPlayer(float deltaTime)
     {
-        // 発見アニメーションの場合
-        if (m_MotionNumber == (int)AnimatorNumber.ANIMATOR_DISCOVER_NUMBER)
-        {
-            var layer = m_Animator.GetLayerIndex("Base Layer");
-            var state = m_Animator.GetCurrentAnimatorStateInfo(layer);
-            var nTime = state.normalizedTime % 1.0f;
-            //var time = state.normalizedTime;
-            // アニメーションの再生が完了したら、次のアニメーションに変更
-            if (nTime < 0.9f)
-            {
-                m_Agent.Stop();
-                return;
-            }
-            else
-            {
-                // アニメーションの変更
-                m_Animator.CrossFade(m_AnimatorStates[(int)AnimatorNumber.ANIMATOR_CHASE_NUMBER], 0.1f, -1);
-                m_Agent.Resume();
-            }
-        }
+        //// 発見アニメーションの場合
+        //if (m_MotionNumber == (int)AnimatorNumber.ANIMATOR_DISCOVER_NUMBER)
+        //{
+        //    var layer = m_Animator.GetLayerIndex("Base Layer");
+        //    var state = m_Animator.GetCurrentAnimatorStateInfo(layer);
+        //    var nTime = state.normalizedTime % 1.0f;
+        //    //var time = state.normalizedTime;
+        //    // アニメーションの再生が完了したら、次のアニメーションに変更
+        //    if (nTime < 0.9f)
+        //    {
+        //        m_Agent.Stop();
+        //        return;
+        //    }
+        //    else
+        //    {
+        //        // アニメーションの変更
+        //        //m_Animator.CrossFade(m_AnimatorStates[(int)AnimatorNumber.ANIMATOR_CHASE_NUMBER], 0.1f, -1);
+        //        ChangeAnimation(AnimatorNumber.ANIMATOR_CHASE_NUMBER);
+        //        m_Agent.Resume();
+        //    }
+        //}
 
         //// プレイヤーとのベクトルを計算して、移動ポイントを更新する
         var vec = m_Player.transform.position - this.transform.position;
@@ -179,8 +180,8 @@ public class MiddleEnemy : Enemy3D {
         ////// ステータスの初期化
         ////InitState();
 
-        // 肉UIの生成
-        CreateMeat(AnimalMeat.MeatNumber.SMALL_NUMBER);
+        //// 肉UIの生成
+        //CreateMeat(AnimalMeat.MeatNumber.SMALL_NUMBER);
         // トラバサミが解放されたときの行動
         TrapReleaseAction();
         // 動物の消去

@@ -51,7 +51,7 @@ public class BoarEnemy : MiddleEnemy {
         // 逃げる
         ChangeMovePoint(m_RunawayPoint.gameObject.transform.position);
         m_MoveLength += m_DiscoverSpeed * deltaTime;
-        ChangeSpriteColor(Color.white);
+        //ChangeSpriteColor(Color.white);
 
         // 壁を発見したとき
         GameObject wall = null;
@@ -83,7 +83,7 @@ public class BoarEnemy : MiddleEnemy {
             // 移動速度を変える
             m_Agent.speed = m_Speed;
             m_Agent.Resume();
-            ChangeSpriteColor(Color.red);
+            //ChangeSpriteColor(Color.red);
         }
     }
 

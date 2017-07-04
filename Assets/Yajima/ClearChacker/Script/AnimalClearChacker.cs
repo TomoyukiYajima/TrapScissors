@@ -24,14 +24,8 @@ public class AnimalClearChacker : ClearChacker
     // Update is called once per frame
     public override void Update()
     {
-        // 動物がトラバサミにかかったら、チュートリアルクリア
-        if (m_Enemy.IsTrapHit())
-        {
-            if (TutorialMediator.GetInstance().IsTextDrawEnd())
-            {
-                TutorialClear();
-            }
-        }
+        // 動物がトラバサミにかかったら、追加テキストの表示
+        if (m_Enemy.IsTrapHit()) DrawText();
     }
 
     #region シリアライズ変更

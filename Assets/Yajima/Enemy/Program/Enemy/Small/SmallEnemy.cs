@@ -66,12 +66,8 @@ public class SmallEnemy : Enemy3D
         // 発見アニメーションの場合
         if (m_MotionNumber == (int)AnimatorNumber.ANIMATOR_DISCOVER_NUMBER)
         {
-            var layer = m_Animator.GetLayerIndex("Base Layer");
-            var state = m_Animator.GetCurrentAnimatorStateInfo(layer);
-            //var nTime = state.normalizedTime % 1.0f;
-            var time = state.normalizedTime;
-            // アニメーションの再生が完了したら、次のアニメーションに変更
-            if (time < 1.0f)
+            // 一定時間経過したら、次のアニメーションを再生
+            if (!IsEndTimeAnimation(0.9f))
             {
                 m_Agent.Stop();
                 return;
@@ -79,7 +75,7 @@ public class SmallEnemy : Enemy3D
             else
             {
                 // アニメーションの変更
-                m_Animator.CrossFade(m_AnimatorStates[(int)AnimatorNumber.ANIMATOR_CHASE_NUMBER], 0.1f, -1);
+                ChangeAnimation(AnimatorNumber.ANIMATOR_CHASE_NUMBER);
                 m_Agent.Resume();
             }
         }
@@ -203,6 +199,15 @@ public class SmallEnemy : Enemy3D
     #endregion
 
     #region override関数
+    protected override void SearchObject()
+    {
+        // トラバサミの捜索
+        SearchTrap();
+        // 反応する動物の捜索
+        SearchAnimal();
+        // プレイヤーの捜索
+        SearchPlayer();
+    }
     protected override void ReturnMove(float deltaTime, float subSpeed = 1.0f)
     {
         base.ReturnMove(deltaTime, subSpeed);

@@ -8,12 +8,6 @@ using UnityEditor;
 public class AnimalFoodEatClearChacker : ClearChacker
 {
     #region シリアライズ変数
-    //[SerializeField]
-    //private bool m_IsChangeToggle;
-    //[SerializeField]
-    //private bool m_IsEnd;
-    //[SerializeField]
-    //private string m_AddText;        // 動物スクリプト
     [SerializeField]
     private GameObject m_Animal;    // 動物オブジェクト
     [SerializeField]
@@ -21,10 +15,6 @@ public class AnimalFoodEatClearChacker : ClearChacker
     #endregion
 
     private Enemy3D m_Enemy;        // 動物スクリプト
-    private bool m_Eat = false;
-
-    private bool m_IsDraw = false;
-    private bool m_IsDrawEnd = false;
 
     // Use this for initialization
     public override void Start()
@@ -37,35 +27,14 @@ public class AnimalFoodEatClearChacker : ClearChacker
     // Update is called once per frame
     public override void Update()
     {
-        if (m_Eat)
-        {
-            if (m_IsDrawEnd) return;
-            var mediator = GameObject.Find("TutorialMediator");
-            if (mediator == null) return;
-
-            if (TutorialMediator.GetInstance().IsTextDrawEnd())
-            {
-                if (m_IsEnd) {
-                    TutorialClear();
-                    m_IsDrawEnd = true;
-                }
-            }
-        }
-
-        if (m_IsDraw) return;
-
         // 動物がえさを食べたら、表示
-        //if (m_Enemy.IsTrapHit()) TutorialClear();
         if(m_Enemy.IsEatFood())
         {
-            TutorialMediator.GetInstance().NextDrawText(m_AddText);
-            m_IsDraw = true;
-            // チェックボックスをオンにする
-            if (m_IsChangeToggle) m_Toggle.isOn = true;
-
-            m_Eat = true;
-            // オオカミを表示
-            if (m_AnimalCreate != null) m_AnimalCreate.SetActive(true);
+            // 追加テキストの表示
+            DrawText();
+            // 動物を表示
+            if (m_AnimalCreate != null && !m_AnimalCreate.activeSelf)
+                m_AnimalCreate.SetActive(true);
         }
     }
 

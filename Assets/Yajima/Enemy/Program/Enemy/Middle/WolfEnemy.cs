@@ -65,7 +65,8 @@ public class WolfEnemy : MiddleEnemy {
                 m_FoodObj = null;
                 m_Agent.Resume();
                 // アニメーションの変更
-                m_Animator.CrossFade(m_AnimatorStates[(int)AnimatorNumber.ANIMATOR_CHASE_NUMBER], 0.1f, -1);
+                //m_Animator.CrossFade(m_AnimatorStates[(int)AnimatorNumber.ANIMATOR_CHASE_NUMBER], 0.1f, -1);
+                ChangeAnimation(AnimatorNumber.ANIMATOR_CHASE_NUMBER);
                 return;
             }
         }
@@ -103,7 +104,8 @@ public class WolfEnemy : MiddleEnemy {
             // 動物発見状態に遷移
             ChangeDiscoverState(DiscoverState.Discover_Animal);
             // アニメーションの変更
-            m_Animator.CrossFade(m_AnimatorStates[(int)AnimatorNumber.ANIMATOR_CHASE_NUMBER], 0.1f, -1);
+            //m_Animator.CrossFade(m_AnimatorStates[(int)AnimatorNumber.ANIMATOR_CHASE_NUMBER], 0.1f, -1);
+            ChangeAnimation(AnimatorNumber.ANIMATOR_CHASE_NUMBER);
             //m_Animal = m_Boars[i].GetComponent<Enemy3D>();
             m_TargetAnimal = m_Boars[i].gameObject;
             break;

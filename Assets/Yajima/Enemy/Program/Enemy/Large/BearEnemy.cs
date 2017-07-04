@@ -11,9 +11,16 @@ public class BearEnemy : LargeEnemy {
         base.Start();
         // 睡眠状態に変更
         m_State = State.Sleep;
+        m_MotionNumber = (int)AnimatorNumber.ANIMATOR_TRAP_HIT_NUMBER;
         // スプライトカラーの変更
-        ChangeSpriteColor(new Color(1.0f, 0.0f, 1.0f, 1.0f));
+        //ChangeSpriteColor(new Color(1.0f, 0.0f, 1.0f, 1.0f));
         m_Agent.Stop();
+    }
+    protected override void Update()
+    {
+        base.Update();
+
+        //print(m_DState.ToString());
     }
     #endregion
 
@@ -49,13 +56,14 @@ public class BearEnemy : LargeEnemy {
         // 乱数値と比較して、大きかったら起こす
         //if (value1 < value2)
         // (乱数値 >= 反応するまでの値)
-        if (value1 > value2) return;
+        //if (value1 > value2) return;
 
         ChangeState(State.Idel, AnimatorNumber.ANIMATOR_IDEL_NUMBER);
+        
         // 視界の描画をONにする
         if (!m_RayPoint.gameObject.activeSelf)
             m_RayPoint.gameObject.SetActive(true);
-        ChangeSpriteColor(Color.red);
+        //ChangeSpriteColor(Color.red);
         m_Agent.Resume();
     }
     #endregion
