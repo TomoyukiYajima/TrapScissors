@@ -4,17 +4,18 @@ using UnityEngine.UI;
 
 public class AnimalMeat : MonoBehaviour {
 
-    public Camera m_MainCamera;                         // メインカメラ
-    public Sprite[] m_Sprites;                          // スプライト配列
+    public Camera m_MainCamera;                     // メインカメラ
+    public Sprite[] m_Sprites;                      // スプライト配列
+    public float m_Speed = 10.0f;                   // 移動速度
 
-    protected string m_MoveUIName = "MeatCount";        // 目的地のUIの名前
-    protected GameObject m_UI;                          // 目的地のUIオブジェクト
+    protected string m_MoveUIName = "MeatCount";    // 目的地のUIの名前
+    protected GameObject m_UI;                      // 目的地のUIオブジェクト
 
-    private int m_MyNumber;                             // UIの番号                         
-    private MeatState m_State = MeatState.NULL;         // 状態
-    private Image m_Image;                              // イメージ
+    private int m_MyNumber;                         // UIの番号                         
+    private MeatState m_State = MeatState.NULL;     // 状態
+    private Image m_Image;                          // イメージ
 
-    public enum MeatState
+    private enum MeatState
     {
         NULL,
         SMALL_STATE,
@@ -46,21 +47,19 @@ public class AnimalMeat : MonoBehaviour {
 	// Update is called once per frame
 	void Update () {
         //m_UI
-        var speed = 4.0f;
+        // 相手の場所が変わることがあるので、毎回移動方向の更新を行う
         var dir = m_UI.transform.position - this.transform.position;
-        this.transform.position += speed * dir.normalized * (Time.deltaTime * 60.0f);
+        this.transform.position += m_Speed * dir.normalized * (Time.deltaTime * 60.0f);
+        // 相手との距離が移動速度未満でなかったら返す
         var length = Vector3.Distance(m_UI.transform.position, this.transform.position);
-        if (length > speed) return;
+        if (length > m_Speed) return;
 
         // 消滅処理
         // スコアの追加
         GameManager.gameManager.PointAdd(1);
-
         var score = m_UI.transform.parent.GetComponent<FoodUIMove>();
         if (score != null) score.FoodCountAdd(m_MyNumber);
-
-        //if (m_GameManager != null) m_GameManager.PointAdd(1);
-        //m_GameManager.PointAdd(1);
+        // 自身の削除
         Destroy(gameObject);
     }
 
@@ -90,7 +89,6 @@ public class AnimalMeat : MonoBehaviour {
     private void SetMeat(MeatState state, string meatName, int number)
     {
         m_State = state;
-        //m_MoveUIName = meatName + m_MoveUIName; // Food (2)
         if (number == 1) m_MoveUIName = "SmallMeatCount";
         else m_MoveUIName = "Food (2)";
         // スプライトの変更
