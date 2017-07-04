@@ -10,11 +10,13 @@ public class Trap_Small : MonoBehaviour
         MOVE_TRAP
     }
 
+    Animator m_Animator;
 
     public TrapState _state;
     private bool recovery;
     private bool collider;
     public GameObject getTarget;
+    public GameObject trapHit;
 
     #region 鋏むときに必要な変数
     //鋏むんでいるオブジェクトを入れる
@@ -31,6 +33,8 @@ public class Trap_Small : MonoBehaviour
     // Use this for initialization
     void Start()
     {
+        m_Animator = GetComponent<Animator>();
+
         _targetAnimal = null;
         _state = TrapState.WAIT_TRAP;
         recovery = true;
@@ -68,6 +72,9 @@ public class Trap_Small : MonoBehaviour
             _targetAnimal = col.gameObject;
             Enemy3D enemy = col.GetComponent<Enemy3D>();
             enemy.ChangeTrap(gameObject);
+            SoundManger.Instance.PlaySE(10);
+            m_Animator.CrossFade("Hit", 0.1f, -1);
+            Instantiate(trapHit);
             if (col.tag == "LargeEnemy")
             {
                 recovery = false;

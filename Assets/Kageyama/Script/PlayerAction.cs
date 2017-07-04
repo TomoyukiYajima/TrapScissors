@@ -238,7 +238,7 @@ public class PlayerAction : MonoBehaviour
         if (_onTrapFlag == false && _trapCount < _trapMax)
         {
             Vector3 pos = new Vector3(this.transform.position.x,
-           this.transform.position.y - 0.5f,
+           this.transform.position.y,
            this.transform.position.z);
 
             Instantiate(

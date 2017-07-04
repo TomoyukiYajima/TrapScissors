@@ -12,6 +12,7 @@ public class Food : MonoBehaviour {
     }
 
     private float smellTime;
+    public GameObject _particle;
 
     public Sprite[] _sprite;
 
@@ -40,22 +41,24 @@ public class Food : MonoBehaviour {
 
     public void SelectFood(int food)
     {
-        if (food == 3) 
+        if(food >= 3)
         {
             Destroy(this.gameObject);
+            StenchEffe();
             return;
         }
-        else if(food == 0)
+        switch (food)
         {
-            food_Kind = Food_Kind.Carrot;
-        }
-        else if (food == 1)
-        {
-            food_Kind = Food_Kind.Meat;
-        }
-        else if (food == 2)
-        {
-            food_Kind = Food_Kind.SmellMeat;
+            case 0:
+                food_Kind = Food_Kind.Carrot;
+                break;
+            case 1:
+                food_Kind = Food_Kind.Meat;
+                break;
+            case 2:
+                food_Kind = Food_Kind.SmellMeat;
+                StenchEffe();
+                break;
         }
         this.gameObject.GetComponent<SpriteRenderer>().sprite = _sprite[food];
     }
@@ -63,4 +66,13 @@ public class Food : MonoBehaviour {
     {
         return food_Kind;
     }
+
+    private void StenchEffe()
+    {
+        GameObject child = Instantiate(_particle);
+        child.transform.SetParent(this.transform);
+        //child.transform.localRotation = new Quaternion(-90.0f, 0.0f, 0.0f, 1.0f);
+        child.transform.localPosition = new Vector3(0.0f, 0.0f, 0.0f);
+    }
+
 }
