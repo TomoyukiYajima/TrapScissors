@@ -44,10 +44,12 @@ public class PlayerAction : MonoBehaviour
 
     Animator m_Animator;
     NavMeshPlayer m_NavMeshPlayer;
+    Food m_food;
     private float setCount;
     private float foodCount;
     public float setTime = 1f;
     private bool setTrap = false;
+    private int recoveryNumber = 0;
     // アクション制限
     [SerializeField]
     private bool isTutorialAction = false;
@@ -172,7 +174,9 @@ public class PlayerAction : MonoBehaviour
         else if (_onFoodFlag == true)
         {
             if (_foodUIMove.FoodCountCheck(_foodNumber) >= 5) return;
-            _foodUIMove.FoodCountAdd(_foodNumber);
+            //m_food.FoodNumber(_foodNumber);
+            //_foodNumber = m_food.FoodNumber();
+            _foodUIMove.FoodCountAdd(recoveryNumber);
             StartCoroutine(FoodDestroy(setTime));
         }
     }
@@ -226,7 +230,11 @@ public class PlayerAction : MonoBehaviour
         if (col.tag == "Food")
         {
             _onFoodFlag = flag;
-            if (_onFoodFlag == true) _foodRecovery = col.gameObject;
+            if (_onFoodFlag == true)
+            {
+                _foodRecovery = col.gameObject;
+                recoveryNumber = _foodRecovery.GetComponent<Food>().FoodNumber();
+            }
             else if (_onFoodFlag == false) _recovery = null;
         }
     }

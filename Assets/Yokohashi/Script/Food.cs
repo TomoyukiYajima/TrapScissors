@@ -18,6 +18,7 @@ public class Food : MonoBehaviour {
 
     private FoodUIMove moveUI;
     private GameObject _foodMoveUI;
+    public int number;
 
     public Food_Kind food_Kind = Food_Kind.NULL;
 
@@ -51,12 +52,15 @@ public class Food : MonoBehaviour {
         {
             case 0:
                 food_Kind = Food_Kind.Carrot;
+                number = food;
                 break;
             case 1:
                 food_Kind = Food_Kind.Meat;
+                number = food;
                 break;
             case 2:
                 food_Kind = Food_Kind.SmellMeat;
+                number = food;
                 StenchEffe();
                 break;
         }
@@ -71,8 +75,12 @@ public class Food : MonoBehaviour {
     {
         GameObject child = Instantiate(_particle);
         child.transform.SetParent(this.transform);
-        //child.transform.localRotation = new Quaternion(-90.0f, 0.0f, 0.0f, 1.0f);
         child.transform.localPosition = new Vector3(0.0f, 0.0f, 0.0f);
     }
 
+    public int FoodNumber()//(int _number)
+    {
+        //number = _number;
+        return number;
+    }
 }
