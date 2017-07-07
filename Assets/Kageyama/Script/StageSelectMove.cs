@@ -15,6 +15,12 @@ public class StageSelectMove : MonoBehaviour
     private RectTransform _myRect;      //自分のRectTransform
     private bool _moveflag;             //動ける状態か
 
+    void Awake()
+    {
+        _eventSystem = GameObject.FindObjectOfType<EventSystem>();
+    }
+    private EventSystem _eventSystem;
+
 	// Use this for initialization
 	void Start ()
     {
@@ -39,6 +45,7 @@ public class StageSelectMove : MonoBehaviour
 	// Update is called once per frame
 	void Update ()
     {
+        if (_eventSystem.enabled != true) return;
         if(Input.GetAxis("Horizontal") >= 0.5f)
         {
             RightMove();
