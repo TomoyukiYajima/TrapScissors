@@ -20,8 +20,11 @@ public class TutorialText : MonoBehaviour {
     private GameObject[] m_ClearChackBoxes;     // クリアチェックボックス
     [SerializeField]
     private GameObject m_PressBottun;           // プリーズボタン
+    [SerializeField]
+    private TutorialDrawTexture m_DrawTexture;  // チュートリアル画像表示
 
     private int m_DrawTextNumber = 0;           // 現在表示しているテキスト番号
+    private int m_DrawTextFileNumber = 1;       // 表示しているテキストデータ番号
     private Text m_Text;                        // UIテキスト
 
     private float m_AddTextTime = 0.0f;         // 文字追加時間
@@ -35,60 +38,33 @@ public class TutorialText : MonoBehaviour {
     private List<string> m_DrawTexts = 
         new List<string>();                     // 表示する文字列リスト
 
-	// Use this for initialization
-	void Start () {
+    private TutorialTexture m_Texture;          // 表示するテクスチャ
+    //private List<GameObject> m_DrawSprites =
+    //    new List<GameObject>();                 // 表示画像配列
+    //private Dic
+
+    // Use this for initialization
+    void Start () {
         m_Text = GetComponent<Text>();
         m_Text.text = "";
-
+        // 初期のテキストファイルの名前を入れる
         m_InitTextName = m_TextName;
-
+        // テキストファイルの読み込み
         ReadTextFile();
-	}
+        // 表示画像があれば、画像の表示
+        m_DrawTexture.SetTexture(m_DrawTextFileNumber, m_DrawTextNumber + 1);
+    }
 	
 	// Update is called once per frame
 	void Update () {
         // 決定ボタンが押されたら、次のテキストの表示
-        if (Input.GetButtonDown("Submit"))
-        {
-            // 表示中にボタンが押されたら、すべて表示する
-            if(!(m_Count >= m_DrawTexts[m_DrawTextNumber].Length))
-            {
-                m_Text.text = m_DrawTexts[m_DrawTextNumber];
-                m_Count = m_DrawTexts[m_DrawTextNumber].Length;
-                m_PressBottun.SetActive(true);
-                return;
-            }
-            // すべて表示していれば、次のテキストを表示
-            m_DrawTextNumber++;
-            m_AddTextTime = 0;
-            m_Count = 0;
-            m_PressBottun.SetActive(false);
-            SoundManger.Instance.PlaySE(0);
-            // 表示するテキストがなければ、終了
-            if (m_DrawTextNumber > m_DrawTexts.Count - 1)
-            {
-                m_DrawTextNumber = 0;
-                m_IsDrawEnd = true;
-                this.transform.parent.gameObject.SetActive(false);
-                // 指定した状態に変更
-                GameManager.gameManager.GameStateSet(m_GameState);
-                // チェックボックスのアクティブ状態を変更
-                var checkBox = m_ClearChackBoxes[m_CheckBoxNumber];
-                if (!checkBox.activeSelf) checkBox.SetActive(true);
-                // テキストを空にする
-                //m_Text.text = "";
-                //return;
-            }
-            // テキストを空にする
-            m_Text.text = "";
-        }
+        if (Input.GetButtonDown("Submit")) DrawText();
 
         m_AddTextTime += Time.deltaTime * m_Speed;
         // 追加時間に達したら、表示文字を追加する
         if ((int)m_AddTextTime == m_Count - 1 || m_Count >= m_DrawTexts[m_DrawTextNumber].Length) return;
         m_Text.text += m_DrawTexts[m_DrawTextNumber].Substring(m_Count, 1);
         m_Count++;
-        // SoundManger.Instance.PlaySE(1);
         // プリーズボタンの表示
         if (m_Count >= m_DrawTexts[m_DrawTextNumber].Length)
             m_PressBottun.SetActive(true);
@@ -175,6 +151,9 @@ public class TutorialText : MonoBehaviour {
     {
         m_TextName = m_InitTextName + text;
         m_CheckBoxNumber = chackNumber;
+        m_DrawTextFileNumber++;
+        // 表示画像があれば、画像の表示
+        m_DrawTexture.SetTexture(m_DrawTextFileNumber, m_DrawTextNumber + 1);
         m_GameState = state;
         // 配列の初期化
         m_DrawTexts.Clear();
@@ -182,11 +161,58 @@ public class TutorialText : MonoBehaviour {
         ReadTextFile();
     }
 
+    private void DrawText()
+    {
+        // 表示中にボタンが押されたら、すべて表示する
+        if (!(m_Count >= m_DrawTexts[m_DrawTextNumber].Length))
+        {
+            m_Text.text = m_DrawTexts[m_DrawTextNumber];
+            m_Count = m_DrawTexts[m_DrawTextNumber].Length;
+            m_PressBottun.SetActive(true);
+            return;
+        }
+
+        // すべて表示していれば、次のテキストを表示
+        m_DrawTextNumber++;
+        m_AddTextTime = 0;
+        m_Count = 0;
+        m_PressBottun.SetActive(false);
+        // テクスチャが表示されていれば、カウントを減らす
+        if (m_Texture != null && m_Texture.gameObject.activeSelf) m_Texture.SubCount();
+        m_DrawTexture.SetTexture(m_DrawTextFileNumber, m_DrawTextNumber + 1);
+        SoundManger.Instance.PlaySE(0);
+        // 表示するテキストがなければ、終了
+        if (m_DrawTextNumber > m_DrawTexts.Count - 1)
+        {
+            m_DrawTextNumber = 0;
+            m_IsDrawEnd = true;
+            this.transform.parent.gameObject.SetActive(false);
+            // 指定した状態に変更
+            GameManager.gameManager.GameStateSet(m_GameState);
+            // チェックボックスのアクティブ状態を変更
+            var checkBox = m_ClearChackBoxes[m_CheckBoxNumber];
+            if (!checkBox.activeSelf) checkBox.SetActive(true);
+        }
+        // テキストを空にする
+        m_Text.text = "";
+    }
+
     // テキスト表示が終了したかを返します
     public bool IsDrawEnd() { return m_IsDrawEnd; }
 
+    // テキスト表示が終了したかを返します(テキスト番号の指定)
+    public bool IsDrawEnd(int number) {
+        // 指定したテキスト番号ならば、表示が完了したかを返す
+        if (m_DrawTextFileNumber == number) return m_IsDrawEnd;
+        // 指定したテキスト番号ではない
+        return false;
+    }
+
     // テキスト表示終了後のゲームの状態を設定します
     public void SetDrawEndGameState(GameManager.GameState state) { m_GameState = state; }
+
+    // テクスチャを設定します
+    public void SetTexture(TutorialTexture texture) { m_Texture = null; m_Texture = texture; }
 
     // 改行コード処理
     private string SetDefaultText() { return "C#あ\n"; }
@@ -202,6 +228,7 @@ public class TutorialText : MonoBehaviour {
         SerializedProperty TextName;
         SerializedProperty ClearChackBoxes;
         SerializedProperty PressBottun;
+        SerializedProperty DrawTexture;
 
         public void OnEnable()
         {
@@ -210,6 +237,7 @@ public class TutorialText : MonoBehaviour {
             TextName = serializedObject.FindProperty("m_TextName");
             ClearChackBoxes = serializedObject.FindProperty("m_ClearChackBoxes");
             PressBottun = serializedObject.FindProperty("m_PressBottun");
+            DrawTexture = serializedObject.FindProperty("m_DrawTexture");
         }
 
         public override void OnInspectorGUI()
@@ -228,11 +256,14 @@ public class TutorialText : MonoBehaviour {
             EditorGUILayout.Space();
 
             PressBottun.objectReferenceValue = EditorGUILayout.ObjectField("次のテキスト表示を知らせる画像", tutorialText.m_PressBottun, typeof(GameObject), true);
+            DrawTexture.objectReferenceValue = EditorGUILayout.ObjectField("チュートリアル画像表示用オブジェクト", tutorialText.m_DrawTexture, typeof(TutorialDrawTexture), true);
             // ClearChackBox.objectReferenceValue = EditorGUILayout.ObjectField("クリア条件表示", tutorialText.m_ClearChackBox, typeof(GameObject), true);
             // 配列
             EditorGUILayout.PropertyField(ClearChackBoxes, new GUIContent("表示するチェックボックス"), true);
             //ClearChackBox.objectReferenceValue = EditorGUILayout.ObjectField("クリア条件表示", tutorialText.m_ClearChackBox, typeof(GameObject), true);
             //TextBox.objectReferenceValue = EditorGUILayout.ObjectField("テキストボックス", tutorialText.m, typeof(GameObject), true);
+
+            // m_SpriteCounts
 
             // Unity画面での変更を更新する(これがないとUnity画面で変更できなくなる)
             serializedObject.ApplyModifiedProperties();

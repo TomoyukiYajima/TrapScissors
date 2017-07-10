@@ -136,7 +136,7 @@ public class BoarEnemy : MiddleEnemy {
 
     protected override bool IsLikeFood(Food.Food_Kind food)
     {
-        return food == Food.Food_Kind.Meat;
+        return food == Food.Food_Kind.Carrot;
     }
     #endregion
     #endregion

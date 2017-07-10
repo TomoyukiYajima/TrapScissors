@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
+using System.Collections.Generic;
 
 public class TutorialMediator : MonoBehaviour {
 
@@ -11,6 +12,9 @@ public class TutorialMediator : MonoBehaviour {
     private Vector3 m_InitPlayerPosition;       // プレイヤーの初期位置
     private int m_ActionCount = 0;              // プレイヤーのアクションカウント
     private bool m_IsAction = false;            // プレイヤーのアクションができるか
+
+    private Dictionary<int, int> m_Numbers =
+       new Dictionary<int, int>();              // ステージ番号(ビット管理用)
 
     private static TutorialMediator instance;   // 自身のインスタンス
 
@@ -25,6 +29,11 @@ public class TutorialMediator : MonoBehaviour {
         }
 
         ActionCount = m_StageNumber;
+
+        for(int i = 0; i != 5; ++i)
+        {
+            m_Numbers[i + 1] = 1 << i;
+        }
 	}
 	
 	// Update is called once per frame
@@ -79,20 +88,71 @@ public class TutorialMediator : MonoBehaviour {
         SceneManagerScript.sceneManager.FadeWhite();
     }
 
-    // チュートリアルアクションを行えるかを返します
-    // 引数　指定したチュートリアル番号(複数指定可能)
-    public bool IsTutorialAction(params int[] numbers)
+    // チュートリアルでのアクションが行えるかを返します
+    // true ならアクションを行えます
+    // 引数2　指定したチュートリアル番号(複数指定可能)
+    public bool IsTutorialAction(bool isAction = true, params int[] numbers)
     {
-        for(int i = 0; i != numbers.Length; ++i)
+        // 完全にアクションを行わないなら、falseを返す
+        if (!isAction) return false;
+        // アクションができる場所でなければ、falseを返す
+        for (int i = 0; i != numbers.Length; ++i)
         {
-            // 同一番号であるならば、true
-            var num = numbers[i];
             if (m_StageNumber == numbers[i] && !m_IsAction)
-                return true;
+                return false;
         }
-        // 該当するチュートリアルではない
-        return false;
+        // アクション制限をするチュートリアルではない
+        return true;
     }
+
+    public bool IsTutorialAction(int[] actionNumbers, params int[] numbers)
+    {
+        // 完全にアクションを行わないなら、falseを返す
+        // !TutorialMediator.GetInstance().IsCheckAction(1, 2, 4)
+        if (TutorialMediator.GetInstance().IsCheckAction(actionNumbers)) return false;
+
+        //if (!isAction) return false;
+        // アクションができる場所でなければ、falseを返す
+        for (int i = 0; i != numbers.Length; ++i)
+        {
+            if (m_StageNumber == numbers[i] && !m_IsAction)
+                return false;
+        }
+        // アクション制限をするチュートリアルではない
+        return true;
+    }
+
+    public bool IsTutorialAction(int number)
+    {
+        // アクションができる場所でなければ、falseを返す
+        if (m_StageNumber == number && !m_IsAction) return false;
+        // アクション制限をするチュートリアルではない
+        return true;
+    }
+
+    // チュートリアルでのアクションが行えるかの確認を行います
+    public bool IsCheckAction(int[] numbers)
+    {
+        int num = 0;
+        for (int i = 0; i != numbers.Length; ++i)
+        {
+            num = num | m_Numbers[numbers[i]];
+        }
+        // 0でなければ、true になる
+        return (m_Numbers[m_StageNumber] & num) != 0;
+    }
+
+    // チュートリアルでのアクションが行えるかを返します
+    // true ならアクションを行えます
+    //public bool IsTutorialAction(int number, bool isAction = true)
+    //{
+    //    // 完全にアクションを行わないなら、falseを返す
+    //    if (!isAction) return false;
+    //    // アクションができる場所でなければ、falseを返す
+    //    if (m_StageNumber == number && !m_IsAction) return false;
+    //    //if (m_StageNumber == number && !m_IsAction) return true;
+    //    return true;
+    //}
 
     // チュートリアルアクションを行えるかを設定します
     public void SetTutorialAction(bool isAction) { m_IsAction = isAction; }
@@ -100,6 +160,12 @@ public class TutorialMediator : MonoBehaviour {
     // テキスト表示が終了したかを返します
     public bool IsTextDrawEnd() { return m_TutorialText.IsDrawEnd(); }
 
+    // テキスト表示が終了したかを返します(テキスト番号の指定)
+    public bool IsTextDrawEnd(int number) { return m_TutorialText.IsDrawEnd(number); }
+
     // テキスト表示終了後のゲームの状態を設定します
     public void SetDrawEndGameState(GameManager.GameState state) { m_TutorialText.SetDrawEndGameState(state); }
+
+    // テクスチャを設定します
+    public void SetTexture(TutorialTexture texture) { m_TutorialText.SetTexture(texture); }
 }

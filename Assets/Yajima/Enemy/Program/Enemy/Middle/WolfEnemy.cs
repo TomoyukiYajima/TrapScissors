@@ -24,8 +24,8 @@ public class WolfEnemy : MiddleEnemy {
         {
             // 指定文字列が無かったら、次のオブジェクトを確かめる
             if (child.name.IndexOf("BoarCreateBox") < 0) continue;
-            var boar = child.FindChild("Boar");
-            var boarAnimal = boar.FindChild("BoarEnemy");
+            var boar = child.Find("Boar");
+            var boarAnimal = boar.Find("BoarEnemy");
             if (boarAnimal == null) continue;
             // イノシシの追加
             m_Boars.Add(boarAnimal);

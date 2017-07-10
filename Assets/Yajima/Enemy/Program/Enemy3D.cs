@@ -84,7 +84,7 @@ public class Enemy3D : MonoBehaviour
         DiscoverState.Discover_None;                    // 発見状態
     protected DiscoverFoodState m_DFState =
         DiscoverFoodState.DiscoverFood_Move;            // えさ発見状態  
-    protected NavMeshAgent m_Agent;                     // ナビメッシュエージェント  
+    protected UnityEngine.AI.NavMeshAgent m_Agent;                     // ナビメッシュエージェント  
 
     protected GameManager.GameState m_GameState =
         GameManager.GameState.START;
@@ -200,7 +200,7 @@ public class Enemy3D : MonoBehaviour
         // アニメーションリストにリソースを追加
         m_Rigidbody = GetComponent<Rigidbody>();
         m_Collider = GetComponent<Collider>();
-        m_Agent = GetComponent<NavMeshAgent>();
+        m_Agent = GetComponent<UnityEngine.AI.NavMeshAgent>();
         // オブジェクトの確認
         CheckObject();
         // ナビメッシュエージェントの設定
@@ -565,7 +565,7 @@ public class Enemy3D : MonoBehaviour
         //animalScript.ChangeTakeIn();
         animalScript.DeleteTrap();
         // 口オブジェクトの子オブジェクトに変更
-        var agent = animal.GetComponent<NavMeshAgent>();
+        var agent = animal.GetComponent<UnityEngine.AI.NavMeshAgent>();
         agent.enabled = false;
         m_OtherCreateBox = animalParent.transform.parent;
         animalParent.transform.parent = m_MouthPoint;
@@ -759,7 +759,6 @@ public class Enemy3D : MonoBehaviour
             ChangeState(State.Faint, AnimatorNumber.ANIMATOR_IDEL_NUMBER);
             // 付属しているトラバサミの削除
             DeleteTrap();
-            ChangeSpriteColor(Color.gray);
             m_Agent.Stop();
             return;
         }
@@ -812,7 +811,7 @@ public class Enemy3D : MonoBehaviour
     protected void MeatIdel(float deltaTime)
     {
         // 持っている肉が無かったら、死亡待機状態に遷移
-        var meat = this.transform.FindChild("Food(Clone)");
+        var meat = this.transform.Find("Food(Clone)");
         if (meat != null) return;
         ChangeState(State.DeadIdel, AnimatorNumber.ANIMATOR_DEAD_NUMBER);
         // ステータスの初期化
@@ -1532,7 +1531,7 @@ public class Enemy3D : MonoBehaviour
         // スプライトがなかった場合
         if (m_Model == null)
         {
-            var obj = this.transform.FindChild("Model");
+            var obj = this.transform.Find("Model");
             if (obj == null) return;
             m_Model = obj.gameObject;
         }
@@ -1568,9 +1567,9 @@ public class Enemy3D : MonoBehaviour
     // 敵のスプライトカラーの変更
     protected void ChangeSpriteColor(Color color)
     {
-        var child = gameObject.transform.FindChild("EnemySprite");
+        var child = gameObject.transform.Find("EnemySprite");
         if (child == null) return;
-        var child2 = child.gameObject.transform.FindChild("Sprite");
+        var child2 = child.gameObject.transform.Find("Sprite");
         var sprite = child2.GetComponent<SpriteRenderer>();
         if (sprite == null) return;
         sprite.color = color;
@@ -1652,7 +1651,7 @@ public class Enemy3D : MonoBehaviour
             var mediator = GameObject.Find("TutorialMediator");
             // チュートリアルステージの123以外 反応
             // if (mediator == null || !TutorialMediator.GetInstance().IsTutorialAction(1, 2, 3))
-            if (mediator == null || TutorialMediator.GetInstance().IsTutorialAction(5))
+            if (mediator == null || !TutorialMediator.GetInstance().IsTutorialAction(5))
             {
                 // プレイヤーを見つけた時の処理
                 ChangePlayerHitMove(obj);
@@ -1661,7 +1660,7 @@ public class Enemy3D : MonoBehaviour
             else
             {
                 // チュートリアルステージの4 初期化
-                if (TutorialMediator.GetInstance().IsTutorialAction(4))
+                if (!TutorialMediator.GetInstance().IsTutorialAction(4))
                 {
                     // チュートリアルシーンだった場合
                     // チュートリアルシーンの初期化処理
@@ -1830,10 +1829,8 @@ public class Enemy3D : MonoBehaviour
     protected void CreateMeat(AnimalMeat.MeatNumber number)
     {
         // 肉UIの生成
-        // GameObject _foodObj = Instantiate(_food);
         var m = Instantiate(m_MeatUI);
         var meat = m.GetComponent<AnimalMeat>();
-        //meat.SetMeat(AnimalMeat.MeatNumber.SMALL_NUMBER);
         meat.SetMeat(number);
         SoundManger.Instance.PlaySE(12);
         // カメラ
@@ -1849,7 +1846,6 @@ public class Enemy3D : MonoBehaviour
     protected void DeleteTrap()
     {
         // 付属しているトラバサミの削除
-        // 付属しているトラバサミの削除
         // トラバサミの取得
         foreach (Transform child in m_TrapsObj.transform)
         {
@@ -1862,7 +1858,6 @@ public class Enemy3D : MonoBehaviour
             }
         }
         m_SmallTrap = null;
-        //m_TrapObj = null;
     }
     #endregion
 
@@ -1871,8 +1866,7 @@ public class Enemy3D : MonoBehaviour
     public void ChasePlayer()
     {
         var player = GameObject.Find("Player");
-        // プレイヤーがいなければ、返す
-        //if (player != null) return;
+        // プレイヤーがいなければ、待機状態に遷移
         if (player != null)
         {
             ChangeState(State.Idel, AnimatorNumber.ANIMATOR_IDEL_NUMBER);
@@ -1881,19 +1875,7 @@ public class Enemy3D : MonoBehaviour
         // 移動ポイントの変更
         ChangeMovePoint(player.transform.position);
         m_Agent.Resume();
-        //var direction = Vector2.right;
-        //var dir = player.transform.position - this.transform.position;
-        //var length = 2.0f;
-        //// 近づきすぎたら、移動しない
-        //if (Mathf.Abs(dir.x) < length) direction.x = 0.0f;
-        //// 方向転換
-        //if (dir.x < 0.0f) direction.x = -1.0f;
-        //// 移動量に代入
-        //m_TotalVelocity = m_Speed * direction * Time.deltaTime;
     }
-
-    // 敵がはさまれた時の、暴れる時間を返します(秒数)
-    //public float RageTime() { return m_RageTime; }
 
     // 敵を待機状態にさせます
     public void ChangeWait()
@@ -1901,16 +1883,6 @@ public class Enemy3D : MonoBehaviour
         ChangeState(State.Idel, AnimatorNumber.ANIMATOR_IDEL_NUMBER);
         ChangeSpriteColor(Color.red);
     }
-
-    // 敵を飲み込まれ状態にさせます
-    //public void ChangeTakeIn()
-    //{
-    //    // 暴れ状態に遷移
-    //    ChangeTrapHitState(
-    //        TrapHitState.TrapHit_TakeIn,
-    //        AnimatorNumber.ANIMATOR_TRAP_HIT_NUMBER
-    //        );
-    //}
 
     // 敵をトラップ化させます
     public void ChangeTrap(GameObject obj = null)
@@ -1958,11 +1930,8 @@ public class Enemy3D : MonoBehaviour
         // エージェントの停止
         m_Agent.Stop();
         m_Agent.enabled = false;
-        // 画像を表示しない
-        m_Model.SetActive(false);
-
         // モデルの表示をオフにする
-
+        m_Model.SetActive(false);
     }
 
     // 動物の状態を取得します
@@ -1991,10 +1960,7 @@ public class Enemy3D : MonoBehaviour
         m_Agent.Resume();
     }
     // 視野のステータスを取得します
-    public Vector2 GetRayStatus()
-    {
-        return new Vector2(m_ViewLength, m_ViewAngle);
-    }
+    public Vector2 GetRayStatus() { return new Vector2(m_ViewLength, m_ViewAngle); }
     #endregion
 
     #region Unity関数
@@ -2038,6 +2004,7 @@ public class Enemy3D : MonoBehaviour
             if (!IsFoodCheck(food.CheckFoodKind())) return;
             // えさ発見移動状態に遷移
             ChangeFoodMove(food);
+            ChangeAnimation(AnimatorNumber.ANIMATOR_IDEL_NUMBER);
             m_FoodObj = obj.gameObject;
             return;
         }
