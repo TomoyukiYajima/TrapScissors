@@ -32,6 +32,9 @@ public class CameraMove : MonoBehaviour
     private Vector3 _moveDirection = Vector3.zero;
     private float _clampX_max, _clampX_min; //X座標のクランプ
     private float _clampZ_max, _clampZ_min; //Z座標のクランプ
+    private float _size = 0;                //カメラの拡大縮小のサイズ
+    private float _sizeMin = 7;
+    private float _sizeMax = 20;
     #endregion
     private Vector3 newPosition;
     [SerializeField]
@@ -39,6 +42,7 @@ public class CameraMove : MonoBehaviour
 
     void Start()
     {
+        _size = this.GetComponent<Camera>().orthographicSize;
         _modeSkipFlag = false;
         _player = GameObject.FindGameObjectWithTag("Player");
         _offset = _cameraPosition - _player.transform.position;
@@ -84,6 +88,18 @@ public class CameraMove : MonoBehaviour
             transform.position = new Vector3(Mathf.Clamp(newPosition.x, _clampX_min, _clampX_max),
                                          newPosition.y,
                                          Mathf.Clamp(newPosition.z, _clampZ_min, _clampZ_max));
+
+            //サイズが範囲内のときのみ拡大縮小を行う
+            if (_sizeMin <= _size && _size <= _sizeMax && GameManager.gameManager.GameStateCheck() == GameManager.GameState.PLAY)
+            {
+
+                print(Input.GetAxis("RightStick"));
+                //サイズの拡大縮小をする
+                _size += Input.GetAxis("RightStick");
+                if (_size < _sizeMin) _size = _sizeMin;
+                else if (_size > _sizeMax) _size = _sizeMax;
+                this.GetComponent<Camera>().orthographicSize = _size;
+            }
         }
 
         //スタート時は強制的にロックする
@@ -99,14 +115,17 @@ public class CameraMove : MonoBehaviour
             _playerReturnPos = transform.position;
             _cameraMap.SetActive(true);
             _playerMoveLock = true;
+            _size = _sizeMin;
+            this.GetComponent<Camera>().orthographicSize = _size;
         }
         //ロックを外す
         else if(Input.GetAxis("Lock") < 0.5f && _playerMoveLock == true)
         {
-            print(_playerReturnPos);
             transform.position = _playerReturnPos;
             _cameraMap.SetActive(false);
             _playerMoveLock = false;
+            _size = _sizeMin;
+            this.GetComponent<Camera>().orthographicSize = _size;
         }
     }
 
@@ -116,16 +135,15 @@ public class CameraMove : MonoBehaviour
     #region OpningExpansion
     IEnumerator OpningExpansion()
     {
-        float _size = this.GetComponent<Camera>().orthographicSize;
-        while (_size > 7 && _modeSkipFlag == false)
+        while (_size > _sizeMin && _modeSkipFlag == false)
         {
             _size -= 1;
             this.GetComponent<Camera>().orthographicSize = _size;
             yield return null;
         }
-        if(_size != 7)
+        if(_size != _sizeMin)
         {
-            _size = 7;
+            _size = _sizeMin;
             this.GetComponent<Camera>().orthographicSize = _size;
         }
         _openingMoveflag = false;
@@ -157,7 +175,10 @@ public class CameraMove : MonoBehaviour
     }
     #endregion
 
-    #region
+    /// <summary>
+    /// 最初の演出をスキップする
+    /// </summary>
+    #region Skip
     public void Skip()
     {
         if (_modeSkipFlag == true)

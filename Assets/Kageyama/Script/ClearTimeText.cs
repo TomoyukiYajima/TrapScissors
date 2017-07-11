@@ -43,7 +43,7 @@ public class ClearTimeText : MonoBehaviour
             if (_clearTimemin <= 9) _clearMinText = "0" + _clearTimemin.ToString();
             else if (_clearTimemin > 9) _clearMinText = _clearTimemin.ToString();
 
-            _myText.text = _clearMinText + "分" + _clearCountText + "秒";
+            _myText.text = _clearMinText + "min" + _clearCountText + "sec";
         }
     }
     
