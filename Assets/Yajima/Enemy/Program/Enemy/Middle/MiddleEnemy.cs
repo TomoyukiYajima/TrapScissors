@@ -164,7 +164,8 @@ public class MiddleEnemy : Enemy3D {
     {
         //ChangeState(State.Runaway, AnimationNumber.ANIME_RUNAWAY_NUMBER);
         ChangeTrapHitState(TrapHitState.TrapHit_Runaway);
-        ChangeSpriteColor(Color.white);
+        m_Agent.Resume();
+        //ChangeSpriteColor(Color.white);
     }
 
     // 大きいトラバサミに衝突した時の行動です
