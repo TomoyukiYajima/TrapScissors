@@ -20,6 +20,8 @@ public class GameStart : MonoBehaviour
             {
                 GameManager.gameManager.GameStateSet(GameManager.GameState.PLAY);
                 _mainCamera.GetComponent<CameraMove>()._modeSkipFlag = true;
+                LeanTween.cancel(_mainCamera);
+                _mainCamera.GetComponent<CameraMove>().Skip();
             }
         }
 	}

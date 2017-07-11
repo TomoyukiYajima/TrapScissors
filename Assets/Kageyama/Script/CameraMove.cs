@@ -113,12 +113,13 @@ public class CameraMove : MonoBehaviour
     /// <summary>
     /// ゲーム開始時に拡大していく
     /// </summary>
+    #region OpningExpansion
     IEnumerator OpningExpansion()
     {
         float _size = this.GetComponent<Camera>().orthographicSize;
         while (_size > 7 && _modeSkipFlag == false)
         {
-            _size -= 4;
+            _size -= 1;
             this.GetComponent<Camera>().orthographicSize = _size;
             yield return null;
         }
@@ -130,19 +131,16 @@ public class CameraMove : MonoBehaviour
         _openingMoveflag = false;
 
     }
+    #endregion
 
     /// <summary>
     /// ゲーム開始時に動く
     /// </summary>
-    /// <param name="num"></param>
+    /// <param name="num">どこの座標まで動くか</param>
+    #region OpningMove
     void OpningMove(int num)
     {
-        if(_modeSkipFlag == true)
-        {
-            _openingMoveflag = false;
-            StartCoroutine(OpningExpansion());
-            return;
-        }
+        Skip();
         if (_openingMoveflag != true) return;
         LeanTween.move(gameObject, _movePoint[num], _moveTime[num])
             .setOnComplete(() =>
@@ -157,31 +155,51 @@ public class CameraMove : MonoBehaviour
                 OpningMove(num);
             });
     }
+    #endregion
+
+    #region
+    public void Skip()
+    {
+        if (_modeSkipFlag == true)
+        {
+            _openingMoveflag = false;
+            StartCoroutine(OpningExpansion());
+            return;
+        }
+    }
+
+    #endregion
 
     /// <summary>
     /// スムーズに追いかけるときはtrue、ピッタリくっつくときはfalseにする
     /// </summary>
     /// <param name="frag">スムーズにするかどうか</param>
+    #region LerpFragChenge
     public void LerpFragChenge(bool frag)
     {
         _lerpFrag = frag;
     }
-    
+    #endregion
+
     /// <summary>
     /// プレイヤーに追尾しないで、カメラ単独で動ける状態かどうか調べる
     /// </summary>
-    /// <returns></returns>
+    /// <returns>単独で動けるかどうか</returns>
+    #region LockCheck
     public bool LockCheck()
     {
         return _playerMoveLock;
     }
+    #endregion
 
     /// <summary>
     /// カメラが単独で動くときの座標の取得
     /// </summary>
-    /// <returns></returns>
+    /// <returns>単独で動いているときの座標値</returns>
+    #region OffsetCheck
     public Vector3 OffsetCheck()
     {
         return _offset_Move;
     }
+    #endregion
 }
