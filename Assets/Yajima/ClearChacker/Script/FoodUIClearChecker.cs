@@ -41,6 +41,6 @@ public class FoodUIClearChecker : ClearChacker {
     private void CheckFoodUI()
     {
         var number = m_FoodUI.SelectFoodNumber();
-        if (number == 0) DrawText();
+        if (number == 0 && m_FoodUI.FoodCountCheck(0) >= 1) DrawText();
     }
 }

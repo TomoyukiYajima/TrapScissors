@@ -6,7 +6,8 @@ using UnityEngine;
 using UnityEditor;
 #endif
 
-public class FoodClearChecker : ClearChacker {
+public class FoodClearChecker : ClearChacker
+{
 
     public GameObject m_Food;   // えさオブジェクト
 
@@ -25,7 +26,19 @@ public class FoodClearChecker : ClearChacker {
     // Update is called once per frame
     public override void Update()
     {
-        if(m_Food == null) DrawText();
+        if (m_Food == null) DrawText();
+    }
+
+    public void OnTriggerEnter(Collider other)
+    {
+        if (other.transform.parent.tag != "Player") return;
+        TutorialMediator.GetInstance().SetTutorialAction(true);
+    }
+
+    public void OnTriggerExit(Collider other)
+    {
+        if (other.transform.parent.tag != "Player") return;
+        TutorialMediator.GetInstance().SetTutorialAction(false);
     }
 
     #region シリアライズ変更

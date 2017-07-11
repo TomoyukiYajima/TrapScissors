@@ -12,6 +12,8 @@ public class ClearChacker : MonoBehaviour
     [SerializeField]
     private GameObject m_CheckBox;              // チェックボックス
     [SerializeField]
+    private string m_ChangeText = "";           // 変更するテキスト
+    [SerializeField]
     private int m_CheckBoxNum = 0;              // 表示するチェックボックス番号
     [SerializeField]
     protected float m_DrawTextTimer;            // テキストを表示するまでの時間
@@ -110,6 +112,7 @@ public class ClearChacker : MonoBehaviour
     public class ClearChackerEditor : Editor
     {
         SerializedProperty CheckBox;
+        SerializedProperty ChangeText;
         SerializedProperty CheckBoxNum;
         SerializedProperty DrawTextTimer;
         SerializedProperty IsChangeToggle;
@@ -120,6 +123,7 @@ public class ClearChacker : MonoBehaviour
         public void OnEnable()
         {
             CheckBox = serializedObject.FindProperty("m_CheckBox");
+            ChangeText = serializedObject.FindProperty("m_ChangeText");
             CheckBoxNum = serializedObject.FindProperty("m_CheckBoxNum");
             DrawTextTimer = serializedObject.FindProperty("m_DrawTextTimer");
             IsChangeToggle = serializedObject.FindProperty("m_IsChangeToggle");
@@ -141,6 +145,8 @@ public class ClearChacker : MonoBehaviour
 
             EditorGUILayout.LabelField("〇クリアチェッカーの設定");
             CheckBox.objectReferenceValue = EditorGUILayout.ObjectField("チェックボックス", chacker.m_CheckBox, typeof(GameObject), true);
+            // ラベルのテキスト変更
+            if(CheckBox != null) ChangeText.stringValue = EditorGUILayout.TextField("ラベルのテキスト", chacker.m_ChangeText);
             // int
             CheckBoxNum.intValue = EditorGUILayout.IntField("表示するチェックボックス番号", chacker.m_CheckBoxNum);
             // float
