@@ -14,7 +14,6 @@ public class Trap_Small : MonoBehaviour
 
     public TrapState _state;
     private bool recovery;
-    private bool collider;
     public GameObject getTarget;
     public GameObject trapHit;
 
@@ -38,7 +37,6 @@ public class Trap_Small : MonoBehaviour
         _targetAnimal = null;
         _state = TrapState.WAIT_TRAP;
         recovery = true;
-        collider = false;
     }
 
     // Update is called once per frame
@@ -74,7 +72,10 @@ public class Trap_Small : MonoBehaviour
             enemy.ChangeTrap(gameObject);
             SoundManger.Instance.PlaySE(10);
             m_Animator.CrossFade("Hit", 0.1f, -1);
-            Instantiate(trapHit);
+            GameObject child = Instantiate(trapHit);
+            child.transform.SetParent(this.transform);
+            child.transform.localPosition = new Vector3(0.0f, 0.0f, 0.0f);
+            child.transform.localScale = new Vector3(0.001f, 0.001f, 0.001f);
             if (col.tag == "LargeEnemy")
             {
                 recovery = false;
