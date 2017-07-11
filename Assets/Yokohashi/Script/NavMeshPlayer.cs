@@ -47,6 +47,11 @@ public class NavMeshPlayer : MonoBehaviour {
         move = (Vector3.forward - Vector3.right)* Input.GetAxis("Vertical") + (Vector3.right + Vector3.forward)* Input.GetAxis("Horizontal");
         agent.Move(move * Time.deltaTime * playerSpeed);
 
+        if(Input.GetAxis("Lock") >= 0.5f)
+        {
+            _AState = AnimationState.Idle;
+        }
+
         //Vector3 move = (Vector3.forward - Vector3.right) * Input.GetAxis("Vertical") + (Vector3.right + Vector3.forward) * Input.GetAxis("Horizontal");
         //agent.Move(move * Time.deltaTime * playerSpeed);
 
@@ -65,10 +70,6 @@ public class NavMeshPlayer : MonoBehaviour {
         {
             _AState = AnimationState.Idle;    
         }
-
-        //ビルボード
-        //Vector3 p = _mainCamera.transform.localPosition;
-        //transform.LookAt(p);
     }
 
     private void OnCollisionEnter(Collision col)
