@@ -53,7 +53,7 @@ public class ResultManager : MonoBehaviour
     public void GameOverPopActiveEnd()
     {
         _gameOver.SetActive(true);
-        _gameOver.transform.FindChild("ContinueButton").GetComponent<Button>().Select();
+        _gameOver.transform.Find("ContinueButton").GetComponent<Button>().Select();
     }
 
     public void ClearSetActive(bool flag)

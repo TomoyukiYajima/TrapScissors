@@ -43,7 +43,7 @@ public class Player : MonoBehaviour
     // Use this for initialization
     void Start ()
     {
-        _myRenderer = this.transform.FindChild("PlayerSprite").GetComponent<SpriteRenderer>();
+        _myRenderer = this.transform.Find("PlayerSprite").GetComponent<SpriteRenderer>();
         _trap = _bigTrap.GetComponent<BigTrap>();
     }
 	

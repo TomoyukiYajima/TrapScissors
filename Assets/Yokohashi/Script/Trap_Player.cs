@@ -1,41 +1,48 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class Trap_Player : MonoBehaviour
-{
+public class Trap_Player : MonoBehaviour {
 
     public GameObject target;
-    private NavMeshAgent agent;
+    private UnityEngine.AI.NavMeshAgent agent;
     //private bool arrived = false;
     private Animator animator;
     public float charaDistance;
 
     // Use this for initialization
-    void Start()
-    {
+    void Start () {
         animator = GetComponent<Animator>();
-        agent = GetComponent<NavMeshAgent>();
+        agent = GetComponent<UnityEngine.AI.NavMeshAgent>();
         agent.SetDestination(target.transform.position);
-    }
+	}
+	
+	// Update is called once per frame
+	void Update () {
+        //if(!arrived)
+        //{
+            if(agent.remainingDistance < charaDistance)
+            {
+                agent.Stop();
+                animator.SetFloat("speed", 0.0f);
+                //arrived = true;
+            }
+            else
+            {
+                agent.Resume();
+                animator.SetFloat("speed", 1.0f);
 
-    // Update is called once per frame
-    void Update()
-    {
-        if (agent.remainingDistance < charaDistance)
-        {
-            agent.Stop();
-            animator.SetFloat("speed", 0.0f);
-        }
-        else
-        {
-            agent.Resume();
-            animator.SetFloat("speed", 1.0f);
-        }
-        agent.SetDestination(target.transform.position);
-    }
+                //if (Vector3.Distance(transform.position, player.transform.position) > 10.0f)
+                //{
+                //    agent.Resume();
+                //    agent.SetDestination(player.transform.position);
+                //    arrived = false;
+                //}
+            }
+            agent.SetDestination(target.transform.position);
+        //}
+	}
 
-    void OnAnimatorIK(int layerIndex)
-    {
+    void OnAnimatorIK(int layerIndex){
         var weight = Vector3.Dot(transform.forward, target.transform.position - transform.position);
 
         if (weight < 0)

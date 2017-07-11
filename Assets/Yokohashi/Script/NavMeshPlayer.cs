@@ -21,7 +21,7 @@ public class NavMeshPlayer : MonoBehaviour {
 
     public Vector3 move;
     public float playerSpeed = 5; 
-    NavMeshAgent agent;
+    UnityEngine.AI.NavMeshAgent agent;
     private GameObject _targetAnimal;
 
     private GameManager _childSprite;
@@ -32,10 +32,10 @@ public class NavMeshPlayer : MonoBehaviour {
 
     // Use this for initialization
     void Start () {
-        agent = GetComponent<NavMeshAgent>();
+        agent = GetComponent<UnityEngine.AI.NavMeshAgent>();
         m_Animator = GetComponentInChildren<Animator>();
 
-        _myRenderer = this.transform.FindChild("PlayerSprite").GetComponent<SpriteRenderer>();
+        _myRenderer = this.transform.Find("PlayerSprite").GetComponent<SpriteRenderer>();
 
         _targetAnimal = null;
 	}
