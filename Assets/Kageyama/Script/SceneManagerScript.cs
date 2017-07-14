@@ -44,6 +44,11 @@ public class SceneManagerScript : MonoBehaviour
     [SerializeField]
     private string _waiting_Scene;
     private float _wTime_Count;
+    [SerializeField]
+    private bool _leave_Alone_Quit;
+    [SerializeField]
+    private float _quitTime;
+    private static float _quitCount;
     #endregion
     #region BGMを流す
     [SerializeField]
@@ -121,23 +126,31 @@ public class SceneManagerScript : MonoBehaviour
         }
 
         //Escキーをおしたらゲーム終了
-        if (Input.GetKeyDown(KeyCode.Escape))
+        if (Input.GetKeyDown(KeyCode.Escape) || (Input.GetButton("BackButton") && Input.GetButton("Pause")))
         {
             QuitCheck();
             return;
         }
 
-        //放置でシーン移動をしないならこの下の処理を行わない
+        //放置でシーン移動するならこの下の処理を行う
         if (_leave_Alone == true)
         {
             _wTime_Count += Time.deltaTime;
             if (_wTime_Count >= _waiting_Time)
             {
                 SceneOut(_waiting_Scene);
+                _wTime_Count = 0;
             }
             if (Input.anyKeyDown) _wTime_Count = 0;
-
-            return;
+        }
+        if(_leave_Alone_Quit == true)
+        {
+            _quitCount += Time.deltaTime;
+            if(_quitCount >= _quitTime)
+            {
+                Quit();
+            }
+            if (Input.anyKeyDown) _quitCount = 0;
         }
     }
 
@@ -327,6 +340,24 @@ public class SceneManagerScript : MonoBehaviour
     }
 
     /// <summary>
+    /// シーン移動せずに画面全体を薄暗くする
+    /// </summary>
+    public void Black(float value)
+    {
+        if (FadeStart == true)
+        {
+            return;
+        }
+        _fade_Object.SetActive(true);
+        FadeStart = true;
+        LeanTween.alpha(_fade, value, 0.1f)
+            .setOnComplete(() =>
+            {
+                FadeStart = false;
+            });
+    }
+
+    /// <summary>
     /// シーン移動せずに画面全体を薄暗くして時間を止める
     /// </summary>
     public void FadeBlack()
@@ -338,6 +369,27 @@ public class SceneManagerScript : MonoBehaviour
         _fade_Object.SetActive(true);
         FadeStart = true;
         LeanTween.alpha(_fade, 0.5f, 0.1f)
+            .setOnComplete(() =>
+            {
+                FadeStart = false;
+                TimeStop();
+            });
+    }
+
+    /// <summary>
+    /// シーン移動せずに画面全体を薄暗くして時間を止める(値を自分で決める)
+    /// </summary>
+    /// <param name="blacknumber">黒くなる値
+    /// /param>
+    public void FadeBlack(float value)
+    {
+        if (FadeStart == true)
+        {
+            return;
+        }
+        _fade_Object.SetActive(true);
+        FadeStart = true;
+        LeanTween.alpha(_fade, value, 0.1f)
             .setOnComplete(() =>
             {
                 FadeStart = false;
@@ -440,6 +492,8 @@ public class SceneManagerScript : MonoBehaviour
         SerializedProperty EndDialog;
         SerializedProperty AnyButtonMove;
         SerializedProperty AnyButtonMoveName;
+        SerializedProperty LeaveAloneQuit;
+        SerializedProperty QuitTime;
 
         public void OnEnable()
         {
@@ -458,6 +512,8 @@ public class SceneManagerScript : MonoBehaviour
             EndDialog = serializedObject.FindProperty("_endDialog");
             AnyButtonMove = serializedObject.FindProperty("_anyButtonMove");
             AnyButtonMoveName = serializedObject.FindProperty("_anyButtonMoveName");
+            LeaveAloneQuit = serializedObject.FindProperty("_leave_Alone_Quit");
+            QuitTime = serializedObject.FindProperty("_quitTime");
         }
         public override void OnInspectorGUI()
         {
@@ -482,6 +538,12 @@ public class SceneManagerScript : MonoBehaviour
             {
                 Waiting_Time.floatValue = EditorGUILayout.FloatField("放置時間", scene._waiting_Time);
                 Waiting_Scene.stringValue = EditorGUILayout.TextField("移動するシーン", scene._waiting_Scene);
+            }
+            
+            LeaveAloneQuit.boolValue = EditorGUILayout.Toggle("放置したらゲーム終了", scene._leave_Alone_Quit);
+            if (scene._leave_Alone_Quit == true)
+            {
+                QuitTime.floatValue = EditorGUILayout.FloatField("放置時間", scene._quitTime);
             }
 
             AnyButtonMove.boolValue = EditorGUILayout.Toggle("何かボタンを押したらシーン移動", scene._anyButtonMove);
