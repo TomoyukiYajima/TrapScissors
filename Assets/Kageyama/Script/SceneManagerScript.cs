@@ -150,7 +150,15 @@ public class SceneManagerScript : MonoBehaviour
             {
                 Quit();
             }
-            if (Input.anyKeyDown) _quitCount = 0;
+            if (Input.anyKeyDown ||
+                Input.GetAxis("Horizontal") != 0 ||
+                Input.GetAxis("Vertical")  != 0 ||
+                Input.GetAxis("Lock") != 0 || 
+                Input.GetAxis("RightStick") != 0)
+            {
+                print("触ったよー");
+                _quitCount = 0;
+            }
         }
     }
 

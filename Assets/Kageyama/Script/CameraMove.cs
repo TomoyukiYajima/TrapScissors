@@ -92,8 +92,6 @@ public class CameraMove : MonoBehaviour
             //サイズが範囲内のときのみ拡大縮小を行う
             if (_sizeMin <= _size && _size <= _sizeMax && GameManager.gameManager.GameStateCheck() == GameManager.GameState.PLAY)
             {
-
-                print(Input.GetAxis("RightStick"));
                 //サイズの拡大縮小をする
                 _size += Input.GetAxis("RightStick");
                 if (_size < _sizeMin) _size = _sizeMin;
