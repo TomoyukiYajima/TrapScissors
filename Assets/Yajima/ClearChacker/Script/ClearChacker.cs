@@ -29,15 +29,19 @@ public class ClearChacker : MonoBehaviour
     #endregion
 
     protected Toggle m_Toggle;              // トグル
+    protected TutorialCheckBox m_TutorialCheck;
 
     private float m_Timer;                  // テキスト表示時間
     private bool m_IsTextDraw = false;      // テキストを表示したか
+    protected bool m_IsChengeBox = false;
 
     // Use this for initialization
     public virtual void Start()
     {
         // トグルの設定
         if (m_CheckBox != null) m_Toggle = m_CheckBox.GetComponent<Toggle>();
+
+        m_TutorialCheck = GameObject.Find("TutorialClearChackBoxes").GetComponent<TutorialCheckBox>();
     }
 
     // Update is called once per frame
@@ -70,8 +74,6 @@ public class ClearChacker : MonoBehaviour
             if (IsTextDrawTime())
             {
                 // 追加テキストの表示
-                // m_GameState
-                //TutorialMediator.GetInstance().NextDrawText(m_AddText, m_CheckBoxNum);
                 TutorialMediator.GetInstance().NextDrawText(m_AddText, m_CheckBoxNum, m_GameState);
                 m_IsTextDraw = true;
                 // チェックボックスの変更
@@ -93,6 +95,7 @@ public class ClearChacker : MonoBehaviour
         var state = GameManager.gameManager.GameStateCheck();
         if (!TutorialMediator.GetInstance().IsTextDrawEnd() ||
             state == GameManager.GameState.END) return;
+        ChengeBox();
         // 終了するならば、チュートリアルクリアの確認を行う
         if (m_IsEnd)
         {
@@ -100,6 +103,16 @@ public class ClearChacker : MonoBehaviour
             if (TutorialMediator.GetInstance().IsTextDrawEnd())
                 TutorialClear();
         }
+    }
+
+    protected virtual void ChengeBox()
+    {
+        if (!m_IsChangeToggle || m_IsChengeBox ||
+            TutorialMediator.GetInstance().GetChackBoxCount() == 0) return;
+
+        m_TutorialCheck.NextTutorial();
+        //m_TutorialCheck.InMoveAdd();
+        m_IsChengeBox = true;
     }
 
     // テキスト表示時間に達したかを返します

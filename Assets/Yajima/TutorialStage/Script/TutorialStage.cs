@@ -13,7 +13,11 @@ public class TutorialStage : MonoBehaviour {
     [SerializeField]
     private GameManager.GameState m_GameState = 
         GameManager.GameState.PAUSE;            // 最初のテキスト表示後のゲームの状態
+    [SerializeField]
+    private bool m_IsMoveCamera = false;
     #endregion
+
+    private bool m_IsMove = false;
 
     // Use this for initialization
     void Start () {
@@ -26,18 +30,15 @@ public class TutorialStage : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
-        // 決定ボタンを押したら
-        //if (Input.GetButtonDown("Submit"))
-        //{
-        //    m_TextBox.SetActive(false);
-        //}
+        // カメラ移動
+        if (m_IsMove || !m_IsMoveCamera) return;
 
-        //if (Input.GetButtonDown("Trap"))
-        //{
-        //    Input.ResetInputAxes();
-        //}
-
-        //print(Input.GetAxis("Vertical"));
+        if (TutorialMediator.GetInstance().IsTextDrawEnd())
+        {
+            var camera = GameObject.Find("Main Camera").GetComponent<CameraMove>();
+            camera.enabled = true;
+            m_IsMove = true;
+        }
     }
 
     public void DrawTextBox()
@@ -54,11 +55,13 @@ public class TutorialStage : MonoBehaviour {
     {
         SerializedProperty TextBox;
         SerializedProperty GameState;
+        SerializedProperty IsMoveCamera;
 
         public void OnEnable()
         {
             TextBox = serializedObject.FindProperty("m_TextBox");
             GameState = serializedObject.FindProperty("m_GameState");
+            IsMoveCamera = serializedObject.FindProperty("m_IsMoveCamera");
         }
 
         public override void OnInspectorGUI()
@@ -73,6 +76,9 @@ public class TutorialStage : MonoBehaviour {
 
             // 列挙クラスの表示
             EditorGUILayout.PropertyField(GameState, new GUIContent("テキスト表示後のゲームの状態"));
+
+            // カメラ移動させるか
+            IsMoveCamera.boolValue = EditorGUILayout.Toggle("表示後にカメラ移動させるか", tutorial.m_IsMoveCamera);
 
             // Unity画面での変更を更新する(これがないとUnity画面で変更できなくなる)
             serializedObject.ApplyModifiedProperties();

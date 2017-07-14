@@ -30,7 +30,7 @@ public class TutorialCheckBox : MonoBehaviour
     {
         LeanTween.move(_checkBox[_num], _outPosition, _moveTime)
             .setOnComplete(() => {
-                InMove();
+                InMoveAdd();
             });
     }
     #endregion
@@ -45,7 +45,7 @@ public class TutorialCheckBox : MonoBehaviour
         LeanTween.move(_checkBox[_num], _outPosition, _moveTime)
             .setDelay(delayTime)
             .setOnComplete(()=>{
-                InMove();
+                InMoveAdd();
             });
     }
     #endregion

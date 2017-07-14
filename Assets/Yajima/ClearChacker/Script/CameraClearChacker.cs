@@ -52,6 +52,19 @@ public class CameraClearChacker : ClearChacker {
         DrawText();
     }
 
+    protected override void ChengeBox()
+    {
+        if (m_IsChengeBox) return;
+        if (!m_IsChangeToggle) m_TutorialCheck.InMove();
+        else
+        {
+            m_TutorialCheck.NextTutorial();
+        }
+        //m_TutorialCheck.NextTutorial();
+        //m_TutorialCheck.InMoveAdd();
+        m_IsChengeBox = true;
+    }
+
     #region シリアライズ変更
 #if UNITY_EDITOR
     [CustomEditor(typeof(CameraClearChacker), true)]

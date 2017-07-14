@@ -157,6 +157,8 @@ public class TutorialMediator : MonoBehaviour {
     // チュートリアルアクションを行えるかを設定します
     public void SetTutorialAction(bool isAction) { m_IsAction = isAction; }
 
+    public int GetChackBoxCount() { return m_TutorialText.GetChackBoxCount(); }
+
     // テキスト表示が終了したかを返します
     public bool IsTextDrawEnd() { return m_TutorialText.IsDrawEnd(); }
 
