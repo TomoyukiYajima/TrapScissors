@@ -92,6 +92,13 @@ public class WolfEnemy : MiddleEnemy {
         m_Agent.Stop();
     }
 
+    protected override void DiscoverPlayer(float deltaTime)
+    {
+        SearchAnimal();
+
+        base.DiscoverPlayer(deltaTime);
+    }
+
     protected override void SearchAnimal()
     {
         // 小さい動物を捜す
