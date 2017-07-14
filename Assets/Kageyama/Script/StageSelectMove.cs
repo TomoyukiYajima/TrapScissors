@@ -30,7 +30,12 @@ public class StageSelectMove : MonoBehaviour
         {
             for(int i = 0; i < _chilButton.Length; i++)
             {
-                if(i > _opennumber) _chilButton[i].GetComponent<Button>().interactable = false;
+                if (i > _opennumber)
+                {
+                    _chilButton[i].GetComponent<Button>().interactable = false;
+                    GameObject _childText = _chilButton[i].transform.Find("Text").gameObject;
+                    _childText.GetComponent<Text>().color = new Color(1.0f, 1.0f, 1.0f, 0.5f);
+                }
                 else _chilButton[i].GetComponent<Button>().interactable = true;
             }
         }

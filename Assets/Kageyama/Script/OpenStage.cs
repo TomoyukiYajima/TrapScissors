@@ -48,7 +48,6 @@ public class OpenStage : MonoBehaviour
     /// <returns></returns>
     public int OpenStageCheck()
     {
-        print(PlayerPrefs.GetInt(_openStage));
         return PlayerPrefs.GetInt(_openStage);
     }
 }
