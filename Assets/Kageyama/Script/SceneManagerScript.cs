@@ -141,7 +141,14 @@ public class SceneManagerScript : MonoBehaviour
                 SceneOut(_waiting_Scene);
                 _wTime_Count = 0;
             }
-            if (Input.anyKeyDown) _wTime_Count = 0;
+            if (Input.anyKeyDown ||
+                Input.GetAxis("Horizontal") != 0 ||
+                Input.GetAxis("Vertical") != 0 ||
+                Input.GetAxis("Lock") != 0 ||
+                Input.GetAxis("RightStick") != 0)
+            {
+                _wTime_Count = 0;
+            }
         }
         if(_leave_Alone_Quit == true)
         {
@@ -156,7 +163,6 @@ public class SceneManagerScript : MonoBehaviour
                 Input.GetAxis("Lock") != 0 || 
                 Input.GetAxis("RightStick") != 0)
             {
-                print("触ったよー");
                 _quitCount = 0;
             }
         }
