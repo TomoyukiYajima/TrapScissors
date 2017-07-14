@@ -17,7 +17,7 @@ public class ClearTimeText : MonoBehaviour
     void Awake()
     {
         _myText = this.GetComponent<Text>();
-        _myText.text = "00分00秒";
+        _myText.text = "00min00sec";
         _skipFlag = false;
     }
     
@@ -72,7 +72,7 @@ public class ClearTimeText : MonoBehaviour
                 if (_clearTimemin <= 9) _clearMinText = "0" + _clearTimemin.ToString();
                 else if (_clearTimemin > 9) _clearMinText = _clearTimemin.ToString();
 
-                _myText.text = _clearMinText + "分" + _clearCountText + "秒";
+                _myText.text = _clearMinText + "min" + _clearCountText + "sec";
                 yield return new WaitForSecondsRealtime(0.02f);
             }
         }
