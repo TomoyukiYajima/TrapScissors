@@ -1651,7 +1651,7 @@ public class Enemy3D : MonoBehaviour
             var mediator = GameObject.Find("TutorialMediator");
             // チュートリアルステージの123以外 反応
             // if (mediator == null || !TutorialMediator.GetInstance().IsTutorialAction(1, 2, 3))
-            if (mediator == null || !TutorialMediator.GetInstance().IsTutorialAction(5))
+            if (mediator == null || !TutorialMediator.GetInstance().IsTutorialAction(4))
             {
                 // プレイヤーを見つけた時の処理
                 ChangePlayerHitMove(obj);
@@ -1659,8 +1659,8 @@ public class Enemy3D : MonoBehaviour
             }
             else
             {
-                // チュートリアルステージの4 初期化
-                if (!TutorialMediator.GetInstance().IsTutorialAction(4))
+                // チュートリアルステージの2 初期化
+                if (!TutorialMediator.GetInstance().IsTutorialAction(2))
                 {
                     // チュートリアルシーンだった場合
                     // チュートリアルシーンの初期化処理

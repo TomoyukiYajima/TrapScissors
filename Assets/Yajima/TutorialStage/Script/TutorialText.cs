@@ -22,6 +22,8 @@ public class TutorialText : MonoBehaviour {
     private GameObject m_PressBottun;           // プリーズボタン
     [SerializeField]
     private TutorialDrawTexture m_DrawTexture;  // チュートリアル画像表示
+    [SerializeField]
+    private bool m_IsFirstMove = true;
 
     private int m_DrawTextNumber = 0;           // 現在表示しているテキスト番号
     private int m_DrawTextFileNumber = 1;       // 表示しているテキストデータ番号
@@ -39,6 +41,8 @@ public class TutorialText : MonoBehaviour {
         new List<string>();                     // 表示する文字列リスト
 
     private TutorialTexture m_Texture;          // 表示するテクスチャ
+
+    protected TutorialCheckBox m_TutorialCheck;
     //private List<GameObject> m_DrawSprites =
     //    new List<GameObject>();                 // 表示画像配列
     //private Dic
@@ -53,6 +57,8 @@ public class TutorialText : MonoBehaviour {
         ReadTextFile();
         // 表示画像があれば、画像の表示
         m_DrawTexture.SetTexture(m_DrawTextFileNumber, m_DrawTextNumber + 1);
+
+        m_TutorialCheck = GameObject.Find("TutorialClearChackBoxes").GetComponent<TutorialCheckBox>();
     }
 	
 	// Update is called once per frame
@@ -192,9 +198,25 @@ public class TutorialText : MonoBehaviour {
             // チェックボックスのアクティブ状態を変更
             var checkBox = m_ClearChackBoxes[m_CheckBoxNumber];
             if (!checkBox.activeSelf) checkBox.SetActive(true);
+            if (m_IsFirstMove)
+            {
+                m_IsFirstMove = false;
+                m_TutorialCheck.InMove();
+            }
         }
         // テキストを空にする
         m_Text.text = "";
+    }
+
+    public int GetChackBoxCount() {
+        int count = 0;
+        for(int i = 0; i != m_ClearChackBoxes.Length; ++i)
+        {
+            var checkBox = m_ClearChackBoxes[i].GetComponent<Toggle>();
+            if (checkBox.isOn) count++;
+        }
+        
+        return m_ClearChackBoxes.Length - count;
     }
 
     // テキスト表示が終了したかを返します
@@ -229,6 +251,7 @@ public class TutorialText : MonoBehaviour {
         SerializedProperty ClearChackBoxes;
         SerializedProperty PressBottun;
         SerializedProperty DrawTexture;
+        SerializedProperty IsFirstMove;
 
         public void OnEnable()
         {
@@ -238,6 +261,7 @@ public class TutorialText : MonoBehaviour {
             ClearChackBoxes = serializedObject.FindProperty("m_ClearChackBoxes");
             PressBottun = serializedObject.FindProperty("m_PressBottun");
             DrawTexture = serializedObject.FindProperty("m_DrawTexture");
+            IsFirstMove = serializedObject.FindProperty("m_IsFirstMove");
         }
 
         public override void OnInspectorGUI()
@@ -262,6 +286,8 @@ public class TutorialText : MonoBehaviour {
             EditorGUILayout.PropertyField(ClearChackBoxes, new GUIContent("表示するチェックボックス"), true);
             //ClearChackBox.objectReferenceValue = EditorGUILayout.ObjectField("クリア条件表示", tutorialText.m_ClearChackBox, typeof(GameObject), true);
             //TextBox.objectReferenceValue = EditorGUILayout.ObjectField("テキストボックス", tutorialText.m, typeof(GameObject), true);
+
+            IsFirstMove.boolValue = EditorGUILayout.Toggle("最初にチェックボックスを表示するか", tutorialText.m_IsFirstMove);
 
             // m_SpriteCounts
 

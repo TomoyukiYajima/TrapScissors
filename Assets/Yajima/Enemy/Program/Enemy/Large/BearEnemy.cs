@@ -27,9 +27,18 @@ public class BearEnemy : LargeEnemy {
     #region override関数
     public override void SoundNotice(Transform point)
     {
-        // 眠っている場合は反応しない
+        // 眠っている場合は起きる
         // プレイヤーを見つけた場合、音のなった位置に移動
-        if (m_State == State.DiscoverMove) SoundMove(point);
+        if (m_State == State.Sleep)
+        {
+            ChangeState(State.Idel, AnimatorNumber.ANIMATOR_IDEL_NUMBER);
+            // 視界の描画をONにする
+            if (!m_RayPoint.gameObject.activeSelf)
+                m_RayPoint.gameObject.SetActive(true);
+            //ChangeSpriteColor(Color.red);
+            m_Agent.Resume();
+        }
+        else if (m_State == State.DiscoverMove) SoundMove(point);
     }
 
     protected override bool IsFoodCheck(Food.Food_Kind food)

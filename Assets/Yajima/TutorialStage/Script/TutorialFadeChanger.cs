@@ -6,6 +6,7 @@ using UnityEngine.UI;
 public class TutorialFadeChanger : MonoBehaviour {
 
     public GameObject m_Player;
+    public int m_FadeNumber = 1;
     [SerializeField]
     public GameObject[] m_ActiveAnimal;
     [SerializeField]
@@ -34,7 +35,7 @@ public class TutorialFadeChanger : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
-        if (TutorialMediator.GetInstance().IsTextDrawEnd(4)) Fade();
+        if (TutorialMediator.GetInstance().IsTextDrawEnd(m_FadeNumber)) Fade();
 
         if (m_IsFadeIn) m_ChangeTimer = Mathf.Min(m_ChangeTimer + Time.deltaTime, 1.0f);
     }
@@ -61,8 +62,13 @@ public class TutorialFadeChanger : MonoBehaviour {
                 // えさの削除
                 var food = GameObject.Find("Food(Clone)");
                 GameObject.Destroy(food);
+                // えさの追加
+                var foodUI = GameObject.Find("FoodParent");
+                var foodUIMove = foodUI.GetComponent<FoodUIMove>();
+                foodUIMove.FoodCountAdd(0);
+                foodUIMove.FoodCountSub(1);
 
-                for(int i = 0; i != m_ActiveAnimal.Length; ++i)
+                for (int i = 0; i != m_ActiveAnimal.Length; ++i)
                 {
                     m_ActiveAnimal[i].SetActive(false);
                 }
