@@ -38,6 +38,9 @@ public class Food : MonoBehaviour {
         if (smellTime >= 30 && food_Kind == Food_Kind.Meat)
         {
             SelectFood(2);
+            GameObject child = transform.Find("Steak_Uncooked(Clone)").gameObject;
+            if (child == null) return;
+            Destroy(child);
         }
     }
 
