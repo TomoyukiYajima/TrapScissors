@@ -33,16 +33,10 @@ public class ResultManager : MonoBehaviour
             return _resultManager;
         }
     }
-    // Use this for initialization
-    void Start () {
-	
-	}
-	
-	// Update is called once per frame
-	void Update () {
-	
-	}
 
+    /// <summary>
+    /// クリアした時に文字を表示させる
+    /// </summary>
     public void ClearPopUpActiveEnd()
     {
         _clearPopUpParent.SetActive(false);
@@ -50,12 +44,19 @@ public class ResultManager : MonoBehaviour
         _gameClear.SetActive(true);
     }
 
+    /// <summary>
+    /// ゲームオーバーの時に文字を表示させる
+    /// </summary>
     public void GameOverPopActiveEnd()
     {
         _gameOver.SetActive(true);
         _gameOver.transform.Find("ContinueButton").GetComponent<Button>().Select();
     }
 
+    /// <summary>
+    /// ゲームクリアのUI表示を設定する
+    /// </summary>
+    /// <param name="flag"></param>
     public void ClearSetActive(bool flag)
     {
         _gameClear.SetActive(flag);

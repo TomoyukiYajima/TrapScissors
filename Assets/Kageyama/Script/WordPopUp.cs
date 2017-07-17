@@ -14,7 +14,7 @@ public class WordPopUp : MonoBehaviour
     [SerializeField]
     private bool _endPopUp;     //ポップアップが終わったら次の演出をするかかどうか
     [SerializeField]
-    private bool _gameClear;     //ゲームクリアかどうか
+    private bool _gameClear;    //ゲームクリアかどうか
 
     private float _drawTime;    //文字を消すまでの時間
     private bool _end;          //演出が終わったかどうか

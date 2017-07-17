@@ -7,40 +7,49 @@ public class CameraRay : MonoBehaviour
     [SerializeField]
     private GameObject _stageObj = null;
     [SerializeField]
-    private GameObject _backUpObje = null;
+    private GameObject _backUpObj = null;
+    private GameObject _player = null;
 
-	// Use this for initialization
-	void Start ()
+    void Start()
     {
+        _player = GameObject.Find("Player_2_Test");
     }
-	
+
 	// Update is called once per frame
 	void Update ()
     {
         RayCheck();
 
-        if (_stageObj == null && _backUpObje == null) return;
-        if (_backUpObje != _stageObj)
+        if (_stageObj == null && _backUpObj == null) return;
+        if (_backUpObj != _stageObj)
         {
-            if(_backUpObje != null) MatChenge(_backUpObje, 1.0f);
-            _backUpObje = _stageObj;
+            if(_backUpObj != null) MatChenge(_backUpObj, 1.0f);
+            _backUpObj = _stageObj;
         }
     }
 
     void RayCheck()
     {
-        RaycastHit hit;
-        Ray ray;
-        ray = new Ray(transform.position + new Vector3(0, 0, 0), transform.forward);
-        if (Physics.SphereCast(ray, 2, out hit, 100))
+        RaycastHit _hit;
+        Ray _ray;
+        Vector3 _pos = Vector3.zero;
+        if (_player == null)
         {
-            Debug.DrawLine(ray.origin, hit.point, Color.red);
+            _ray = new Ray(transform.position + new Vector3(0, 0, 0), transform.forward);
+        }
+        else
+        {
+            _pos =new Vector3(_player.transform.position.x,_player.transform.position.y + 1,_player.transform.position.z);
+            _ray = new Ray(transform.position + new Vector3(0, 0, 0), _pos - this.transform.position);
+        }
+        if (Physics.SphereCast(_ray, 2, out _hit, 100))
+        {
+            Debug.DrawLine(_ray.origin, _hit.point, Color.red);
         }
         
-        if (hit.collider != null && hit.collider.tag == "StageObje")
+        if (_hit.collider != null && _hit.collider.tag == "StageObje")
         {
-            _stageObj = hit.collider.gameObject;
-            _backUpObje = _stageObj;
+            _stageObj = _hit.collider.gameObject;
             MatChenge(_stageObj, 0.5f);
         }
         else _stageObj = null;

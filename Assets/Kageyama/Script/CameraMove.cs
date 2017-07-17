@@ -36,7 +36,8 @@ public class CameraMove : MonoBehaviour
     private float _sizeMin = 7;
     private float _sizeMax = 20;
     #endregion
-    private Vector3 newPosition;
+
+    private Vector3 newPosition;    //移動時に座標を計算するために一時的に座標を入れる変数
     [SerializeField]
     private GameObject _cameraMap;  //ミニマップのカメラUI
 
