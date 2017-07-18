@@ -22,9 +22,9 @@ public class NavMeshPlayer : MonoBehaviour {
     public Vector3 move;
     public float playerSpeed = 5; 
     UnityEngine.AI.NavMeshAgent agent;
-    private GameObject _targetAnimal;
+    //private GameObject _targetAnimal;
 
-    private GameManager _childSprite;
+    //private GameManager _childSprite;
     private SpriteRenderer _myRenderer;
     public Sprite[] _sprite;
     //public GameObject _gameOver;
@@ -37,11 +37,16 @@ public class NavMeshPlayer : MonoBehaviour {
 
         _myRenderer = this.transform.Find("PlayerSprite").GetComponent<SpriteRenderer>();
 
-        _targetAnimal = null;
+        //_targetAnimal = null;
 	}
 	
 	// Update is called once per frame
 	void Update () {
+
+        if (GameManager.gameManager.GameStateCheck() == GameManager.GameState.END || GameManager.gameManager.GameStateCheck() == GameManager.GameState.PAUSE)
+        {
+            _AState = AnimationState.Idle;
+        }
 
         if (GameManager.gameManager.GameStateCheck() != GameManager.GameState.PLAY || _mainCamera.GetComponent<CameraMove>().LockCheck() == true || _AState == AnimationState.Set || _AState == AnimationState.Food) return;
         move = (Vector3.forward - Vector3.right)* Input.GetAxis("Vertical") + (Vector3.right + Vector3.forward)* Input.GetAxis("Horizontal");

@@ -78,6 +78,11 @@ public class PlayerAction : MonoBehaviour
         //大型トラップが何かを捕まえた、もしくはゲームが終了していたらアクションをできないようにする
         if (_trap.FlgTarget() == true || GameManager.gameManager.GameStateCheck() == GameManager.GameState.END) return;
 
+        if(GameManager.gameManager.GameStateCheck() == GameManager.GameState.END || GameManager.gameManager.GameStateCheck() == GameManager.GameState.PAUSE)
+        {
+            m_NavMeshPlayer._AState = NavMeshPlayer.AnimationState.Idle;
+        }
+
         //print("set" + setCount);
         //print("food" + foodCount);
 
