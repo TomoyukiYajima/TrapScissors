@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using UnityEngine.UI;
 
 public class CameraMove : MonoBehaviour
 {
@@ -36,11 +37,13 @@ public class CameraMove : MonoBehaviour
     private float _sizeMin = 7;
     private float _sizeMax = 20;
     #endregion
-
+    #region その他
     private Vector3 newPosition;    //移動時に座標を計算するために一時的に座標を入れる変数
     [SerializeField]
     private GameObject _cameraMap;  //ミニマップのカメラUI
-
+    [SerializeField]
+    private GameObject _freeLook;
+    #endregion
     void Start()
     {
         _size = this.GetComponent<Camera>().orthographicSize;
@@ -116,6 +119,9 @@ public class CameraMove : MonoBehaviour
             _playerMoveLock = true;
             _size = _sizeMin;
             this.GetComponent<Camera>().orthographicSize = _size;
+            _freeLook.GetComponent<Image>().color = new Color(1, 1, 1, 0);
+            _freeLook.SetActive(true);
+            _freeLook.GetComponent<ButtonFlash>().Flash();
         }
         //ロックを外す
         else if(Input.GetAxis("Lock") < 0.5f && _playerMoveLock == true)
@@ -125,6 +131,8 @@ public class CameraMove : MonoBehaviour
             _playerMoveLock = false;
             _size = _sizeMin;
             this.GetComponent<Camera>().orthographicSize = _size;
+            _freeLook.SetActive(false);
+            LeanTween.cancel(_freeLook);
         }
     }
 
