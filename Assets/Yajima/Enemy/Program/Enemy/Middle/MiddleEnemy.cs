@@ -83,8 +83,8 @@ public class MiddleEnemy : Enemy3D {
         // トラバサミが解放されたときの行動
         TrapReleaseAction();
         // 死亡状態に変更
-        ChangeState(State.DeadIdel, AnimatorNumber.ANIMATOR_DEAD_NUMBER);
-        //ChangeAnimation(AnimatorNumber.ANIMATOR_DEAD_NUMBER);
+        //ChangeState(State.DeadIdel, AnimatorNumber.ANIMATOR_DEAD_NUMBER);
+        ChangeAnimation(AnimatorNumber.ANIMATOR_DEAD_NUMBER);
         // トラバサミを空っぽにする
         m_SmallTrap = null;
         // ナビメッシュエージェント関連の初期化

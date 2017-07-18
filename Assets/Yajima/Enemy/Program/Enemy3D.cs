@@ -331,6 +331,7 @@ public class Enemy3D : MonoBehaviour
     // 発見状態
     protected virtual void Discover(float deltaTime)
     {
+        if (m_MotionNumber == (int)AnimatorNumber.ANIMATOR_DEAD_NUMBER) return;
         //print(m_DState.ToString());
 
         switch (m_DState)

@@ -65,7 +65,6 @@ public class WolfEnemy : MiddleEnemy {
                 m_FoodObj = null;
                 m_Agent.Resume();
                 // アニメーションの変更
-                //m_Animator.CrossFade(m_AnimatorStates[(int)AnimatorNumber.ANIMATOR_CHASE_NUMBER], 0.1f, -1);
                 ChangeAnimation(AnimatorNumber.ANIMATOR_CHASE_NUMBER);
                 return;
             }

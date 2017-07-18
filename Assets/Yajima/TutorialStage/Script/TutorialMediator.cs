@@ -93,6 +93,8 @@ public class TutorialMediator : MonoBehaviour {
             m_Timer = 0.0f;
             m_Init = false;
         }
+
+        if (!m_Init) return;
         m_Timer += 1.0f / 60.0f;
     }
 
