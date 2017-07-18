@@ -55,6 +55,11 @@ public class PlayerAction : MonoBehaviour
     private bool isTutorialAction = false;
 
     [SerializeField]
+    public GameObject X_Collect;
+    [SerializeField]
+    public GameObject Y_Collect;
+
+    [SerializeField]
     private GameObject _bigTrap;
     private BigTrap _trap;
     // Use this for initialization
@@ -233,8 +238,16 @@ public class PlayerAction : MonoBehaviour
         if (col.tag == "Trap")
         {
             _onTrapFlag = flag;
-            if (_onTrapFlag == true) _recovery = col.gameObject;
-            else if (_onTrapFlag == false) _recovery = null;
+            if (_onTrapFlag == true)
+            {
+                _recovery = col.gameObject;
+                X_Collect.SetActive(true);
+            }
+            else if (_onTrapFlag == false)
+            {
+                _recovery = null;
+                X_Collect.SetActive(false);
+            }
         }
     }
 
@@ -247,8 +260,13 @@ public class PlayerAction : MonoBehaviour
             {
                 _foodRecovery = col.gameObject;
                 recoveryNumber = _foodRecovery.GetComponent<Food>().FoodNumber();
+                Y_Collect.SetActive(true);
             }
-            else if (_onFoodFlag == false) _recovery = null;
+            else if (_onFoodFlag == false)
+            {
+                _recovery = null;
+                Y_Collect.SetActive(false);
+            }
         }
     }
 
