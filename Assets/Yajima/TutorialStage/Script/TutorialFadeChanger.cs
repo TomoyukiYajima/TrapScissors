@@ -44,40 +44,37 @@ public class TutorialFadeChanger : MonoBehaviour {
     {
         if (!m_IsFadeOut)
         {
-            SceneManagerScript.sceneManager.FadeOut("");
+            SceneManagerScript.sceneManager.FadeBlack(1.0f);
             m_IsFadeOut = true;
         }
         else
         {
             if (m_IsFadeIn) return;
-            // m_FadeColor.a >= 1.0f
-            m_Timer += Time.deltaTime;
-            if (m_Timer >= 1.0f)
+            m_Timer += 1.0f / 30.0f;
+            if (m_Timer < 1.0f) return;
+
+            SceneManagerScript.sceneManager.FadeWhite();
+            m_IsFadeIn = true;
+
+            //プレイヤーを初期位置に戻す
+            m_Player.transform.position = m_InitPosition;
+            // えさの削除
+            var food = GameObject.Find("Food(Clone)");
+            GameObject.Destroy(food);
+            // えさの追加
+            var foodUI = GameObject.Find("FoodParent");
+            var foodUIMove = foodUI.GetComponent<FoodUIMove>();
+            foodUIMove.FoodCountAdd(0);
+            foodUIMove.FoodCountSub(1);
+
+            for (int i = 0; i != m_ActiveAnimal.Length; ++i)
             {
-                SceneManagerScript.sceneManager.FadeIn();
-                m_IsFadeIn = true;
+                m_ActiveAnimal[i].SetActive(false);
+            }
 
-                //プレイヤーを初期位置に戻す
-                m_Player.transform.position = m_InitPosition;
-                // えさの削除
-                var food = GameObject.Find("Food(Clone)");
-                GameObject.Destroy(food);
-                // えさの追加
-                var foodUI = GameObject.Find("FoodParent");
-                var foodUIMove = foodUI.GetComponent<FoodUIMove>();
-                foodUIMove.FoodCountAdd(0);
-                foodUIMove.FoodCountSub(1);
-
-                for (int i = 0; i != m_ActiveAnimal.Length; ++i)
-                {
-                    m_ActiveAnimal[i].SetActive(false);
-                }
-
-                for (int i = 0; i != m_NotActiveAnimal.Length; ++i)
-                {
-                    m_NotActiveAnimal[i].SetActive(true);
-                }
-                
+            for (int i = 0; i != m_NotActiveAnimal.Length; ++i)
+            {
+                m_NotActiveAnimal[i].SetActive(true);
             }
         }
     }

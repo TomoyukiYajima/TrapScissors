@@ -36,95 +36,14 @@ public class MiddleEnemy : Enemy3D {
 
     #region 関数
     #region 状態関数
-    //protected override void Idel(float deltaTime)
-    //{
-    //    //if (InObject("RabbitEnemy", out m_DiscoverObj))
-    //    // if (IsInTrapAnimal(out m_DiscoverObj))
-
-    //    // トラバサミの持っているターゲットを取得
-    //    var trapName = "RabbitEnemy";//"sample1(Clone)";
-    //    // 餌である動物を見つけたら、動物のもとに行く
-    //    if (InObject(trapName, out m_DiscoverObj))
-    //    {
-    //        // えさ発見状態に遷移
-    //        //m_DiscoverObj
-    //        //m_DSNumber = DSNumber.DISCOVERED_FEED_NUMBER;
-    //        //ChangeState(State.Discover, AnimationNumber.ANIME_DISCOVER_NUMBER);
-    //        ChangeDiscoverMoveState(DiscoverMoveState.DiscoverMove_Animal);
-    //        //var enemy = m_DiscoverObj.GetComponent<Enemy3D>();
-    //        //if (enemy == null) return;
-    //        //m_Animal = enemy;
-    //        // 移動ポイントを動物に変更
-    //        ChangeMovePoint(m_DiscoverObj.transform.position);
-    //        ChangeSpriteColor(Color.magenta);
-    //        return;
-
-
-    //        //// えさ発見状態に遷移
-    //        //var trap = m_DiscoverObj.GetComponent<Trap_Small>():
-    //        //if (trap == null) return;
-    //        ////var animal = trap.t
-    //        ////m_DSNumber = DSNumber.DISCOVERED_FEED_NUMBER;
-    //        ////ChangeState(State.Discover, AnimationNumber.ANIME_DISCOVER_NUMBER);
-    //        //ChangeDiscoverMoveState(DiscoverMoveState.DiscoverMove_Animal);
-    //        ////var enemy = m_DiscoverObj.GetComponent<Enemy3D>();
-    //        ////if (enemy == null) return;
-    //        ////m_Animal = enemy;
-    //        //// 移動ポイントを動物に変更
-    //        //ChangeMovePoint(m_DiscoverObj.transform.position);
-    //        //ChangeSpriteColor(Color.magenta);
-    //        //return;
-    //    }
-
-    //    // 親の移動
-    //    base.Idel(deltaTime);
-    //}
-
-    //protected override void DiscoverMove(float deltaTime)
-    //{
-    //    switch (m_DiscoverMoveState)
-    //    {
-    //        case DiscoverMoveState.DiscoverMove_Animal: DiscoverMoveAnimal(deltaTime); break;
-    //        case DiscoverMoveState.DiscoverMove_Lift: DiscoverMoveLift(deltaTime); break;
-    //        case DiscoverMoveState.DiscoverMove_TakeAway: DiscoverMoveTakeAway(deltaTime); break;
-    //    }
-    //    //ChangeMovePoint(m_Animal.transform.position);
-    //    //m_Agent.Resume();
-    //}
-
     protected override void DiscoverPlayer(float deltaTime)
     {
-        //// 発見アニメーションの場合
-        //if (m_MotionNumber == (int)AnimatorNumber.ANIMATOR_DISCOVER_NUMBER)
-        //{
-        //    var layer = m_Animator.GetLayerIndex("Base Layer");
-        //    var state = m_Animator.GetCurrentAnimatorStateInfo(layer);
-        //    var nTime = state.normalizedTime % 1.0f;
-        //    //var time = state.normalizedTime;
-        //    // アニメーションの再生が完了したら、次のアニメーションに変更
-        //    if (nTime < 0.9f)
-        //    {
-        //        m_Agent.Stop();
-        //        return;
-        //    }
-        //    else
-        //    {
-        //        // アニメーションの変更
-        //        //m_Animator.CrossFade(m_AnimatorStates[(int)AnimatorNumber.ANIMATOR_CHASE_NUMBER], 0.1f, -1);
-        //        ChangeAnimation(AnimatorNumber.ANIMATOR_CHASE_NUMBER);
-        //        m_Agent.Resume();
-        //    }
-        //}
-
-        //// プレイヤーとのベクトルを計算して、移動ポイントを更新する
+        // プレイヤーとのベクトルを計算して、移動ポイントを更新する
         var vec = m_Player.transform.position - this.transform.position;
         var dir = vec.normalized;
-        //var point = m_Player.transform.position + dir * 10.0f;
-        //m_Agent.destination = point;
-        //m_Agent.speed = m_Speed * 1.5f;
         // velocity に移動量を渡すー＞ナビメッシュが自動で速度の補正をしてしまい、
         // 動物が追いつけなくなっているため
-        m_Agent.velocity = dir * m_DiscoverSpeed; //m_Speed;
+        m_Agent.velocity = dir * m_DiscoverSpeed;
         m_Agent.destination = m_Player.transform.position;
 
         base.DiscoverPlayer(deltaTime);
@@ -146,47 +65,36 @@ public class MiddleEnemy : Enemy3D {
         // ぴよりアニメーション
         m_AnimatorStates[(int)AnimatorNumber.ANIMATOR_FAINT_NUMBER] = "Faint";
     }
-    public override void SoundNotice(Transform point)
-    {
-        base.SoundNotice(point);
-    }
-    //// トラバサミに当たった時の行動です
-    //protected override void TrapHitAction()
+    //public override void SoundNotice(Transform point)
     //{
-    //    base.TrapHitAction();
-
-    //    ChangeState(State.Runaway, AnimationNumber.ANIME_RUNAWAY_NUMBER);
-    //    ChangeSpriteColor(Color.white);
+    //    base.SoundNotice(point);
     //}
 
     // 小さいトラバサミに衝突した時の行動です
     protected override void SmallTrapHitAction()
     {
-        //ChangeState(State.Runaway, AnimationNumber.ANIME_RUNAWAY_NUMBER);
         ChangeTrapHitState(TrapHitState.TrapHit_Runaway);
         m_Agent.Resume();
-        //ChangeSpriteColor(Color.white);
     }
 
     // 大きいトラバサミに衝突した時の行動です
     protected override void BigTrapHitAction()
     {
-        ////base.SmallTrapHitAction();
-        //// 死亡待機状態に遷移
-        //ChangeState(State.DeadIdel, AnimationNumber.ANIME_DEAD_NUMBER);
-        //// 肉UIの生成
-        //CreateMeat(AnimalMeat.MeatNumber.SMALL_NUMBER);
-        ////// トラバサミが解放されたときの行動
-        ////TrapReleaseAction();
-        ////// ステータスの初期化
-        ////InitState();
-
-        //// 肉UIの生成
-        //CreateMeat(AnimalMeat.MeatNumber.SMALL_NUMBER);
         // トラバサミが解放されたときの行動
         TrapReleaseAction();
-        // 動物の消去
-        DeadAnimal();
+        // 死亡状態に変更
+        ChangeState(State.DeadIdel, AnimatorNumber.ANIMATOR_DEAD_NUMBER);
+        //ChangeAnimation(AnimatorNumber.ANIMATOR_DEAD_NUMBER);
+        // トラバサミを空っぽにする
+        m_SmallTrap = null;
+        // ナビメッシュエージェント関連の初期化
+        m_Agent.isStopped = true;
+        m_Agent.enabled = false;
+        if (m_MovePoints.Length > 0)
+            m_MovePointPosition = m_MovePoints[0].position;
+        // 自身の衝突判定をオンにする
+        m_Collider.enabled = false;
+        m_RayPoint.gameObject.SetActive(false);
     }
     protected override void AnimalHit(GameObject animal)
     {

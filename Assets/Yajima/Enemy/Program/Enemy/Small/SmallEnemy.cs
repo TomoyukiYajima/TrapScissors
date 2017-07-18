@@ -35,55 +35,20 @@ public class SmallEnemy : Enemy3D
     protected override void Start()
     {
         base.Start();
-
         m_RunawayPoint = m_RemovePoint.GetComponent<RunawayPoint>();
-
-        //// キャンパスが設定されていなかったら取得
-        //if (m_Canvas == null) m_Canvas = GameObject.Find("Canvas");
-        //// キャンパスのフレームを取得
-        //var frame = m_Canvas.transform.FindChild("Frame");
-        //if (frame != null) m_Frame = frame.gameObject;
-
-        //// 壁を発見したとき
-        //GameObject wall = null;
-        //if (InWall(out wall, 20))
-        //{
-        //    // ベクトルを求める
-        //    var cross = Vector3.Cross(wall.transform.up, this.transform.forward);
-        //    m_RemovePoint.transform.localPosition = cross;
-        //}
     }
 
     protected override void Update()
     {
         base.Update();
         m_RunawayPoint.SetPosition(this.transform.position);
-        //var rotate = wall.transform.rotation.eulerAngles;
     }
 
     protected override void DiscoverPlayer(float deltaTime)
     {
-        // 発見アニメーションの場合
-        if (m_MotionNumber == (int)AnimatorNumber.ANIMATOR_DISCOVER_NUMBER)
-        {
-            // 一定時間経過したら、次のアニメーションを再生
-            if (!IsEndTimeAnimation(0.9f))
-            {
-                m_Agent.Stop();
-                return;
-            }
-            else
-            {
-                // アニメーションの変更
-                ChangeAnimation(AnimatorNumber.ANIMATOR_CHASE_NUMBER);
-                m_Agent.Resume();
-            }
-        }
-
         // 移動(通常の移動速度の数倍)
         Move(deltaTime, m_DiscoverSpeed);
         m_MoveLength += m_DiscoverSpeed * deltaTime;
-        //base.DiscoverPlayer(deltaTime);]
         ChangeMovePoint(m_RunawayPoint.transform.position);
         // 壁を発見したとき
         GameObject wall = null;
@@ -95,22 +60,10 @@ public class SmallEnemy : Enemy3D
             var vec = point - wall.transform.position;
             var cross = Vector3.Cross(up, vec);
             var rotate = Mathf.Atan2(vec.z, vec.x);
-
-
             // 壁に沿うように逃げる
-            //var rotate = wall.transform.rotation.eulerAngles;
             m_RunawayPoint.ChangeAddPosition(rotate);
-            //print(rotate.y.ToString());
         }
 
-        // 移動(通常の移動速度の数倍)
-        //Move(deltaTime, m_Speed * 2.0f);
-        //m_Agent.destination = m_Player.transform.position;
-        //Camera.
-
-        // 一定距離移動したら、待機状態に遷移
-        //GameObject obj = null;
-        // if (!InPlayer(out obj, 20.0f, true) || m_MoveLength > 20)
         if (m_MoveLength > 20)
         {
             // 待機状態に遷移
@@ -175,13 +128,8 @@ public class SmallEnemy : Enemy3D
             var cross = Vector3.Cross(vec, up);
             degree = Mathf.Atan2(vec.z, vec.x) * Mathf.Rad2Deg;
 
-            //print(degree);
-
             // 壁に沿うように逃げる
-            //var rotate = wall.transform.rotation.eulerAngles;
             m_RunawayPoint.ChangeAddPosition(degree);
-
-            //print(rotate.y.ToString());
         }
 
         // 一定距離移動したら、待機状態に遷移
@@ -208,12 +156,6 @@ public class SmallEnemy : Enemy3D
         // プレイヤーの捜索
         SearchPlayer();
     }
-    protected override void ReturnMove(float deltaTime, float subSpeed = 1.0f)
-    {
-        base.ReturnMove(deltaTime, subSpeed);
-        // 移動距離の加算
-        //m_MoveLength += Mathf.Abs(m_TotalVelocity.x) + Mathf.Abs(m_TotalVelocity.y) + Mathf.Abs(m_TotalVelocity.z);
-    }
 
     protected override void ChangePlayerHitMove(GameObject player)
     {
@@ -223,8 +165,6 @@ public class SmallEnemy : Enemy3D
         var vec = player.transform.position - this.transform.position;
         var angle = Mathf.Atan2(vec.z, vec.x);
         m_RunawayPoint.ChangeAddPosition(angle * Mathf.Rad2Deg - 180);
-        //ChangeMovePoint(m_RunawayPoint.transform.position);
-        //PointRunaway(player.transform);
     }
 
     protected override void SetAnimator()
@@ -285,17 +225,6 @@ public class SmallEnemy : Enemy3D
     //        m_Agent.Stop();
     //        return;
     //    }
-    //}
-
-    //protected override void TurnWall()
-    //{
-    //    // 一定距離移動したら、折り返す
-    //    //if (m_MoveLength < m_TurnLength * 10) return;
-
-    //    m_MoveLength = 0.0f;
-    //    //base.TurnWall();
-    //    // 角度の設定
-    //    SetDegree();
     //}
 
     protected override void TrapReleaseAction()

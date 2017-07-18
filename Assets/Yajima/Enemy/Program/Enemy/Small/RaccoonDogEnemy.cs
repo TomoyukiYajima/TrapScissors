@@ -88,7 +88,7 @@ public class RaccoonDogEnemy : SmallEnemy {
         if (!m_IsRandomMove) return;
         // 円の描画
         var color = Color.green;
-        color.a = 0.3f;
+        color.a = 0.15f;
         Gizmos.color = color;
         Gizmos.DrawSphere(transform.parent.position, m_MoveRadius);
     }

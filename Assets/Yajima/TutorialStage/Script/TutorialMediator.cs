@@ -13,6 +13,9 @@ public class TutorialMediator : MonoBehaviour {
     private int m_ActionCount = 0;              // プレイヤーのアクションカウント
     private bool m_IsAction = false;            // プレイヤーのアクションができるか
 
+    private bool m_Init = false;
+    private float m_Timer = 0.0f;
+
     private Dictionary<int, int> m_Numbers =
        new Dictionary<int, int>();              // ステージ番号(ビット管理用)
 
@@ -30,15 +33,12 @@ public class TutorialMediator : MonoBehaviour {
 
         ActionCount = m_StageNumber;
 
-        for(int i = 0; i != 5; ++i)
-        {
-            m_Numbers[i + 1] = 1 << i;
-        }
-	}
+        for (int i = 0; i != 5; ++i) m_Numbers[i + 1] = 1 << i;
+    }
 	
 	// Update is called once per frame
 	void Update () {
-	
+        if (m_Init) FadeInit();
 	}
 
     // インスタンスの取得を行います
@@ -51,7 +51,6 @@ public class TutorialMediator : MonoBehaviour {
             // インスタンスが無かった場合、ログの表示
             if (instance == null) Debug.LogError("TutorialMediator Instance Error");
         }
-
         return instance;
     }
 
@@ -76,16 +75,25 @@ public class TutorialMediator : MonoBehaviour {
     }
 
     // 
-    public void TutorialInit()
+    public void TutorialInit() { m_Init = true; }
+
+    private void FadeInit()
     {
         // 一旦停止する
-        //GameManager.gameManager.GameStateSet(GameManager.GameState.PAUSE);
-        //SceneManagerScript.sceneManager.FadeBlack();
-
-        // フェード中は移動させない
-        m_Player.transform.position = m_InitPlayerPosition;
-        // フェードインする
-        SceneManagerScript.sceneManager.FadeWhite();
+        //var state = GameManager.gameManager.GameStateCheck();
+        //if (state == GameManager.GameState.END || state == GameManager.GameState.PAUSE) return;
+        GameManager.gameManager.GameStateSet(GameManager.GameState.PAUSE);
+        if (m_Timer == 0.0f) SceneManagerScript.sceneManager.Black(1.0f);
+        if (m_Timer >= 1.0f)
+        {
+            // フェードインする
+            SceneManagerScript.sceneManager.FadeWhite();
+            GameManager.gameManager.GameStateSet(GameManager.GameState.PLAY);
+            m_Player.transform.position = m_InitPlayerPosition;
+            m_Timer = 0.0f;
+            m_Init = false;
+        }
+        m_Timer += 1.0f / 60.0f;
     }
 
     // チュートリアルでのアクションが行えるかを返します
