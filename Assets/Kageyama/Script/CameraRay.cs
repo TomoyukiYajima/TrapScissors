@@ -9,9 +9,11 @@ public class CameraRay : MonoBehaviour
     [SerializeField]
     private GameObject _backUpObj = null;
     private GameObject _player = null;
+    private CameraMove _cameraMove = null;
 
     void Start()
     {
+        _cameraMove = this.GetComponent<CameraMove>();
         _player = GameObject.Find("Player_2_Test");
     }
 
@@ -33,7 +35,8 @@ public class CameraRay : MonoBehaviour
         RaycastHit _hit;
         Ray _ray;
         Vector3 _pos = Vector3.zero;
-        if (_player == null)
+        //プレイヤーがいない、もしくはカメラだけで動く状態なら、中心にRayを飛ばす
+        if (_player == null || _cameraMove.LockCheck() == true)
         {
             _ray = new Ray(transform.position + new Vector3(0, 0, 0), transform.forward);
         }
@@ -42,11 +45,14 @@ public class CameraRay : MonoBehaviour
             _pos =new Vector3(_player.transform.position.x,_player.transform.position.y + 1,_player.transform.position.z);
             _ray = new Ray(transform.position + new Vector3(0, 0, 0), _pos - this.transform.position);
         }
+
+#if UNITY_EDITOR
         if (Physics.SphereCast(_ray, 2, out _hit, 100))
         {
             Debug.DrawLine(_ray.origin, _hit.point, Color.red);
         }
-        
+#endif
+
         if (_hit.collider != null && _hit.collider.tag == "StageObje")
         {
             _stageObj = _hit.collider.gameObject;
@@ -57,7 +63,6 @@ public class CameraRay : MonoBehaviour
 
     void MatChenge(GameObject obj, float alpha)
     {
-        //List<Material> mat = new List<Material>();
         Material[] mat = obj.GetComponent<Renderer>().materials;
         Color matColor;
         for(int i = 0; i < mat.Length; i++)
