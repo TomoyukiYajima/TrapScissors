@@ -69,16 +69,24 @@ public class PlayerAction : MonoBehaviour
         _foodUIMove = _foodUI.GetComponent<FoodUIMove>();
         //今選んでいる餌を調べる
         _foodNumber = _foodUIMove.SelectFoodNumber();
-        _trap = _bigTrap.GetComponent<BigTrap>();
+        if (_trap != null)
+        {
+            _trap = _bigTrap.GetComponent<BigTrap>();
+        }
     }
 
     // Update is called once per frame
     void Update()
     {
         //大型トラップが何かを捕まえた、もしくはゲームが終了していたらアクションをできないようにする
-        if (_trap.FlgTarget() == true || GameManager.gameManager.GameStateCheck() == GameManager.GameState.END) return;
+        if (GameManager.gameManager.GameStateCheck() == GameManager.GameState.END) return;
 
-        if(GameManager.gameManager.GameStateCheck() == GameManager.GameState.END || GameManager.gameManager.GameStateCheck() == GameManager.GameState.PAUSE)
+        if (_trap != null)
+        {
+            if (_trap.FlgTarget() == true) return;
+        }
+
+        if (GameManager.gameManager.GameStateCheck() == GameManager.GameState.END || GameManager.gameManager.GameStateCheck() == GameManager.GameState.PAUSE)
         {
             m_NavMeshPlayer._AState = NavMeshPlayer.AnimationState.Idle;
         }
