@@ -38,7 +38,9 @@ public class BearEnemy : LargeEnemy {
             //ChangeSpriteColor(Color.red);
             m_Agent.Resume();
         }
-        else if (m_State == State.DiscoverMove) SoundMove(point);
+        else base.SoundNotice(point);
+        
+        //else if (m_State == State.DiscoverMove) SoundMove(point);
     }
 
     protected override bool IsFoodCheck(Food.Food_Kind food)

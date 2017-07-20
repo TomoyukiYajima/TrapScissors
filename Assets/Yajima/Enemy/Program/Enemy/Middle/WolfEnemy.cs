@@ -137,7 +137,7 @@ public class WolfEnemy : MiddleEnemy {
     }
 
     // 音反応なし
-    public override void SoundNotice(Transform point) { }
+    //public override void SoundNotice(Transform point) { }
 
     protected override bool IsFoodCheck(Food.Food_Kind food)
     {

@@ -118,13 +118,13 @@ public class BoarEnemy : MiddleEnemy {
         if (objName == "AttackCollider") ChangeMeat();
     }
 
-    public override void SoundNotice(Transform point)
-    {
-        // プレイヤーを見つけた場合、音のなった位置に移動
-        // 見つけていない場合、音のなった位置から離れます
-        if (m_State == State.DiscoverMove) SoundMove(point);
-        else PointRunaway(point);
-    }
+    //public override void SoundNotice(Transform point)
+    //{
+    //    // プレイヤーを見つけた場合、音のなった位置に移動
+    //    // 見つけていない場合、音のなった位置から離れます
+    //    if (m_State == State.DiscoverMove) SoundMove(point);
+    //    else PointRunaway(point);
+    //}
 
     protected override bool IsFoodCheck(Food.Food_Kind food)
     {

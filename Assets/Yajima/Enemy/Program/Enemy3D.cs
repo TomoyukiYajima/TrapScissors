@@ -105,11 +105,14 @@ public class Enemy3D : MonoBehaviour
     private GameObject m_TrapsObj = null;           // トラバサミの親クラス
     private Transform m_OtherCreateBox;             // 持ち帰る動物の元の親オブジェクト
     private TrapHitState m_THState =
-        TrapHitState.TrapHit_Change;                  // トラップヒット状態
+        TrapHitState.TrapHit_Change;                // トラップヒット状態
     private State m_PrevState = State.Idel;         // 前回の行動
     //private GameObject m_Frame;             // キャンバスのフレーム                                     
     //private List<State>
     //    m_DiscoveredStates = new List<State>();     // 発見後の行動
+
+    private Vector3 m_SoundPoint;                   // 音の鳴った位置
+    //private 
 
     private const int MULT_SPEED = 10;               // 速度の倍率(調整しやすくさせるため)
     private const string PLAYER_TAG = "Player";      // プレイヤータグ
@@ -122,16 +125,17 @@ public class Enemy3D : MonoBehaviour
     [System.Flags]
     public enum State
     {
-        Idel = 0,           // 待機状態
-        Discover = 1,       // 発見状態
-        DiscoverMove = 2,   // 発見後の移動状態
-        Attack = 4,         // 攻撃状態
-        Faint = 8,          // 気絶状態
-        Sleep = 16,          // 睡眠状態
-        TrapHit = 32,        // トラバサミに挟まれている状態
-        Meat = 64,           // お肉状態
-        DeadIdel = 128,       // 死亡待機状態
-        Runaway = 256,        // 逃亡状態
+        Idel = 1 << 0,          // 待機状態
+        Search = 1 << 1,        // 捜索状態
+        Discover = 1 << 2,      // 発見状態
+        //DiscoverMove = 1 << 3,  // 発見後の移動状態
+        Attack = 1 << 3,        // 攻撃状態
+        Faint = 1 << 4,         // 気絶状態
+        Sleep = 1 << 5,         // 睡眠状態
+        TrapHit = 1 << 6,       // トラバサミに挟まれている状態
+        Meat = 1 << 7,          // お肉状態
+        DeadIdel = 1 << 8,      // 死亡待機状態
+        Runaway = 1 << 9,       // 逃亡状態
     }
 
     // 発見状態
@@ -221,6 +225,9 @@ public class Enemy3D : MonoBehaviour
     // Update is called once per frame
     protected virtual void Update()
     {
+        // 衝突時の移動量を消す
+        m_Rigidbody.velocity = Vector3.zero;
+
         // ゲームマネージャの状態が変更された場合
         if (m_GameState != GameManager.gameManager.GameStateCheck())
         {
@@ -230,12 +237,16 @@ public class Enemy3D : MonoBehaviour
             if (GameManager.gameManager.GameStateCheck() != GameManager.GameState.PLAY &&
                 GameManager.gameManager.GameStateCheck() != GameManager.GameState.START)
             {
+                // ゲームマネージャの状態が「PLAY」以外だったら動かない
                 // 自身の衝突判定をオフにする
                 m_Collider.enabled = false;
                 // エージェントの停止
-                m_Agent.velocity = Vector3.zero;
-                // ゲームマネージャの状態が「PLAY」以外だったら動かない
-                if (m_Agent.enabled) m_Agent.Stop();
+                if (m_Agent.enabled)
+                {
+                    m_Agent.velocity = Vector3.zero;
+                    m_Agent.Stop();
+                    m_Agent.enabled = false;
+                }
                 if (m_MotionNumber != (int)AnimatorNumber.ANIMATOR_DEAD_NUMBER)
                     m_Animator.enabled = false;
                 return;
@@ -243,6 +254,7 @@ public class Enemy3D : MonoBehaviour
             else
             {
                 m_Animator.enabled = true;
+                if (!m_Agent.enabled) m_Agent.enabled = true;
                 if (m_Agent.enabled && m_State != State.Sleep) m_Agent.Resume();
                 m_Collider.enabled = true;
             }            
@@ -262,14 +274,22 @@ public class Enemy3D : MonoBehaviour
     // 状態の更新
     private void UpdateState(float deltaTime)
     {
+        // ゲームプレイでない場合
+        if (m_GameState != GameManager.GameState.PLAY && m_GameState != GameManager.GameState.START) return;
+
         // 移動開始時間が 0 になったら移動
         m_MoveStartTime = Mathf.Max(m_MoveStartTime - deltaTime, 0.0f);
         if (m_MoveStartTime > 0.0f) return;
+
+        // オブジェクトの捜索
+        if((m_State & (State.TrapHit | State.Meat | State.Faint | State.Attack | State.Discover)) == 0) SearchObject();
+
         // ラムダでリスト内の関数を呼び出すように変更する
         // 状態の変更
         switch (m_State)
         {
             case State.Idel: Idel(deltaTime); break;
+            case State.Search: Search(deltaTime); break;
             case State.Discover: Discover(deltaTime); break;
             case State.Attack: Attack(deltaTime); break;
             case State.Faint: Faint(deltaTime); break;
@@ -321,10 +341,35 @@ public class Enemy3D : MonoBehaviour
     // 待機状態
     protected virtual void Idel(float deltaTime)
     {
-        // オブジェクトの捜索
-        SearchObject();
+        //// オブジェクトの捜索
+        //SearchObject();
         // 移動
         PointMove(deltaTime);
+    }
+
+    // 捜索状態
+    protected void Search(float deltaTime)
+    {
+        m_Agent.Stop();
+
+        if (m_StateTimer >= 3.0f)
+        {
+            ChangeState(State.Idel, AnimatorNumber.ANIMATOR_IDEL_NUMBER);
+            m_Agent.Resume();
+            return;
+        }
+
+        // 音の鳴った方向の取得
+        Vector3 dir = (m_SoundPoint - this.transform.position).normalized;
+        Vector3 cross = Vector3.Cross(this.transform.forward, dir);
+        float dot = Vector3.Dot(this.transform.up, cross);
+
+        float speed = 100.0f * deltaTime;
+        // 値が小さくなったら返す返す
+        if (Mathf.Abs(dot) < 0.001f * speed) return;
+        // 内積が0未満なら、速度を負の値にする
+        if (dot < 0.0f) speed *= -1.0f;
+        this.transform.Rotate(this.transform.up * speed);
     }
 
     #region 発見状態
@@ -604,10 +649,8 @@ public class Enemy3D : MonoBehaviour
             ChangeDiscoverState(DiscoverState.Discover_Player);
             SoundManger.Instance.PlaySE(13);
             // アニメーションの変更
-            //m_Animator.CrossFade(m_AnimatorStates[(int)AnimatorNumber.ANIMATOR_CHASE_NUMBER], 0.1f, -1);
             ChangeAnimation(AnimatorNumber.ANIMATOR_CHASE_NUMBER);
             //m_Mark.ExclamationMark();
-            //ChangeSpriteColor(Color.blue);
             return;
         }
 
@@ -631,6 +674,7 @@ public class Enemy3D : MonoBehaviour
         if (IsEndTimeAnimation(0.9f))
         {
             ChangeState(State.Idel, AnimatorNumber.ANIMATOR_IDEL_NUMBER);
+            m_DState = DiscoverState.Discover_None;
             m_Agent.Resume();
             // 移動速度を変える
             m_Agent.speed = m_Speed;
@@ -1397,7 +1441,8 @@ public class Enemy3D : MonoBehaviour
         // アニメーションの変更
         ChangeAnimation(AnimatorNumber.ANIMATOR_CHASE_NUMBER);
         m_TargetAnimal = animal;
-        print(animal.name);
+        m_Agent.Resume();
+        //print(animal.name);
     }
     #endregion
 
@@ -1534,7 +1579,11 @@ public class Enemy3D : MonoBehaviour
     // 音に気付きます
     public virtual void SoundNotice(Transform point)
     {
-        SoundMove(point);
+        //SoundMove(point);
+        if (m_DState == DiscoverState.Discover_Player)
+            return;
+        m_SoundPoint = point.position;
+        ChangeState(State.Search, AnimatorNumber.ANIMATOR_IDEL_NUMBER);
     }
 
     // 音の位置に近づきます
@@ -1553,8 +1602,6 @@ public class Enemy3D : MonoBehaviour
     // トリガー用
     public void OnTriggerEnter(Collider other)
     {
-        // 衝突時の移動量を消す
-        m_Rigidbody.velocity = Vector3.zero;
         // 特定の状態なら返す
         if (IsNotChangeState()) return;
         // トリガーとの衝突判定
@@ -1563,8 +1610,6 @@ public class Enemy3D : MonoBehaviour
 
     public void OnTriggerStay(Collider other)
     {
-        // 衝突時の移動量を消す
-        m_Rigidbody.velocity = Vector3.zero;
         // 特定の状態なら返す
         if (IsNotChangeState()) return;
         // トリガーとの衝突判定

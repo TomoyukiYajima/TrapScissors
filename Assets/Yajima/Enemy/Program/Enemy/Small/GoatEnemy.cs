@@ -17,10 +17,10 @@ public class GoatEnemy : SmallEnemy {
     //}
 
     #region override関数
-    public override void SoundNotice(Transform point)
-    {
-        // 音のなった位置に近づきます
-        SoundMove(point);
-    }
+    //public void SoundNotice(Transform point)
+    //{
+    //    // 音のなった位置に近づきます
+    //    SoundMove(point);
+    //}
     #endregion
 }
