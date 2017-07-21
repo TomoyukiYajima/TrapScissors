@@ -491,6 +491,7 @@ public class Enemy3D : MonoBehaviour
         {
             // えさ食べ状態に遷移
             ChangeDiscoverFoodState(DiscoverFoodState.DiscoverFood_Eat);
+            //ChangeAnimation(AnimatorNumber.)
             SoundManger.Instance.PlaySE(11);
             m_Agent.isStopped = true;
             return;
@@ -1762,11 +1763,9 @@ public class Enemy3D : MonoBehaviour
         SerializedProperty ReRageTime;
         SerializedProperty ViewLength;
         SerializedProperty ViewAngle;
-        //SerializedProperty GroundPoint;
         SerializedProperty RayPoint;
         SerializedProperty MouthPoint;
         SerializedProperty MovePoints;
-        //SerializedProperty Sprite;
         SerializedProperty Model;
         SerializedProperty MainCamera;
         SerializedProperty WChackPoint;
@@ -1776,7 +1775,6 @@ public class Enemy3D : MonoBehaviour
         SerializedProperty MeatUI;
         SerializedProperty DiscoverUI;
         SerializedProperty AnimalAnimator;
-        //SerializedProperty State;
 
         protected List<SerializedProperty> m_Serializes = new List<SerializedProperty>();
         protected List<string> m_SerializeNames = new List<string>();
@@ -1795,11 +1793,9 @@ public class Enemy3D : MonoBehaviour
             ReRageTime = serializedObject.FindProperty("m_ReRageTime");
             ViewLength = serializedObject.FindProperty("m_ViewLength");
             ViewAngle = serializedObject.FindProperty("m_ViewAngle");
-            //GroundPoint = serializedObject.FindProperty("m_GroundPoint");
             RayPoint = serializedObject.FindProperty("m_RayPoint");
             MovePoints = serializedObject.FindProperty("m_MovePoints");
             MouthPoint = serializedObject.FindProperty("m_MouthPoint");
-            //Sprite = serializedObject.FindProperty("m_Sprite");
             Model = serializedObject.FindProperty("m_Model");
             MainCamera = serializedObject.FindProperty("m_MainCamera");
             WChackPoint = serializedObject.FindProperty("m_WChackPoint");
@@ -1809,7 +1805,6 @@ public class Enemy3D : MonoBehaviour
             MeatUI = serializedObject.FindProperty("m_MeatUI");
             DiscoverUI = serializedObject.FindProperty("m_DiscoverUI");
             AnimalAnimator = serializedObject.FindProperty("m_Animator");
-            //State = serializedObject.FindProperty("m_State");
 
             OnChildEnable();
         }
@@ -1850,17 +1845,14 @@ public class Enemy3D : MonoBehaviour
             EditorGUILayout.Space();
             EditorGUILayout.LabelField("〇各種オブジェクトの位置ベクトル");
             // Transform
-            //GroundPoint.objectReferenceValue = EditorGUILayout.ObjectField("接地ポイント", enemy.m_GroundPoint, typeof(Transform), true);
             RayPoint.objectReferenceValue = EditorGUILayout.ObjectField("レイポイント", enemy.m_RayPoint, typeof(Transform), true);
             MouthPoint.objectReferenceValue = EditorGUILayout.ObjectField("口ポイント", enemy.m_MouthPoint, typeof(Transform), true);
             // 配列
             EditorGUILayout.PropertyField(MovePoints, new GUIContent("徘徊ポイント"), true);
-            // EditorGUILayout.PropertyField( prop , new GUIContent( “array1” ), true );
 
             EditorGUILayout.Space();
             EditorGUILayout.LabelField("〇各種オブジェクトのオブジェクト設定");
             Model.objectReferenceValue = EditorGUILayout.ObjectField("モデル", enemy.m_Model, typeof(GameObject), true);
-            //Sprite.objectReferenceValue = EditorGUILayout.ObjectField("敵の画像", enemy.m_Sprite, typeof(GameObject), true);
             MainCamera.objectReferenceValue = EditorGUILayout.ObjectField("メインカメラ", enemy.m_MainCamera, typeof(CameraMove), true);
             WChackPoint.objectReferenceValue = EditorGUILayout.ObjectField("壁捜索ポイント", enemy.m_WChackPoint, typeof(WallChackPoint), true);
             // GameObject
