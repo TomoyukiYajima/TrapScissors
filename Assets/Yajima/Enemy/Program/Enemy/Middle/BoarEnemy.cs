@@ -82,7 +82,7 @@ public class BoarEnemy : MiddleEnemy {
             m_MoveLength = 0.0f;
             // 移動速度を変える
             m_Agent.speed = m_Speed;
-            m_Agent.Resume();
+            m_Agent.isStopped = false;
             //ChangeSpriteColor(Color.red);
         }
     }

@@ -93,22 +93,22 @@ public class WolfEnemy : MiddleEnemy {
 
     protected override void DiscoverPlayer(float deltaTime)
     {
-        // 発見アニメーションの場合
-        if (m_MotionNumber == (int)AnimatorNumber.ANIMATOR_DISCOVER_NUMBER)
-        {
-            // 一定時間経過したら、次のアニメーションを再生
-            if (!IsEndTimeAnimation(0.9f))
-            {
-                m_Agent.Stop();
-                return;
-            }
-            else
-            {
-                // アニメーションの変更
-                ChangeAnimation(AnimatorNumber.ANIMATOR_CHASE_NUMBER);
-                m_Agent.Resume();
-            }
-        }
+        //// 発見アニメーションの場合
+        //if (m_MotionNumber == (int)AnimatorNumber.ANIMATOR_DISCOVER_NUMBER)
+        //{
+        //    // 一定時間経過したら、次のアニメーションを再生
+        //    if (!IsEndTimeAnimation(0.9f))
+        //    {
+        //        m_Agent.Stop();
+        //        return;
+        //    }
+        //    else
+        //    {
+        //        // アニメーションの変更
+        //        ChangeAnimation(AnimatorNumber.ANIMATOR_CHASE_NUMBER);
+        //        m_Agent.Resume();
+        //    }
+        //}
 
         //SearchAnimal();
         //if (m_DState == DiscoverState.Discover_Animal) return;

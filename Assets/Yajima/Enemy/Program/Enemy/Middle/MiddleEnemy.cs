@@ -74,7 +74,7 @@ public class MiddleEnemy : Enemy3D {
     protected override void SmallTrapHitAction()
     {
         ChangeTrapHitState(TrapHitState.TrapHit_Runaway);
-        m_Agent.Resume();
+        m_Agent.isStopped = false;
     }
 
     // 大きいトラバサミに衝突した時の行動です

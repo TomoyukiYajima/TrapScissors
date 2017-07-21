@@ -46,12 +46,12 @@ public class CameraRay : MonoBehaviour
             _ray = new Ray(transform.position + new Vector3(0, 0, 0), _pos - this.transform.position);
         }
 
-#if UNITY_EDITOR
+//#if UNITY_EDITOR
         if (Physics.SphereCast(_ray, 2, out _hit, 100))
         {
             Debug.DrawLine(_ray.origin, _hit.point, Color.red);
         }
-#endif
+//#endif
 
         if (_hit.collider != null && _hit.collider.tag == "StageObje")
         {
