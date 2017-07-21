@@ -65,16 +65,12 @@ public class MiddleEnemy : Enemy3D {
         // ぴよりアニメーション
         m_AnimatorStates[(int)AnimatorNumber.ANIMATOR_FAINT_NUMBER] = "Faint";
     }
-    //public override void SoundNotice(Transform point)
-    //{
-    //    base.SoundNotice(point);
-    //}
 
     // 小さいトラバサミに衝突した時の行動です
     protected override void SmallTrapHitAction()
     {
         ChangeTrapHitState(TrapHitState.TrapHit_Runaway);
-        m_Agent.Resume();
+        m_Agent.isStopped = false;
     }
 
     // 大きいトラバサミに衝突した時の行動です
@@ -83,7 +79,6 @@ public class MiddleEnemy : Enemy3D {
         // トラバサミが解放されたときの行動
         TrapReleaseAction();
         // 死亡状態に変更
-        //ChangeState(State.DeadIdel, AnimatorNumber.ANIMATOR_DEAD_NUMBER);
         ChangeAnimation(AnimatorNumber.ANIMATOR_DEAD_NUMBER);
         // トラバサミを空っぽにする
         m_SmallTrap = null;

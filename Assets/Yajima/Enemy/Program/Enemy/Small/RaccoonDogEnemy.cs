@@ -18,7 +18,6 @@ public class RaccoonDogEnemy : SmallEnemy {
     #endregion
 
     #region private変数
-    private int m_PrevPointNum = 0;     // 前回の移動ポイント
     private List<Transform> m_Points =
         new List<Transform>();          // 付近のポイント配列
     #endregion

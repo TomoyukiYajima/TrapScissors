@@ -79,16 +79,13 @@ public class TutorialMediator : MonoBehaviour {
 
     private void FadeInit()
     {
-        // 一旦停止する
-        //var state = GameManager.gameManager.GameStateCheck();
-        //if (state == GameManager.GameState.END || state == GameManager.GameState.PAUSE) return;
-        GameManager.gameManager.GameStateSet(GameManager.GameState.PAUSE);
-        if (m_Timer == 0.0f) SceneManagerScript.sceneManager.Black(1.0f);
+        // 一旦停止するフェードアウトをする
+        if (m_Timer == 0.0f) SceneManagerScript.sceneManager.FadeBlack(1.0f);
         if (m_Timer >= 1.0f)
         {
             // フェードインする
             SceneManagerScript.sceneManager.FadeWhite();
-            GameManager.gameManager.GameStateSet(GameManager.GameState.PLAY);
+            // プレイヤーを初期位置に戻す
             m_Player.transform.position = m_InitPlayerPosition;
             m_Timer = 0.0f;
             m_Init = false;

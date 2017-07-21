@@ -14,7 +14,7 @@ public class BearEnemy : LargeEnemy {
         m_MotionNumber = (int)AnimatorNumber.ANIMATOR_TRAP_HIT_NUMBER;
         // スプライトカラーの変更
         //ChangeSpriteColor(new Color(1.0f, 0.0f, 1.0f, 1.0f));
-        m_Agent.Stop();
+        m_Agent.isStopped = true;
     }
     protected override void Update()
     {
@@ -36,9 +36,11 @@ public class BearEnemy : LargeEnemy {
             if (!m_RayPoint.gameObject.activeSelf)
                 m_RayPoint.gameObject.SetActive(true);
             //ChangeSpriteColor(Color.red);
-            m_Agent.Resume();
+            m_Agent.isStopped = false;
         }
-        else if (m_State == State.DiscoverMove) SoundMove(point);
+        else base.SoundNotice(point);
+        
+        //else if (m_State == State.DiscoverMove) SoundMove(point);
     }
 
     protected override bool IsFoodCheck(Food.Food_Kind food)
@@ -73,7 +75,7 @@ public class BearEnemy : LargeEnemy {
         if (!m_RayPoint.gameObject.activeSelf)
             m_RayPoint.gameObject.SetActive(true);
         //ChangeSpriteColor(Color.red);
-        m_Agent.Resume();
+        m_Agent.isStopped = false;
     }
     #endregion
     #endregion

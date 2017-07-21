@@ -292,6 +292,7 @@ public class PlayerAction : MonoBehaviour
         else if (_onTrapFlag == true)
         {
             Destroy(_recovery);
+            X_Collect.SetActive(false);
             _onTrapFlag = false;
 
             if (m_NavMeshPlayer._AState != NavMeshPlayer.AnimationState.Set)
@@ -329,6 +330,7 @@ public class PlayerAction : MonoBehaviour
     {
         yield return new WaitForSecondsRealtime(time);
         Destroy(_foodRecovery);
+        Y_Collect.SetActive(false);
         _onFoodFlag = false;
         //_foodUIMove.FoodCountAdd(_foodNumber);
         GameManager.gameManager.FoodCountSub();

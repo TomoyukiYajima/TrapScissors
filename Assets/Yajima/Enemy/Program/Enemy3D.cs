@@ -52,6 +52,8 @@ public class Enemy3D : MonoBehaviour
     protected GameObject m_DiscoverUI = null;           // 発見時のUI
     [SerializeField]
     protected Animator m_Animator;                      // アニメーター
+    [SerializeField]
+    protected State m_State = State.Idel;               // 状態
     #endregion
 
     #region protected変数
@@ -79,7 +81,6 @@ public class Enemy3D : MonoBehaviour
     protected Collider m_Collider;                      // 自身のコライダー
     protected DSNumber m_DSNumber =
         DSNumber.DISCOVERED_CHASE_NUMBER;               // 追跡状態の番号 
-    protected State m_State = State.Idel;               // 状態
     protected DiscoverState m_DState =
         DiscoverState.Discover_None;                    // 発見状態
     protected DiscoverFoodState m_DFState =
@@ -105,11 +106,14 @@ public class Enemy3D : MonoBehaviour
     private GameObject m_TrapsObj = null;           // トラバサミの親クラス
     private Transform m_OtherCreateBox;             // 持ち帰る動物の元の親オブジェクト
     private TrapHitState m_THState =
-        TrapHitState.TrapHit_Change;                  // トラップヒット状態
+        TrapHitState.TrapHit_Change;                // トラップヒット状態
     private State m_PrevState = State.Idel;         // 前回の行動
     //private GameObject m_Frame;             // キャンバスのフレーム                                     
     //private List<State>
     //    m_DiscoveredStates = new List<State>();     // 発見後の行動
+
+    private Vector3 m_SoundPoint;                   // 音の鳴った位置
+    //private 
 
     private const int MULT_SPEED = 10;               // 速度の倍率(調整しやすくさせるため)
     private const string PLAYER_TAG = "Player";      // プレイヤータグ
@@ -122,16 +126,18 @@ public class Enemy3D : MonoBehaviour
     [System.Flags]
     public enum State
     {
-        Idel = 0,           // 待機状態
-        Discover = 1,       // 発見状態
-        DiscoverMove = 2,   // 発見後の移動状態
-        Attack = 4,         // 攻撃状態
-        Faint = 8,          // 気絶状態
-        Sleep = 16,          // 睡眠状態
-        TrapHit = 32,        // トラバサミに挟まれている状態
-        Meat = 64,           // お肉状態
-        DeadIdel = 128,       // 死亡待機状態
-        Runaway = 256,        // 逃亡状態
+        Idel = 1 << 0,          // 待機状態
+        Search = 1 << 1,        // 捜索状態
+        Discover = 1 << 2,      // 発見状態
+        DiscoverAction = 1 << 3,// 発見行動状態
+        //DiscoverMove = 1 << 3,  // 発見後の移動状態
+        Attack = 1 << 4,        // 攻撃状態
+        Faint = 1 << 5,         // 気絶状態
+        Sleep = 1 << 6,         // 睡眠状態
+        TrapHit = 1 << 7,       // トラバサミに挟まれている状態
+        Meat = 1 << 8,          // お肉状態
+        DeadIdel = 1 << 9,      // 死亡待機状態
+        Runaway = 1 << 10,      // 逃亡状態
     }
 
     // 発見状態
@@ -221,6 +227,9 @@ public class Enemy3D : MonoBehaviour
     // Update is called once per frame
     protected virtual void Update()
     {
+        // 衝突時の移動量を消す
+        m_Rigidbody.velocity = Vector3.zero;
+
         // ゲームマネージャの状態が変更された場合
         if (m_GameState != GameManager.gameManager.GameStateCheck())
         {
@@ -230,12 +239,16 @@ public class Enemy3D : MonoBehaviour
             if (GameManager.gameManager.GameStateCheck() != GameManager.GameState.PLAY &&
                 GameManager.gameManager.GameStateCheck() != GameManager.GameState.START)
             {
+                // ゲームマネージャの状態が「PLAY」以外だったら動かない
                 // 自身の衝突判定をオフにする
                 m_Collider.enabled = false;
                 // エージェントの停止
-                m_Agent.velocity = Vector3.zero;
-                // ゲームマネージャの状態が「PLAY」以外だったら動かない
-                if (m_Agent.enabled) m_Agent.Stop();
+                if (m_Agent.enabled)
+                {
+                    m_Agent.velocity = Vector3.zero;
+                    m_Agent.isStopped = true;
+                    m_Agent.enabled = false;
+                }
                 if (m_MotionNumber != (int)AnimatorNumber.ANIMATOR_DEAD_NUMBER)
                     m_Animator.enabled = false;
                 return;
@@ -243,7 +256,8 @@ public class Enemy3D : MonoBehaviour
             else
             {
                 m_Animator.enabled = true;
-                if (m_Agent.enabled && m_State != State.Sleep) m_Agent.Resume();
+                if (!m_Agent.enabled) m_Agent.enabled = true;
+                if (m_Agent.enabled && m_State != State.Sleep) m_Agent.isStopped = false;
                 m_Collider.enabled = true;
             }            
         }
@@ -254,6 +268,9 @@ public class Enemy3D : MonoBehaviour
         // 状態の更新
         UpdateState(Time.deltaTime);
 
+        // 床の角度に合わせる
+        FloorAngle();
+
         m_IsRendered = false;
     }
     #endregion
@@ -262,15 +279,25 @@ public class Enemy3D : MonoBehaviour
     // 状態の更新
     private void UpdateState(float deltaTime)
     {
+        // ゲームプレイでない場合
+        if (m_GameState != GameManager.GameState.PLAY && m_GameState != GameManager.GameState.START) return;
+
         // 移動開始時間が 0 になったら移動
         m_MoveStartTime = Mathf.Max(m_MoveStartTime - deltaTime, 0.0f);
         if (m_MoveStartTime > 0.0f) return;
+
+        // オブジェクトの捜索
+        if((m_State & (State.TrapHit | State.Meat | State.Faint | State.Attack | State.Discover | State.DiscoverAction)) == 0)
+            SearchObject();
+
         // ラムダでリスト内の関数を呼び出すように変更する
         // 状態の変更
         switch (m_State)
         {
             case State.Idel: Idel(deltaTime); break;
+            case State.Search: Search(deltaTime); break;
             case State.Discover: Discover(deltaTime); break;
+            case State.DiscoverAction: DiscoverAction(deltaTime); break;
             case State.Attack: Attack(deltaTime); break;
             case State.Faint: Faint(deltaTime); break;
             case State.Sleep: Sleep(deltaTime); break;
@@ -321,10 +348,35 @@ public class Enemy3D : MonoBehaviour
     // 待機状態
     protected virtual void Idel(float deltaTime)
     {
-        // オブジェクトの捜索
-        SearchObject();
+        //// オブジェクトの捜索
+        //SearchObject();
         // 移動
         PointMove(deltaTime);
+    }
+
+    // 捜索状態
+    protected void Search(float deltaTime)
+    {
+        m_Agent.isStopped = true;
+
+        if (m_StateTimer >= 3.0f)
+        {
+            ChangeState(State.Idel, AnimatorNumber.ANIMATOR_IDEL_NUMBER);
+            m_Agent.isStopped = false;
+            return;
+        }
+
+        // 音の鳴った方向の取得
+        Vector3 dir = (m_SoundPoint - this.transform.position).normalized;
+        Vector3 cross = Vector3.Cross(this.transform.forward, dir);
+        float dot = Vector3.Dot(this.transform.up, cross);
+
+        float speed = 100.0f * deltaTime;
+        // 値が小さくなったら返す返す
+        if (Mathf.Abs(dot) < 0.001f * speed) return;
+        // 内積が0未満なら、速度を負の値にする
+        if (dot < 0.0f) speed *= -1.0f;
+        this.transform.Rotate(this.transform.up * speed);
     }
 
     #region 発見状態
@@ -377,14 +429,14 @@ public class Enemy3D : MonoBehaviour
         //    }
         //}
 
-        // 一定時間経過したら、次のアニメーションを再生
-        if (!IsEndTimeAnimation(0.9f)) m_Agent.Stop();
-        else
-        {
-            // アニメーションの変更
-            ChangeAnimation(AnimatorNumber.ANIMATOR_CHASE_NUMBER);
-            m_Agent.Resume();
-        }
+        //// 一定時間経過したら、次のアニメーションを再生
+        //if (!IsEndTimeAnimation(0.9f)) m_Agent.isStopped = true;
+        //else
+        //{
+        //    // アニメーションの変更
+        //    ChangeAnimation(AnimatorNumber.ANIMATOR_CHASE_NUMBER);
+        //    m_Agent.isStopped = false;
+        //}
 
         GameObject obj = null;
         if (!InPlayer(out obj, 2.0f, true))
@@ -392,8 +444,8 @@ public class Enemy3D : MonoBehaviour
             // 見失う状態に遷移
             ChangeDiscoverState(DiscoverState.Discover_Lost);
             // アニメーションの変更
-            ChangeAnimation(AnimatorNumber.ANIMATOR_LOST_NUMBER);
-            m_Agent.Resume();
+            //ChangeAnimation(AnimatorNumber.ANIMATOR_LOST_NUMBER);
+            m_Agent.isStopped = false;
         };
     }
 
@@ -439,8 +491,9 @@ public class Enemy3D : MonoBehaviour
         {
             // えさ食べ状態に遷移
             ChangeDiscoverFoodState(DiscoverFoodState.DiscoverFood_Eat);
+            //ChangeAnimation(AnimatorNumber.)
             SoundManger.Instance.PlaySE(11);
-            m_Agent.Stop();
+            m_Agent.isStopped = true;
             return;
         }
 
@@ -481,7 +534,7 @@ public class Enemy3D : MonoBehaviour
         {
             ChangeState(State.Idel, AnimatorNumber.ANIMATOR_IDEL_NUMBER);
             ChangeMovePoint();
-            m_Agent.Resume();
+            m_Agent.isStopped = false;
         }
     }
     // えさ食べ状態
@@ -501,7 +554,7 @@ public class Enemy3D : MonoBehaviour
             // アニメーションの変更
             //m_Animator.CrossFade(m_AnimatorStates[(int)AnimatorNumber.ANIMATOR_IDEL_NUMBER], 0.1f, -1);
             //ChangeSpriteColor(Color.red);
-            m_Agent.Resume();
+            m_Agent.isStopped = false;
         }
 
         if (m_StateTimer <= 3.0f) return;
@@ -552,7 +605,7 @@ public class Enemy3D : MonoBehaviour
         m_SmallTrap = null;
         // 初期位置に移動
         ChangeMovePoint(nest.transform.position);
-        m_Agent.Resume();
+        m_Agent.isStopped = false;
     }
     // えさ持ち帰り状態
     protected virtual void DiscoverFoodTakeOut(float deltaTime)
@@ -589,7 +642,7 @@ public class Enemy3D : MonoBehaviour
         if (!InObject(TRAP_NAME, out obj))
         {
             ChangeState(State.Idel, AnimatorNumber.ANIMATOR_IDEL_NUMBER);
-            m_Agent.Resume();
+            m_Agent.isStopped = false;
             ChangeSpriteColor(Color.red);
         }
     }
@@ -604,10 +657,7 @@ public class Enemy3D : MonoBehaviour
             ChangeDiscoverState(DiscoverState.Discover_Player);
             SoundManger.Instance.PlaySE(13);
             // アニメーションの変更
-            //m_Animator.CrossFade(m_AnimatorStates[(int)AnimatorNumber.ANIMATOR_CHASE_NUMBER], 0.1f, -1);
             ChangeAnimation(AnimatorNumber.ANIMATOR_CHASE_NUMBER);
-            //m_Mark.ExclamationMark();
-            //ChangeSpriteColor(Color.blue);
             return;
         }
 
@@ -621,7 +671,8 @@ public class Enemy3D : MonoBehaviour
             ChangeDiscoverState(DiscoverState.Discover_Lost_Stop);
             // アニメーションの変更
             ChangeAnimation(AnimatorNumber.ANIMATOR_LOST_NUMBER);
-            m_Agent.Stop();
+            m_TargetAnimal = null;
+            m_Agent.isStopped = true;
         }
     }
     // 見失い停止状態
@@ -631,14 +682,35 @@ public class Enemy3D : MonoBehaviour
         if (IsEndTimeAnimation(0.9f))
         {
             ChangeState(State.Idel, AnimatorNumber.ANIMATOR_IDEL_NUMBER);
-            m_Agent.Resume();
+            m_DState = DiscoverState.Discover_None;
+            m_Agent.isStopped = false;
             // 移動速度を変える
             m_Agent.speed = m_Speed;
             m_Player = null;
-            //ChangeSpriteColor(Color.red);
         }
     }
     #endregion
+
+    // 発見行動状態
+    protected virtual void DiscoverAction(float deltaTime)
+    {
+        // 一定時間経過したら、次のアニメーションを再生
+        if (m_MotionNumber == (int)AnimatorNumber.ANIMATOR_DISCOVER_NUMBER
+            && !IsEndTimeAnimation(0.9f))
+        {
+            m_Agent.isStopped = true;
+            return;
+        }
+        else
+        {
+            // アニメーションの変更
+            ChangeAnimation(AnimatorNumber.ANIMATOR_CHASE_NUMBER);
+            //m_Agent.isStopped = false;
+        }
+
+        ChangeDiscoverState(m_DState);
+        m_Agent.isStopped = false;
+    }
 
     // 攻撃状態
     protected virtual void Attack(float deltaTime)
@@ -646,9 +718,8 @@ public class Enemy3D : MonoBehaviour
         if (m_StateTimer < 2.0f) return;
         // 待機状態に遷移
         ChangeState(State.Idel, AnimatorNumber.ANIMATOR_IDEL_NUMBER);
-        //ChangeSpriteColor(Color.red);
-        //m_Animator.CrossFade(m_AnimatorStates[(int)AnimatorNumber.ANIMATOR_IDEL_NUMBER], 0.1f, -1);
-        m_Agent.Resume();
+        m_TargetAnimal = null;
+        m_Agent.isStopped = false;
     }
 
     // 気絶状態
@@ -659,25 +730,12 @@ public class Enemy3D : MonoBehaviour
         // 待機状態に遷移
         ChangeState(State.Idel, AnimatorNumber.ANIMATOR_IDEL_NUMBER);
         ChangeMovePoint();
-        m_Agent.Resume();
+        m_Agent.isStopped = false;
         ChangeSpriteColor(Color.red);
     }
 
     // 睡眠状態
-    protected void Sleep(float deltaTime)
-    {
-        //// えさ判定で、trueならば、起こす(待機状態に遷移)
-        //int value1 = Random.Range(1, 100 + 1);
-        //// 個数によって、判定用の値を変える
-        //int count = 6;
-        //int value2 = Mathf.Min(count, 10) * 6;
-        //print((value1 > value2).ToString());
-
-        // 
-        //ChangeState(State.Idel, AnimationNumber.ANIME_IDEL_NUMBER);
-        //ChangeSpriteColor(Color.red);
-        //m_Agent.Resume();
-    }
+    protected void Sleep(float deltaTime) { }
 
     #region トラバサミヒット状態
     // トラバサミに挟まれている状態
@@ -709,7 +767,7 @@ public class Enemy3D : MonoBehaviour
             ChangeState(State.Faint, AnimatorNumber.ANIMATOR_IDEL_NUMBER);
             // 付属しているトラバサミの削除
             DeleteTrap();
-            m_Agent.Stop();
+            m_Agent.isStopped = true;
             return;
         }
 
@@ -778,9 +836,7 @@ public class Enemy3D : MonoBehaviour
         // 最初のポイントに移動
         m_CurrentMovePoint = 0;
         ChangeMovePoint(m_MovePointPosition);
-        m_Agent.Resume();
-        //if (!m_EnemySprite.gameObject.activeSelf) m_EnemySprite.gameObject.SetActive(true);
-        ChangeSpriteColor(Color.red);
+        m_Agent.isStopped = false;
     }
     // 逃げ状態
     protected void Runaway(float deltaTime)
@@ -790,8 +846,6 @@ public class Enemy3D : MonoBehaviour
         // 画面に映っている間は返す
         if (IsRendered()) return;
         // 自身の衝突判定のトリガーをオンにする
-        //var collider = gameObject.GetComponent<Collider>();
-        //collider.isTrigger = false;
         m_Collider.isTrigger = false;
         // 付属しているトラバサミの削除
         DeleteTrap();
@@ -814,7 +868,7 @@ public class Enemy3D : MonoBehaviour
         m_Collider.isTrigger = true;
         m_Collider.enabled = false;
         // エージェントを停止させる
-        m_Agent.Stop();
+        m_Agent.isStopped = true;
         //m_Agent.isStopped = true;
         m_Agent.enabled = false;
     }
@@ -856,15 +910,13 @@ public class Enemy3D : MonoBehaviour
     {
         // えさを食べ終わったら、待機状態に遷移
         ChangeState(State.Idel, AnimatorNumber.ANIMATOR_IDEL_NUMBER);
-        ChangeSpriteColor(Color.red);
-        m_Agent.Resume();
+        m_Agent.isStopped = false;
         // えさの削除
         Destroy(m_FoodObj);
         m_FoodObj = null;
         // ゲームマネージャ側の減算処理を呼ぶ
         GameManager.gameManager.FoodCountSub();
-        //// アニメーションの変更
-        //m_Animator.CrossFade(m_AnimatorStates[(int)AnimatorNumber.ANIMATOR_IDEL_NUMBER], 0.1f, -1);
+        // アニメーションの変更
         ChangeAnimation(AnimatorNumber.ANIMATOR_IDEL_NUMBER);
     }
 
@@ -1063,6 +1115,27 @@ public class Enemy3D : MonoBehaviour
         //return true;
         return false;
     }
+    // 床の角度に合わせます
+    public void FloorAngle()
+    {
+        //GameObject hitObj = null;
+        //var hitPoint = Vector3.zero;
+        //// レイポイントからオブジェクトの位置までのレイを伸ばす
+        //var point = m_RayPoint.position + this.transform.forward * length;
+        //var dir = point - m_RayPoint.position;
+        ////var playerDir = obj.transform.position - m_RayPoint.position;
+        //Ray ray = new Ray(m_RayPoint.position, dir);
+        //RaycastHit hitInfo;
+        //var hit = Physics.Raycast(ray, out hitInfo);
+        ////print("見えているか調査");
+        //if (!hit || hitInfo.collider.tag != "Wall") return false;
+        //// 指定距離より長かったら返す
+        //if (hitInfo.distance > length) return false;
+        //// 当たった壁
+        //hitObj = hitInfo.collider.gameObject;
+        //hitPoint = hitInfo.point;
+        //return true;
+    }
     #endregion
 
     #region その他関数
@@ -1130,7 +1203,13 @@ public class Enemy3D : MonoBehaviour
     {
         // 発見状態に遷移
         m_DSNumber = DSNumber.DISCOVERED_CHASE_NUMBER;
-        ChangeDiscoverState(DiscoverState.Discover_Player);
+        if ((m_State & (State.Idel | State.Search)) != 0)
+        {
+            m_DState = DiscoverState.Discover_Player;
+            ChangeState(State.DiscoverAction, AnimatorNumber.ANIMATOR_DISCOVER_NUMBER);
+        }
+        else ChangeDiscoverState(DiscoverState.Discover_Player);
+
         SoundManger.Instance.PlaySE(13);
         m_Mark.ExclamationMark();
         // 移動速度を変える
@@ -1139,7 +1218,7 @@ public class Enemy3D : MonoBehaviour
         m_DiscoverPlayer = player.transform;
         m_DSNumber = DSNumber.DISCOVERED_RUNAWAY_NUMBER;
         // 移動ポイントの変更
-        m_Agent.Resume();
+        m_Agent.isStopped = false;
     }
     // オブジェクトの確認を行います
     private void CheckObject()
@@ -1308,8 +1387,12 @@ public class Enemy3D : MonoBehaviour
     {
         // トラバサミの捜索
         SearchTrap();
+        //// トラバサミを見つけていたら返す
+        //if (m_SmallTrap != null) return;
         // 反応する動物の捜索
         SearchAnimal();
+        //// 動物を見つけていたら返す
+        //if (m_TargetAnimal != null) return;
         // プレイヤーの捜索
         SearchPlayer();
     }
@@ -1397,7 +1480,9 @@ public class Enemy3D : MonoBehaviour
         // アニメーションの変更
         ChangeAnimation(AnimatorNumber.ANIMATOR_CHASE_NUMBER);
         m_TargetAnimal = animal;
-        print(animal.name);
+        m_Agent.isStopped = false;
+        //m_Agent.Resume();
+        //print(animal.name);
     }
     #endregion
 
@@ -1459,7 +1544,7 @@ public class Enemy3D : MonoBehaviour
         }
         // 移動ポイントの変更
         ChangeMovePoint(player.transform.position);
-        m_Agent.Resume();
+        m_Agent.isStopped = false;
     }
 
     // 敵を待機状態にさせます
@@ -1513,7 +1598,7 @@ public class Enemy3D : MonoBehaviour
         // 自身の衝突判定をオフにする
         m_Collider.enabled = false;
         // エージェントの停止
-        m_Agent.Stop();
+        m_Agent.isStopped = true;
         m_Agent.enabled = false;
         // モデルの表示をオフにする
         m_Model.SetActive(false);
@@ -1534,7 +1619,11 @@ public class Enemy3D : MonoBehaviour
     // 音に気付きます
     public virtual void SoundNotice(Transform point)
     {
-        SoundMove(point);
+        //SoundMove(point);
+        if (m_DState == DiscoverState.Discover_Player)
+            return;
+        m_SoundPoint = point.position;
+        ChangeState(State.Search, AnimatorNumber.ANIMATOR_IDEL_NUMBER);
     }
 
     // 音の位置に近づきます
@@ -1542,7 +1631,7 @@ public class Enemy3D : MonoBehaviour
     {
         //　音の位置をポイントに変更します
         ChangeMovePoint(point.position);
-        m_Agent.Resume();
+        m_Agent.isStopped = false;
     }
     // 視野のステータスを取得します
     public Vector2 GetRayStatus() { return new Vector2(m_ViewLength, m_ViewAngle); }
@@ -1553,8 +1642,6 @@ public class Enemy3D : MonoBehaviour
     // トリガー用
     public void OnTriggerEnter(Collider other)
     {
-        // 衝突時の移動量を消す
-        m_Rigidbody.velocity = Vector3.zero;
         // 特定の状態なら返す
         if (IsNotChangeState()) return;
         // トリガーとの衝突判定
@@ -1563,8 +1650,6 @@ public class Enemy3D : MonoBehaviour
 
     public void OnTriggerStay(Collider other)
     {
-        // 衝突時の移動量を消す
-        m_Rigidbody.velocity = Vector3.zero;
         // 特定の状態なら返す
         if (IsNotChangeState()) return;
         // トリガーとの衝突判定
@@ -1595,6 +1680,8 @@ public class Enemy3D : MonoBehaviour
             ChangeFoodMove(food);
             ChangeAnimation(AnimatorNumber.ANIMATOR_IDEL_NUMBER);
             m_FoodObj = obj.gameObject;
+            // 動物を空にする
+            m_TargetAnimal = null;
             return;
         }
     }
@@ -1676,11 +1763,9 @@ public class Enemy3D : MonoBehaviour
         SerializedProperty ReRageTime;
         SerializedProperty ViewLength;
         SerializedProperty ViewAngle;
-        //SerializedProperty GroundPoint;
         SerializedProperty RayPoint;
         SerializedProperty MouthPoint;
         SerializedProperty MovePoints;
-        //SerializedProperty Sprite;
         SerializedProperty Model;
         SerializedProperty MainCamera;
         SerializedProperty WChackPoint;
@@ -1708,11 +1793,9 @@ public class Enemy3D : MonoBehaviour
             ReRageTime = serializedObject.FindProperty("m_ReRageTime");
             ViewLength = serializedObject.FindProperty("m_ViewLength");
             ViewAngle = serializedObject.FindProperty("m_ViewAngle");
-            //GroundPoint = serializedObject.FindProperty("m_GroundPoint");
             RayPoint = serializedObject.FindProperty("m_RayPoint");
             MovePoints = serializedObject.FindProperty("m_MovePoints");
             MouthPoint = serializedObject.FindProperty("m_MouthPoint");
-            //Sprite = serializedObject.FindProperty("m_Sprite");
             Model = serializedObject.FindProperty("m_Model");
             MainCamera = serializedObject.FindProperty("m_MainCamera");
             WChackPoint = serializedObject.FindProperty("m_WChackPoint");
@@ -1762,17 +1845,14 @@ public class Enemy3D : MonoBehaviour
             EditorGUILayout.Space();
             EditorGUILayout.LabelField("〇各種オブジェクトの位置ベクトル");
             // Transform
-            //GroundPoint.objectReferenceValue = EditorGUILayout.ObjectField("接地ポイント", enemy.m_GroundPoint, typeof(Transform), true);
             RayPoint.objectReferenceValue = EditorGUILayout.ObjectField("レイポイント", enemy.m_RayPoint, typeof(Transform), true);
             MouthPoint.objectReferenceValue = EditorGUILayout.ObjectField("口ポイント", enemy.m_MouthPoint, typeof(Transform), true);
             // 配列
             EditorGUILayout.PropertyField(MovePoints, new GUIContent("徘徊ポイント"), true);
-            // EditorGUILayout.PropertyField( prop , new GUIContent( “array1” ), true );
 
             EditorGUILayout.Space();
             EditorGUILayout.LabelField("〇各種オブジェクトのオブジェクト設定");
             Model.objectReferenceValue = EditorGUILayout.ObjectField("モデル", enemy.m_Model, typeof(GameObject), true);
-            //Sprite.objectReferenceValue = EditorGUILayout.ObjectField("敵の画像", enemy.m_Sprite, typeof(GameObject), true);
             MainCamera.objectReferenceValue = EditorGUILayout.ObjectField("メインカメラ", enemy.m_MainCamera, typeof(CameraMove), true);
             WChackPoint.objectReferenceValue = EditorGUILayout.ObjectField("壁捜索ポイント", enemy.m_WChackPoint, typeof(WallChackPoint), true);
             // GameObject
@@ -1783,6 +1863,10 @@ public class Enemy3D : MonoBehaviour
             // m_Animator
             AnimalAnimator.objectReferenceValue = EditorGUILayout.ObjectField("アニメーター", enemy.m_Animator, typeof(Animator), true);
 
+            EditorGUILayout.Space();
+
+            // State
+            enemy.m_State = (State)EditorGUILayout.EnumPopup("現在の状態", enemy.m_State);
             EditorGUILayout.Space();
 
             OnChildInspectorGUI();
