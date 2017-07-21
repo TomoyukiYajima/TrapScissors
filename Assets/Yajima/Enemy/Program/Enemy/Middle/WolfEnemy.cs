@@ -58,19 +58,17 @@ public class WolfEnemy : MiddleEnemy {
             if(m_Player != null)
             {
                 ChangeDiscoverState(DiscoverState.Discover_Player);
-                //m_Mark.ExclamationMark();
-                ChangeSpriteColor(Color.blue);
                 // えさの削除
                 Destroy(m_FoodObj);
                 m_FoodObj = null;
-                m_Agent.Resume();
+                m_Agent.isStopped = false;
+                // ゲームマネージャ側の減算処理を呼ぶ
+                GameManager.gameManager.FoodCountSub();
                 // アニメーションの変更
                 ChangeAnimation(AnimatorNumber.ANIMATOR_CHASE_NUMBER);
                 return;
             }
         }
-
-        base.EatFood();
     }
 
     // 動物発見時の行動
@@ -149,6 +147,28 @@ public class WolfEnemy : MiddleEnemy {
         //return food == Food.Food_Kind.Tanuki;
         m_EatFood = food;
         return food == Food.Food_Kind.Meat || food == Food.Food_Kind.SmellMeat;
+    }
+
+    protected override void TriggerEnterObject(Collider other)
+    {
+        base.TriggerEnterObject(other);
+
+        var objName = other.name;
+        // 攻撃判定との衝突判定
+        // お肉状態に遷移
+        if (objName == "AttackCollider")
+            ChangeMeat();
+    }
+
+    protected override void TriggerStayObject(Collider other)
+    {
+        base.TriggerStayObject(other);
+
+        var objName = other.name;
+        // 攻撃判定との衝突判定
+        // お肉状態に遷移
+        if (objName == "AttackCollider")
+            ChangeMeat();
     }
     #endregion
     #endregion

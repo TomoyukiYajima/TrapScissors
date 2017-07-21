@@ -52,6 +52,8 @@ public class Enemy3D : MonoBehaviour
     protected GameObject m_DiscoverUI = null;           // 発見時のUI
     [SerializeField]
     protected Animator m_Animator;                      // アニメーター
+    [SerializeField]
+    protected State m_State = State.Idel;               // 状態
     #endregion
 
     #region protected変数
@@ -79,7 +81,6 @@ public class Enemy3D : MonoBehaviour
     protected Collider m_Collider;                      // 自身のコライダー
     protected DSNumber m_DSNumber =
         DSNumber.DISCOVERED_CHASE_NUMBER;               // 追跡状態の番号 
-    protected State m_State = State.Idel;               // 状態
     protected DiscoverState m_DState =
         DiscoverState.Discover_None;                    // 発見状態
     protected DiscoverFoodState m_DFState =
@@ -908,15 +909,13 @@ public class Enemy3D : MonoBehaviour
     {
         // えさを食べ終わったら、待機状態に遷移
         ChangeState(State.Idel, AnimatorNumber.ANIMATOR_IDEL_NUMBER);
-        ChangeSpriteColor(Color.red);
         m_Agent.isStopped = false;
         // えさの削除
         Destroy(m_FoodObj);
         m_FoodObj = null;
         // ゲームマネージャ側の減算処理を呼ぶ
         GameManager.gameManager.FoodCountSub();
-        //// アニメーションの変更
-        //m_Animator.CrossFade(m_AnimatorStates[(int)AnimatorNumber.ANIMATOR_IDEL_NUMBER], 0.1f, -1);
+        // アニメーションの変更
         ChangeAnimation(AnimatorNumber.ANIMATOR_IDEL_NUMBER);
     }
 
@@ -1777,6 +1776,7 @@ public class Enemy3D : MonoBehaviour
         SerializedProperty MeatUI;
         SerializedProperty DiscoverUI;
         SerializedProperty AnimalAnimator;
+        //SerializedProperty State;
 
         protected List<SerializedProperty> m_Serializes = new List<SerializedProperty>();
         protected List<string> m_SerializeNames = new List<string>();
@@ -1809,6 +1809,7 @@ public class Enemy3D : MonoBehaviour
             MeatUI = serializedObject.FindProperty("m_MeatUI");
             DiscoverUI = serializedObject.FindProperty("m_DiscoverUI");
             AnimalAnimator = serializedObject.FindProperty("m_Animator");
+            //State = serializedObject.FindProperty("m_State");
 
             OnChildEnable();
         }
@@ -1870,6 +1871,10 @@ public class Enemy3D : MonoBehaviour
             // m_Animator
             AnimalAnimator.objectReferenceValue = EditorGUILayout.ObjectField("アニメーター", enemy.m_Animator, typeof(Animator), true);
 
+            EditorGUILayout.Space();
+
+            // State
+            enemy.m_State = (State)EditorGUILayout.EnumPopup("現在の状態", enemy.m_State);
             EditorGUILayout.Space();
 
             OnChildInspectorGUI();

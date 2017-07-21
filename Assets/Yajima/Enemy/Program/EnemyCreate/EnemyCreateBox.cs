@@ -7,12 +7,6 @@ using UnityEditor;
 
 public class EnemyCreateBox : MonoBehaviour {
 
-    //[SerializeField]
-    //private int m_CreateCount = 3;              // 生成数
-    //[SerializeField]
-    //private float m_CreateTime = 2.0f;          // 生成間隔
-    //[SerializeField]
-    //private float m_CreateLength = 10.0f;       // 生成する距離
     [SerializeField]
     private Transform[] m_MovePoints = null;    // 移動用ポイント配列
     [SerializeField]
@@ -22,11 +16,8 @@ public class EnemyCreateBox : MonoBehaviour {
     [SerializeField]
     private bool m_IsStartCreate = false;       // ゲーム開始時に生成するか
 
-    private int m_CreateCount = 1;              // 生成数
-    private float m_Timer = 0.0f;               // 経過時間
     private bool m_IsRendered = true;           // カメラ内か
     private AnimalManager m_AnimalManager;      // 動物マネージャー
-    //private GameObject m_ChildObject;           // 生成した子供オブジェクト
 
     // Use this for initialization
     void Start () {
@@ -37,96 +28,25 @@ public class EnemyCreateBox : MonoBehaviour {
             if (camera == null) return;
             m_MainCamera = camera;
         }
-        // もし、動物が設定されていない場合、設定しなおす
-        if(m_CreateEnemy == null)
-        {
-            return;
-        }
-
-        // 動物マネージャーの取得
-        //var obj = this.transform.parent.gameObject;
-        ////if(obj != null)
-        ////{
-        ////    SetAnimalManager(obj);
-        ////}
-        ////else 
-        //if (obj == null)
-        //{
-        //    var enemiesObject = GameObject.Find("Enemies");
-        //    if (enemiesObject == null) return;
-        //    obj = enemiesObject;
-        //    //var 
-        //}
-        //SetAnimalManager(obj);
-
+        // 動物の設定を行います
+        var child = gameObject.transform.GetChild(0);
+        m_CreateEnemy = child.gameObject;
         // 開始時に生成しない場合は返す
         if (!m_IsStartCreate) return;
-        // 敵の生成
-        CreateEnemy();
-
-        //if (m_CreateEnemy == null) return;
-        //var enemy = m_CreateEnemy.GetComponent<Enemy3D>();
-        //if (enemy == null) return;
-        ////m_Enemy = enemy;
-        //if (m_MovePoints.Length == 0) return;
-        //for(int i = 0; i != m_MovePoints.Length; i++)
-        //{
-        //    enemy.AddMovePoint(m_MovePoints[i]);
-        //}
-        //m_Enemy.AddMovePoint();
-        //enemy.
     }
 	
 	// Update is called once per frame
 	void Update () {
-        m_Timer += Time.deltaTime;
-
         // カメラから映っていなかったら、アクティブ状態に変更
         if (!m_IsRendered)
         {
-            // 生成数に達していなかったら、動物を生成
-            if (this.transform.childCount < m_CreateCount)
-            {
-                // 敵の生成
-                CreateEnemy();
-                m_Timer = 0.0f;
-            }
             // 子オブジェクトが非アクティブ状態なら、アクティブ状態に変更
-            //if (m_ChildObject.activeSelf) return;
-            //m_ChildObject.SetActive(true);
             if (m_CreateEnemy.activeSelf) return;
             m_CreateEnemy.SetActive(true);
         }
 
         m_IsRendered = false;
     }
-
-    // 敵の生成
-    private void CreateEnemy()
-    {
-        //Enemy3D enemy = m_CreateEnemy.GetComponentInChildren<Enemy3D>();
-        //if (enemy == null) return;
-        ////if (m_MovePoints.Length == 0) return;
-        //enemy.ResizeMovePoints(m_MovePoints.Length);
-        //for (int i = 0; i != m_MovePoints.Length; i++)
-        //{
-        //    enemy.AddMovePoint(i, m_MovePoints[i]);
-        //}
-
-        // 生成して、子オブジェクトにする
-        //Instantiate(
-        //    m_CreateEnemy, this.transform.position,
-        //    this.transform.rotation, this.transform
-        //    );
-        // 生成カウントに加算
-        //m_AnimalManager.AddAnimalCount(1);
-
-        //// 子供オブジェクトに追加
-        //var child = this.transform.FindChild(m_CreateEnemy.name); // + "(Clone)");
-        //if (child == null) return;
-        //m_ChildObject = child.gameObject;
-    }
-
     private void SetAnimalManager(GameObject obj)
     {
         var manager = obj.GetComponent<AnimalManager>();
