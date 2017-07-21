@@ -69,6 +69,8 @@ public class WolfEnemy : MiddleEnemy {
                 return;
             }
         }
+
+        base.EatFood();
     }
 
     // 動物発見時の行動
