@@ -26,16 +26,12 @@ public class Enemy3D : MonoBehaviour
     protected float m_ViewLength = 10.0f;               // プレイヤーが見える距離
     [SerializeField]
     protected float m_ViewAngle = 30.0f;                // プレイヤーが見える角度
-    //[SerializeField]
-    //protected Transform m_GroundPoint = null;           // 接地ポイント
     [SerializeField]
     protected Transform m_RayPoint = null;              // レイポイント
     [SerializeField]
     protected Transform m_MouthPoint = null;            // 口ポイント
     [SerializeField]
     protected Transform[] m_MovePoints = null;          // 移動用ポイント配列
-    //[SerializeField]
-    //protected GameObject m_Sprite = null;               // スプライト
     [SerializeField]
     protected GameObject m_Model = null;                // モデル
     [SerializeField]
@@ -198,13 +194,7 @@ public class Enemy3D : MonoBehaviour
         SetAgentStatus();
         // アニメーターの設定
         SetAnimator();
-        //m_Animator.CrossFade(m_AnimatorStates[(int)AnimatorNumber.ANIMATOR_IDEL_NUMBER], 0.1f, -1, 0.1f);
-        // 移動配列に何も入っていなかった場合は通常移動
-        //if(m_MovePoints.Length == 0)
-
         m_Mark = m_DiscoverUI.GetComponent<DiscoverMark>();
-
-
         // キャンパスが設定されていなかったら取得
         if (m_Canvas == null) m_Canvas = GameObject.Find("Canvas");
     }
@@ -745,7 +735,7 @@ public class Enemy3D : MonoBehaviour
         if (m_WChackPoint.IsWallHit())
         {
             // 気絶状態に遷移
-            ChangeState(State.Faint, AnimatorNumber.ANIMATOR_IDEL_NUMBER);
+            ChangeState(State.Faint, AnimatorNumber.ANIMATOR_WALL_HIT_NUMBER);
             // 付属しているトラバサミの削除
             DeleteTrap();
             m_Agent.isStopped = true;
@@ -759,16 +749,11 @@ public class Enemy3D : MonoBehaviour
         var hit = Physics.Raycast(ray, out hitInfo);
         // 地面に当たらなかった場合は返す
         if (!hit || hitInfo.collider.gameObject.tag != "Ground") return;
-
         // ステージ外の床に接地していたら、逃げ状態に遷移
         if (hitInfo.transform.name.IndexOf("StageOutPlane") < 0) return;
-
         // 逃げ状態に遷移
-        ChangeState(State.Runaway, AnimatorNumber.ANIMATOR_FAINT_NUMBER);
-        ChangeSpriteColor(Color.green);
+        ChangeState(State.Runaway, AnimatorNumber.ANIMATOR_CHASE_NUMBER);
         // 自身の衝突判定のトリガーをオンにする
-        //var collider = gameObject.GetComponent<Collider>();
-        //collider.isTrigger = true;
         m_Collider.isTrigger = true;
 
     }
@@ -850,7 +835,6 @@ public class Enemy3D : MonoBehaviour
         m_Collider.enabled = false;
         // エージェントを停止させる
         m_Agent.isStopped = true;
-        //m_Agent.isStopped = true;
         m_Agent.enabled = false;
     }
 
@@ -861,12 +845,7 @@ public class Enemy3D : MonoBehaviour
     protected virtual void TrapReleaseAction() { }
 
     // 反応するえさかどうかを判定します
-    protected virtual bool IsFoodCheck(Food.Food_Kind food)
-    {
-        //if (food == Food.Food_Kind.Goat) return true;
-        //return false;
-        return food == Food.Food_Kind.Carrot;
-    }
+    protected virtual bool IsFoodCheck(Food.Food_Kind food) { return food == Food.Food_Kind.Carrot; }
 
     // えさの判断を行います
     protected void ChangeFoodMove(Food food)
@@ -876,7 +855,6 @@ public class Enemy3D : MonoBehaviour
         {
             ChangeDiscoverFoodState(DiscoverFoodState.DiscoverFood_Move);
             ChangeMovePoint(food.transform.position);
-            ChangeSpriteColor(Color.magenta);
         }
         else {
             // 逃げる
@@ -909,7 +887,7 @@ public class Enemy3D : MonoBehaviour
     // 特定の状態で動かないようにします(衝突判定時)
     protected virtual bool IsNotChangeState()
     {
-        return ((m_State & (State.TrapHit | State.Meat | State.Faint | State.Attack)) != 0);
+        return ((m_State & (State.TrapHit | State.Meat | State.Faint | State.Attack | State.DiscoverAction)) != 0);
     }
     #endregion
 
