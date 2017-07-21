@@ -77,7 +77,7 @@ public class NavMeshPlayer : MonoBehaviour {
         }
     }
 
-    private void OnCollisionEnter(Collision col)
+    private void OnTrigerEnter(Collision col)
     {
         if (GameManager.gameManager.GameStateCheck() != GameManager.GameState.PLAY) return;
         if (col.gameObject.tag == "LargeEnemy")
