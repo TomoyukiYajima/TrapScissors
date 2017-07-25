@@ -111,22 +111,29 @@ public class WolfEnemy : MiddleEnemy {
     //    base.DiscoverPlayer(deltaTime);
     //}
 
-    protected override void SearchAnimal()
+    protected override bool SearchAnimal()
     {
+        if (m_DState == DiscoverState.Discover_Animal) return false;
         // 小さい動物を捜す
-        SearchAnimal("SmallEnemy");
+        if (SearchAnimal("SmallEnemy")) return true;
         // イノシシが見えているかを確かめる
         for (int i = 0; i != m_Boars.Count; i++)
         {
             if (!InObject(m_Boars[i].gameObject)) continue;
             if (!m_Boars[i].gameObject.transform.parent.parent.gameObject.activeSelf) continue;
+            // 相手が特定の状態だったら返す
+            var boar = m_Boars[i].GetComponent<Enemy3D>();
+            if (boar.GetState() == State.Meat) return false;
             // 動物発見状態に遷移
             ChangeDiscoverState(DiscoverState.Discover_Animal);
             // アニメーションの変更
             ChangeAnimation(AnimatorNumber.ANIMATOR_CHASE_NUMBER);
             m_TargetAnimal = m_Boars[i].gameObject;
-            break;
+            return true;
+            //break;
         }
+        // 見つからなかった
+        return false;
     }
 
     protected override bool IsFoodCheck(Food.Food_Kind food)
