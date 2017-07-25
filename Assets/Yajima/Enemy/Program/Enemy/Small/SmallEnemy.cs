@@ -83,7 +83,6 @@ public class SmallEnemy : Enemy3D
         // 逃げる
         ChangeMovePoint(m_RunawayPoint.gameObject.transform.position);
         m_MoveLength += m_DiscoverSpeed * deltaTime;
-        ChangeSpriteColor(Color.white);
 
         // 壁を発見したとき
         GameObject wall = null;
@@ -140,22 +139,21 @@ public class SmallEnemy : Enemy3D
             m_MoveLength = 0.0f;
             // 移動速度を変える
             m_Agent.speed = m_Speed;
-            m_Agent.Resume();
-            ChangeSpriteColor(Color.red);
+            m_Agent.isStopped = false;
         }
     }
     #endregion
 
     #region override関数
-    protected override void SearchObject()
-    {
-        // トラバサミの捜索
-        SearchTrap();
-        // 反応する動物の捜索
-        SearchAnimal();
-        // プレイヤーの捜索
-        SearchPlayer();
-    }
+    //protected override void SearchObject()
+    //{
+    //    // トラバサミの捜索
+    //    SearchTrap();
+    //    // 反応する動物の捜索
+    //    SearchAnimal();
+    //    // プレイヤーの捜索
+    //    SearchPlayer();
+    //}
 
     protected override void ChangePlayerHitMove(GameObject player)
     {

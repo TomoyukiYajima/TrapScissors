@@ -1,7 +1,23 @@
 ﻿using UnityEngine;
 using System.Collections;
 
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
+
 public class BearEnemy : LargeEnemy {
+
+    #region 変数
+    #region シリアライズ変数
+    [SerializeField]
+    protected GameObject m_RemovePoint = null;  // 逃げるポイント
+    #endregion
+
+    #region private変数
+    private RunawayPoint m_RunawayPoint;    // 逃げ用ポイント
+    private float m_MoveLength = 0.0f;      // 移動距離
+    #endregion
+    #endregion
 
     #region 関数
     #region 基盤関数
@@ -9,18 +25,19 @@ public class BearEnemy : LargeEnemy {
     protected override void Start()
     {
         base.Start();
+
+        m_RunawayPoint = m_RemovePoint.GetComponent<RunawayPoint>();
         // 睡眠状態に変更
         m_State = State.Sleep;
         m_MotionNumber = (int)AnimatorNumber.ANIMATOR_TRAP_HIT_NUMBER;
-        // スプライトカラーの変更
-        //ChangeSpriteColor(new Color(1.0f, 0.0f, 1.0f, 1.0f));
         m_Agent.isStopped = true;
     }
+
     protected override void Update()
     {
         base.Update();
 
-        //print(m_DState.ToString());
+        m_RunawayPoint.SetPosition(this.transform.position);
     }
     #endregion
 
@@ -35,12 +52,59 @@ public class BearEnemy : LargeEnemy {
             // 視界の描画をONにする
             if (!m_RayPoint.gameObject.activeSelf)
                 m_RayPoint.gameObject.SetActive(true);
-            //ChangeSpriteColor(Color.red);
             m_Agent.isStopped = false;
         }
         else base.SoundNotice(point);
-        
-        //else if (m_State == State.DiscoverMove) SoundMove(point);
+    }
+
+    protected override void DiscoverAnimal(float deltaTime)
+    {
+        // 逃げる
+        ChangeMovePoint(m_RunawayPoint.gameObject.transform.position);
+        m_MoveLength += m_DiscoverSpeed * deltaTime;
+
+        // 壁を発見したとき
+        GameObject wall = null;
+        Vector3 point = Vector3.zero;
+        if (InWall(out wall, out point, 2))
+        {
+            // 壁と衝突点との外積を求めて、角度を決める
+            var up = wall.transform.up;
+            var vec = point - wall.transform.position;
+            var cross = Vector3.Cross(up, vec);
+            var rotate = Mathf.Atan2(vec.z, vec.x);
+
+            // 壁に沿うように逃げる
+            //var rotate = wall.transform.rotation.eulerAngles;
+            m_RunawayPoint.ChangeAddPosition(rotate);
+
+            // 壁に沿うように逃げる
+            //var rotate = wall.transform.rotation.eulerAngles;
+            //m_RunawayPoint.ChangeAddPosition(rotate.y);
+            //print(rotate.y.ToString());
+        }
+
+        // 一定距離移動したら、待機状態に遷移
+        if (m_MoveLength > 20)
+        {
+            // 待機状態に遷移
+            ChangeState(State.Idel, AnimatorNumber.ANIMATOR_IDEL_NUMBER);
+            m_MoveLength = 0.0f;
+            // 移動速度を変える
+            m_Agent.speed = m_Speed;
+            m_Agent.isStopped = false;
+        }
+    }
+
+    protected override void AnimalHit(GameObject animal)
+    {
+        base.AnimalHit(animal);
+        // 逃げポイントの追加位置の変更
+        // 前方ベクトルから、角度の取得
+        var vec = animal.transform.position - this.transform.position;
+        var angle = Mathf.Atan2(vec.z, vec.x);
+        m_Mark.ExclamationMark();
+        m_RunawayPoint.ChangeAddPosition(angle * Mathf.Rad2Deg - 180);
     }
 
     protected override bool IsFoodCheck(Food.Food_Kind food)
@@ -58,25 +122,53 @@ public class BearEnemy : LargeEnemy {
     #region public関数
     public void CheckFood()
     {
+        // 睡眠状態でなければ返す
+        if (m_State != State.Sleep) return;
+
         // えさ判定で、trueならば、起こす(待機状態に遷移)
         int value1 = Random.Range(1, 100 + 1);
         // 個数によって、判定用の値を変える
         // ゲームマネージャから、えさの個数を取得する
         int count = GameManager.gameManager.FoodCountCheck();
-        int value2 = Mathf.Min(count, 10) * 3;
+        int maxCount = 5;
+        int value2 = count * (100 / maxCount);
         // 乱数値と比較して、大きかったら起こす
-        //if (value1 < value2)
-        // (乱数値 >= 反応するまでの値)
-        //if (value1 > value2) return;
+        // (乱数値 > 反応するまでの値)
+        print("最大値 " + value2.ToString() + " を超えたら返す : " + value1.ToString());
+        if (value1 > value2) return;
 
         ChangeState(State.Idel, AnimatorNumber.ANIMATOR_IDEL_NUMBER);
         
         // 視界の描画をONにする
         if (!m_RayPoint.gameObject.activeSelf)
             m_RayPoint.gameObject.SetActive(true);
-        //ChangeSpriteColor(Color.red);
         m_Agent.isStopped = false;
     }
     #endregion
+    #endregion
+
+    #region シリアライズ変更
+#if UNITY_EDITOR
+    [CustomEditor(typeof(BearEnemy), true)]
+    [CanEditMultipleObjects]
+    public class BearEditor : MiddleEnemyEditor
+    {
+        SerializedProperty RemovePoint;
+
+        protected override void OnChildEnable()
+        {
+            RemovePoint = serializedObject.FindProperty("m_RemovePoint");
+        }
+
+        protected override void OnChildInspectorGUI()
+        {
+            BearEnemy enemy = target as BearEnemy;
+
+            EditorGUILayout.LabelField("〇クマ固有のステータス");
+            RemovePoint.objectReferenceValue = EditorGUILayout.ObjectField("逃げポイント", enemy.m_RemovePoint, typeof(GameObject), true);
+
+        }
+    }
+#endif
     #endregion
 }

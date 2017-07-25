@@ -75,7 +75,7 @@ public class BoarEnemy : MiddleEnemy {
         }
 
         // 一定距離移動したら、待機状態に遷移
-        if (m_MoveLength > 20)
+        if (m_MoveLength > 30)
         {
             // 待機状態に遷移
             ChangeState(State.Idel, AnimatorNumber.ANIMATOR_IDEL_NUMBER);
