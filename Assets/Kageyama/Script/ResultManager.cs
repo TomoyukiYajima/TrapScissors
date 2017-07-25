@@ -59,6 +59,7 @@ public class ResultManager : MonoBehaviour
     /// <param name="flag"></param>
     public void ClearSetActive(bool flag)
     {
+        _clearPopUpParent.SetActive(flag);
         _gameClear.SetActive(flag);
     }
 }
