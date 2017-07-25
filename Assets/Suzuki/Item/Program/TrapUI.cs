@@ -20,7 +20,7 @@ public class TrapUI : MonoBehaviour
     void Update()
     {
         CheackTrap();
-        //_text.text = _trapRe.ToString();
+        _text.text = _trapRe.ToString();
     }
     void CheackTrap()
     {
