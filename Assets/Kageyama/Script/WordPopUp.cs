@@ -42,7 +42,11 @@ public class WordPopUp : MonoBehaviour
             //ゲームクリアの場合
             if (_gameClear == true)
             {
-                ResultManager.resultManager.ClearPopUpActiveEnd();
+                RectTransform parent = this.transform.parent.gameObject.GetComponent<RectTransform>();
+                LeanTween.scale(parent, new Vector2(0.5f, 0.5f), 0.5f);
+                LeanTween.move(parent, new Vector2(150, 120), 0.5f)
+                    .setOnComplete(()=>{ ResultManager.resultManager.ClearPopUpActiveEnd(); });
+                
                 return;
             }
 

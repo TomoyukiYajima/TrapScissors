@@ -39,7 +39,7 @@ public class ResultManager : MonoBehaviour
     /// </summary>
     public void ClearPopUpActiveEnd()
     {
-        _clearPopUpParent.SetActive(false);
+        //_clearPopUpParent.SetActive(false);
         SceneManagerScript.sceneManager.Black();
         _gameClear.SetActive(true);
     }
