@@ -15,8 +15,8 @@ public class SetMovie : MonoBehaviour
     {
         _time += Time.deltaTime;
 
-        if ((int)_time == 5) SoundManger.Instance.PlayBGM(3); //タイトルロゴ表示後
-        else if ((int)_time == 84) SceneMovement();                     //PVが終了後にシーン移動
+        if ((int)_time == 5) SoundManger.Instance.PlayBGM(3);           //タイトルロゴ表示後
+        else if ((int)_time == 110) SceneMovement();                     //PVが終了後にシーン移動
 
         if (Input.GetButtonDown("Trap") || Input.GetButtonDown("Whistle") ||//Xボタン,Aボタン
              Input.GetButtonDown("Food") || Input.GetButtonDown("Pause"))   //Yボタン,Startボタン 
