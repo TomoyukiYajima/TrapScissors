@@ -112,7 +112,8 @@ public class RayCircularSector : MonoBehaviour {
             // レイポイントからオブジェクトの位置までのレイを伸ばす
             Ray ray = new Ray(this.transform.position, point - transform.position);
             RaycastHit hitInfo;
-            var hit = Physics.Raycast(ray, out hitInfo);
+            // 指定レイヤーと衝突する(壁のレイヤー)
+            var hit = Physics.Raycast(ray, out hitInfo, Mathf.Infinity, 1 << 9);
 
             // 壁に衝突した場合は、位置の補正
             if (hit && hitInfo.collider.tag == "Wall")
