@@ -262,7 +262,7 @@ public class Enemy3D : MonoBehaviour
         if (m_MoveStartTime > 0.0f) return;
 
         // オブジェクトの捜索
-        if ((m_State & (State.TrapHit | State.Meat | State.Faint | State.Attack | State.DiscoverAction)) == 0)
+        if ((m_State & (State.TrapHit | State.Meat | State.Faint | State.Attack | State.DiscoverAction | State.Sleep)) == 0)
         {
             if((m_DState & (DiscoverState.Discover_Food | DiscoverState.Discover_Animal | DiscoverState.Discover_Lost)) == 0)
                 SearchObject();
@@ -820,8 +820,8 @@ public class Enemy3D : MonoBehaviour
         // えさの削除
         Destroy(m_FoodObj);
         m_FoodObj = null;
-        // ゲームマネージャ側の減算処理を呼ぶ
-        GameManager.gameManager.FoodCountSub();
+        //// ゲームマネージャ側の減算処理を呼ぶ
+        //GameManager.gameManager.FoodCountSub();
     }
 
     // 好きなえさ
@@ -834,7 +834,7 @@ public class Enemy3D : MonoBehaviour
     // 特定の状態で動かないようにします(衝突判定時)
     protected virtual bool IsNotChangeState()
     {
-        return ((m_State & (State.TrapHit | State.Meat | State.Faint | State.Attack | State.DiscoverAction)) != 0);
+        return ((m_State & (State.TrapHit | State.Meat | State.Faint | State.Attack | State.DiscoverAction | State.Sleep)) != 0);
     }
     #endregion
 
@@ -1058,6 +1058,9 @@ public class Enemy3D : MonoBehaviour
         if(m_MovePoints.Length > 0) m_MovePointPosition = m_MovePoints[0].position;
         // 自身の衝突判定をオンにする
         m_Collider.enabled = true;
+        // 視野描画をオンにする
+        if (!m_RayPoint.gameObject.activeSelf)
+            m_RayPoint.gameObject.SetActive(true);
         m_Model.SetActive(true);
         // 初期位置に変更
         this.transform.localPosition = Vector3.zero;
@@ -1514,6 +1517,9 @@ public class Enemy3D : MonoBehaviour
         // エージェントの停止
         m_Agent.isStopped = true;
         m_Agent.enabled = false;
+        // 視野描画をオフにする
+        if (m_RayPoint.gameObject.activeSelf)
+            m_RayPoint.gameObject.SetActive(false);
         // モデルの表示をオフにする
         m_Model.SetActive(false);
     }

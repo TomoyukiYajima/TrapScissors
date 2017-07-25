@@ -24,16 +24,6 @@ public class MiddleEnemy : Enemy3D {
     #endregion
     #endregion
 
-    #region 列挙クラス
-    //// 餌
-    //protected enum DiscoverMoveState
-    //{
-    //    DiscoverMove_Animal,      // 発見移動
-    //    DiscoverMove_Lift,      // 持ち上げ状態
-    //    DiscoverMove_TakeAway   // 持ち帰り状態
-    //}
-    #endregion
-
     #region 関数
     #region 状態関数
     protected override void DiscoverPlayer(float deltaTime)

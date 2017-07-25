@@ -9,9 +9,7 @@ public class RayCircularSector : MonoBehaviour {
     private int m_EndDegree = 90;           // 最後に生成する角度
     private int m_TriangleCount = 5;        // 生成する三角形の数
     private MeshFilter m_MeshFilter;        // 編集するメッシュ
-
-    private Vector3 m_ParentLossyScale;
-    //private Vector3 m_LocalScale;
+    private Vector3 m_ParentLossyScale;     // 親の大きさ
 
     // Use this for initialization
     void Start () {
@@ -107,7 +105,6 @@ public class RayCircularSector : MonoBehaviour {
             float z = Mathf.Sin(rad + angle + addRad);
             // 二次元の頂点を設定する
             var vec = new Vector3(x * m_Radius, 0.0f, z * m_Radius);
-
             var point = vec + this.transform.position;
             // レイポイントからオブジェクトの位置までのレイを伸ばす
             Ray ray = new Ray(this.transform.position, point - transform.position);

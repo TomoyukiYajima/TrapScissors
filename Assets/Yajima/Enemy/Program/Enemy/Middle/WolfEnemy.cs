@@ -62,7 +62,7 @@ public class WolfEnemy : MiddleEnemy {
                 m_FoodObj = null;
                 m_Agent.isStopped = false;
                 // ゲームマネージャ側の減算処理を呼ぶ
-                GameManager.gameManager.FoodCountSub();
+                ////GameManager.gameManager.FoodCountSub();
                 // アニメーションの変更
                 ChangeAnimation(AnimatorNumber.ANIMATOR_CHASE_NUMBER);
                 return;
