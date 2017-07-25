@@ -372,7 +372,7 @@ public class Enemy3D : MonoBehaviour
     // 発見状態の変更
     protected void ChangeDiscoverState(DiscoverState state)
     {
-        var motion = AnimatorNumber.ANIMATOR_DISCOVER_NUMBER;
+        var motion = AnimatorNumber.ANIMATOR_CHASE_NUMBER;
         if (state == DiscoverState.Discover_Food) motion = AnimatorNumber.ANIMATOR_NULL;
         ChangeState(State.Discover, motion);
         // 同じ行動なら返す
@@ -440,7 +440,7 @@ public class Enemy3D : MonoBehaviour
         if (m_FoodObj == null)
         {
             ChangeState(State.Idel, AnimatorNumber.ANIMATOR_IDEL_NUMBER);
-            ChangeSpriteColor(Color.red);
+            m_DState = DiscoverState.Discover_None;
         }
     }
     // 動物発見状態
@@ -454,13 +454,13 @@ public class Enemy3D : MonoBehaviour
         {
             // 持ち上げ状態に遷移
             ChangeDiscoverFoodState(DiscoverFoodState.DiscoverFood_Lift);
-            ChangeSpriteColor(Color.yellow);
             return;
         }
         // えさがなかったら、待機状態に遷移
         if (m_SmallTrap == null)
         {
             ChangeState(State.Idel, AnimatorNumber.ANIMATOR_IDEL_NUMBER);
+            m_DState = DiscoverState.Discover_None;
             ChangeMovePoint();
             m_Agent.isStopped = false;
         }
