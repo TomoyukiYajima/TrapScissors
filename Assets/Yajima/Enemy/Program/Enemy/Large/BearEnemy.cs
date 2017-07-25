@@ -57,43 +57,57 @@ public class BearEnemy : LargeEnemy {
         else base.SoundNotice(point);
     }
 
+    //protected override void DiscoverAnimal(float deltaTime)
+    //{
+    //    // 逃げる
+    //    ChangeMovePoint(m_RunawayPoint.gameObject.transform.position);
+    //    m_MoveLength += m_DiscoverSpeed * deltaTime;
+
+    //    // 壁を発見したとき
+    //    GameObject wall = null;
+    //    Vector3 point = Vector3.zero;
+    //    if (InWall(out wall, out point, 2))
+    //    {
+    //        // 壁と衝突点との外積を求めて、角度を決める
+    //        var up = wall.transform.up;
+    //        var vec = point - wall.transform.position;
+    //        var cross = Vector3.Cross(up, vec);
+    //        var rotate = Mathf.Atan2(vec.z, vec.x);
+
+    //        // 壁に沿うように逃げる
+    //        //var rotate = wall.transform.rotation.eulerAngles;
+    //        m_RunawayPoint.ChangeAddPosition(rotate);
+
+    //        // 壁に沿うように逃げる
+    //        //var rotate = wall.transform.rotation.eulerAngles;
+    //        //m_RunawayPoint.ChangeAddPosition(rotate.y);
+    //        //print(rotate.y.ToString());
+    //    }
+
+    //    // 一定距離移動したら、待機状態に遷移
+    //    if (m_MoveLength > 20)
+    //    {
+    //        // 待機状態に遷移
+    //        ChangeState(State.Idel, AnimatorNumber.ANIMATOR_IDEL_NUMBER);
+    //        m_MoveLength = 0.0f;
+    //        // 移動速度を変える
+    //        m_Agent.speed = m_Speed;
+    //        m_Agent.isStopped = false;
+    //    }
+    //}
+
     protected override void DiscoverAnimal(float deltaTime)
     {
-        // 逃げる
-        ChangeMovePoint(m_RunawayPoint.gameObject.transform.position);
-        m_MoveLength += m_DiscoverSpeed * deltaTime;
-
-        // 壁を発見したとき
-        GameObject wall = null;
-        Vector3 point = Vector3.zero;
-        if (InWall(out wall, out point, 2))
-        {
-            // 壁と衝突点との外積を求めて、角度を決める
-            var up = wall.transform.up;
-            var vec = point - wall.transform.position;
-            var cross = Vector3.Cross(up, vec);
-            var rotate = Mathf.Atan2(vec.z, vec.x);
-
-            // 壁に沿うように逃げる
-            //var rotate = wall.transform.rotation.eulerAngles;
-            m_RunawayPoint.ChangeAddPosition(rotate);
-
-            // 壁に沿うように逃げる
-            //var rotate = wall.transform.rotation.eulerAngles;
-            //m_RunawayPoint.ChangeAddPosition(rotate.y);
-            //print(rotate.y.ToString());
-        }
-
-        // 一定距離移動したら、待機状態に遷移
-        if (m_MoveLength > 20)
-        {
-            // 待機状態に遷移
-            ChangeState(State.Idel, AnimatorNumber.ANIMATOR_IDEL_NUMBER);
-            m_MoveLength = 0.0f;
-            // 移動速度を変える
-            m_Agent.speed = m_Speed;
-            m_Agent.isStopped = false;
-        }
+        // 移動ポイントを見つけた動物の位置にする
+        m_Agent.destination = m_TargetAnimal.transform.position;
+        // 一定距離内なら、攻撃状態に遷移
+        var length = Vector3.Distance(this.transform.position, m_TargetAnimal.transform.position);
+        var otherCol = m_TargetAnimal.GetComponent<BoxCollider>();
+        var scale = m_TargetAnimal.transform.localScale.z * otherCol.size.z;
+        if (length > scale + 1.0f) return;
+        ChangeState(State.Attack, AnimatorNumber.ANIMATOR_ATTACK_NUMBER);
+        // アニメーションの変更
+        m_Agent.isStopped = true;
     }
 
     protected override void AnimalHit(GameObject animal)
@@ -134,7 +148,7 @@ public class BearEnemy : LargeEnemy {
         int value2 = count * (100 / maxCount);
         // 乱数値と比較して、大きかったら起こす
         // (乱数値 > 反応するまでの値)
-        print("最大値 " + value2.ToString() + " を超えたら返す : " + value1.ToString());
+        //print("最大値 " + value2.ToString() + " を超えたら返す : " + value1.ToString());
         if (value1 > value2) return;
 
         ChangeState(State.Idel, AnimatorNumber.ANIMATOR_IDEL_NUMBER);
@@ -151,17 +165,23 @@ public class BearEnemy : LargeEnemy {
 #if UNITY_EDITOR
     [CustomEditor(typeof(BearEnemy), true)]
     [CanEditMultipleObjects]
-    public class BearEditor : MiddleEnemyEditor
+    public class BearEditor : LargeEnemyEditor
     {
         SerializedProperty RemovePoint;
 
         protected override void OnChildEnable()
         {
+            base.OnChildEnable();
+
             RemovePoint = serializedObject.FindProperty("m_RemovePoint");
         }
 
         protected override void OnChildInspectorGUI()
         {
+            base.OnChildInspectorGUI();
+
+            EditorGUILayout.Space();
+
             BearEnemy enemy = target as BearEnemy;
 
             EditorGUILayout.LabelField("〇クマ固有のステータス");

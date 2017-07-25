@@ -632,6 +632,7 @@ public class Enemy3D : MonoBehaviour
         if (m_StateTimer < 2.0f) return;
         // 待機状態に遷移
         ChangeState(State.Idel, AnimatorNumber.ANIMATOR_IDEL_NUMBER);
+        m_DState = DiscoverState.Discover_None;
         m_TargetAnimal = null;
         m_Agent.isStopped = false;
     }
@@ -767,11 +768,13 @@ public class Enemy3D : MonoBehaviour
     // 小さいトラバサミに衝突した時の行動です
     protected virtual void SmallTrapHitAction()
     {
+        if (m_State == State.TrapHit) return;
         // トラップ化状態に遷移
         ChangeTrapHitState(
             TrapHitState.TrapHit_Change,
             AnimatorNumber.ANIMATOR_DEAD_NUMBER
             );
+        //m_DState = DiscoverState.Discover_None;
         m_IsTrapHit = true;
         // 自身の衝突判定をオフにする
         m_Collider.isTrigger = true;
@@ -1047,6 +1050,8 @@ public class Enemy3D : MonoBehaviour
         ChangeState(State.Idel, AnimatorNumber.ANIMATOR_IDEL_NUMBER);
         // トラバサミを空っぽにする
         m_SmallTrap = null;
+        // 発見状態を初期化する
+        m_DState = DiscoverState.Discover_None;
         // ナビメッシュエージェント関連の初期化
         m_Agent.enabled = true;
         m_CurrentMovePoint = 0;

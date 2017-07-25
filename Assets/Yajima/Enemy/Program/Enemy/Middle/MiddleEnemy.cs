@@ -51,6 +51,20 @@ public class MiddleEnemy : Enemy3D {
     #endregion
 
     #region override関数
+    protected override void Attack(float deltaTime)
+    {
+        // 攻撃判定をアクティブ状態に変更
+        if (!m_AttackCollider.activeSelf)
+            m_AttackCollider.SetActive(true);
+        if (m_StateTimer < 2.0f) return;
+        // 待機状態に遷移
+        ChangeState(State.Idel, AnimatorNumber.ANIMATOR_IDEL_NUMBER);
+        m_DState = DiscoverState.Discover_None;
+        m_Agent.isStopped = false;
+        // 攻撃判定を非アクティブ状態に変更
+        m_AttackCollider.SetActive(false);
+    }
+
     protected override void SetAnimator()
     {
         base.SetAnimator();
@@ -69,7 +83,9 @@ public class MiddleEnemy : Enemy3D {
     // 小さいトラバサミに衝突した時の行動です
     protected override void SmallTrapHitAction()
     {
+        if (m_State == State.TrapHit) return;
         ChangeTrapHitState(TrapHitState.TrapHit_Runaway);
+        //m_DState = DiscoverState.Discover_None;
         m_Agent.isStopped = false;
     }
 
