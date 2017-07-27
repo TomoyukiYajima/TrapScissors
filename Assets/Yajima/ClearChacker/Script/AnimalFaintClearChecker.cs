@@ -6,23 +6,18 @@ using UnityEditor;
 #endif
 
 
-public class AnimalFaintClearChecker : ClearChacker {
-
-    [SerializeField]
-    private GameObject m_Animal;
-
-    private Enemy3D m_AnimalScript;
+public class AnimalFaintClearChecker : AnimalClearChacker {
 
 	// Use this for initialization
 	public override void Start () {
         base.Start();
 
-        m_AnimalScript = m_Animal.GetComponent<Enemy3D>();
+        m_Enemy = m_Animal.GetComponent<Enemy3D>();
 	}
 
     // Update is called once per frame
     public override void Update () {
-        if (m_AnimalScript.GetState() == Enemy3D.State.Faint) DrawText();
+        if (m_Enemy.GetState() == AnimalState.Faint) DrawText();
 	}
 
     #region シリアライズ変更

@@ -5,7 +5,7 @@ using UnityEngine;
 using UnityEditor;
 #endif
 
-public class AnimalSleepClearChecker : ClearChacker {
+public class AnimalSleepClearChecker : AnimalClearChacker {
 
     [SerializeField]
     private GameObject m_Animal;
@@ -21,7 +21,7 @@ public class AnimalSleepClearChecker : ClearChacker {
 
     // Update is called once per frame
     public override void Update () {
-        if (m_AnimalScript.GetState() == Enemy3D.State.Sleep) return;
+        if (m_AnimalScript.GetState() == AnimalState.Sleep) return;
 
         if (m_Toggle)
         {

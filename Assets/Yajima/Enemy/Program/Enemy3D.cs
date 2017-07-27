@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 
@@ -49,17 +50,13 @@ public class Enemy3D : MonoBehaviour
     [SerializeField]
     protected Animator m_Animator;                      // アニメーター
     [SerializeField]
-    protected State m_State = State.Idel;               // 状態
+    protected global::AnimalState m_State = global::AnimalState.Idel;   // 状態
     #endregion
 
     #region protected変数
     protected int m_Size = 1;                           // 動物の大きさ(内部数値)
     protected float m_StateTimer = 0.0f;                // 状態の時間
-    //protected string m_LineObjName = "Player";
     protected string m_FeedName = "Food(Clone)";        // 反応するえさの名前
-    // えさStateの追加
-    //protected Food.Food_Kind m_FoodState =
-    //    Food.Food_Kind.NULL;                            // 反応するえさの状態
     protected string m_AnimalFeedName = "";             // 反応するトラバサミにかかった動物の名前
     protected Enemy3D m_TakeInAnimal;                   // 持ち帰る動物オブジェクト
     protected bool m_IsRendered = false;                // カメラに映っているか
@@ -67,7 +64,6 @@ public class Enemy3D : MonoBehaviour
     protected Vector3 m_Velocity = Vector3.right;       // 移動量
     protected Vector3 m_MovePointPosition;              // 移動ポイントの位置
     protected Transform m_DiscoverPlayer;               // プレイヤーを発見
-    //protected Transform m_InitPoint;
     protected GameObject m_Player = null;               // 当たったプレイヤー
     protected GameObject m_FoodObj;                     // えさオブジェクト
     protected GameObject m_TargetAnimal;                // 追跡・逃亡用動物
@@ -75,33 +71,45 @@ public class Enemy3D : MonoBehaviour
     protected Trap_Small m_SmallTrap = null;
     protected Rigidbody m_Rigidbody;
     protected Collider m_Collider;                      // 自身のコライダー
-    protected DiscoverState m_DState =
-        DiscoverState.Discover_None;                    // 発見状態
-    protected DiscoverFoodState m_DFState =
-        DiscoverFoodState.DiscoverFood_Move;            // えさ発見状態  
-    protected UnityEngine.AI.NavMeshAgent m_Agent;                     // ナビメッシュエージェント  
+    protected global::AnimalState_DiscoverState m_DState =
+        global::AnimalState_DiscoverState.Discover_None;        // 発見状態
+    protected global::AnimalState_DiscoverFoodState m_DFState =
+        global::AnimalState_DiscoverFoodState.DiscoverFood_Move;// えさ発見状態  
+    protected UnityEngine.AI.NavMeshAgent m_Agent;      // ナビメッシュエージェント  
 
     protected GameManager.GameState m_GameState =
         GameManager.GameState.START;
 
     // モーション番号
-    protected int m_MotionNumber = (int)AnimatorNumber.ANIMATOR_IDEL_NUMBER;
+    protected int m_MotionNumber = (int)AnimalAnimatorNumber.ANIMATOR_IDEL_NUMBER;
     // モーション配列
     protected Dictionary<int, string> m_AnimatorStates =
         new Dictionary<int, string>();
+
+    // 状態関数テーブル
+    protected Dictionary<AnimalState, Func<float, int>> m_Status =
+        new Dictionary<AnimalState, Func<float, int>>();
+    // 発見状態関数テーブル
+    protected Dictionary<AnimalState_DiscoverState, Func<float, int>> m_DStatus =
+        new Dictionary<AnimalState_DiscoverState, Func<float, int>>();
+    // 状態関数テーブル
+    protected Dictionary<AnimalState_DiscoverFoodState, Func<float, int>> m_DFStatus =
+        new Dictionary<AnimalState_DiscoverFoodState, Func<float, int>>();
+    // 発見状態関数テーブル
+    protected Dictionary<AnimalState_TrapHitState, Func<float, int>> m_THtatus =
+        new Dictionary<AnimalState_TrapHitState, Func<float, int>>();
     #endregion
 
     #region private変数
-    //private bool m_IsPravGround;                    // 前回の接地判定
-    //private int m_PointCount = 0;                   // 移動ポイント数
     private int m_CurrentMovePoint = -1;            // 現在の移動ポイント
     private float m_MoveStartTime = 0.5f;           // 移動開始時間
     private bool m_IsTrapHit = false;               // トラバサミに挟まったか
     private GameObject m_TrapsObj = null;           // トラバサミの親クラス
     private Transform m_OtherCreateBox;             // 持ち帰る動物の元の親オブジェクト
-    private TrapHitState m_THState =
-        TrapHitState.TrapHit_Change;                // トラップヒット状態
-    private State m_PrevState = State.Idel;         // 前回の行動
+    private global::AnimalState_TrapHitState m_THState =
+        global::AnimalState_TrapHitState.TrapHit_Change;    // トラップヒット状態
+    private global::AnimalState m_PrevState = 
+        global::AnimalState.Idel;                           // 前回の行動
     //private GameObject m_Frame;             // キャンバスのフレーム                                     
     //private List<State>
     //    m_DiscoveredStates = new List<State>();     // 発見後の行動
@@ -115,75 +123,13 @@ public class Enemy3D : MonoBehaviour
     #endregion
     #endregion
 
-    #region 列挙クラス
-    // 状態クラス 
-    [System.Flags]
-    public enum State
-    {
-        Idel = 1 << 0,          // 待機状態
-        Search = 1 << 1,        // 捜索状態
-        Discover = 1 << 2,      // 発見状態
-        DiscoverAction = 1 << 3,// 発見行動状態
-        Attack = 1 << 4,        // 攻撃状態
-        Faint = 1 << 5,         // 気絶状態
-        Sleep = 1 << 6,         // 睡眠状態
-        TrapHit = 1 << 7,       // トラバサミに挟まれている状態
-        Meat = 1 << 8,          // お肉状態
-        DeadIdel = 1 << 9,      // 死亡待機状態
-        Runaway = 1 << 10,      // 逃亡状態
-    }
-
-    // 発見状態
-    protected enum DiscoverState
-    {
-        Discover_None = 1 << 0,     // なにも見つけていない状態
-        Discover_Player = 1 << 1,   // プレイヤーを発見状態
-        Discover_Animal = 1 << 2,   // 動物発見状態
-        Discover_Food = 1 << 3,     // えさ発見状態
-        Discover_Trap = 1 << 4,     // トラバサミ発見状態
-        Discover_Lost = 1 << 5,     // 見失う状態
-        Discover_Lost_Stop = 1 << 6 // 見失い停止状態
-    }
-    // えさ発見状態
-    protected enum DiscoverFoodState
-    {
-        DiscoverFood_Move = 1 << 0,         // 発見移動
-        DiscoverFood_AnimalMove = 1 << 1,   // 動物発見移動
-        DiscoverFood_Eat = 1 << 2,          // えさ食べ状態
-        DiscoverFood_Lift = 1 << 3,         // 持ち上げ状態
-        DiscoverFood_TakeAway = 1 << 4,     // 持ち帰り状態
-    }
-    // トラバサミに挟まれた時の状態クラス
-    protected enum TrapHitState
-    {
-        TrapHit_Change = 1 << 0,    // トラップ化状態
-        TrapHit_TakeIn = 1 << 1,    // トラバサミに飲み込まれた状態
-        TrapHit_Runaway = 1 << 2    // トラバサミ逃げ状態
-    }
-
-    // アニメーター番号
-    protected enum AnimatorNumber
-    {
-        ANIMATOR_NULL = 0,
-        ANIMATOR_IDEL_NUMBER = 1,
-        ANIMATOR_DISCOVER_NUMBER = 2,
-        ANIMATOR_CHASE_NUMBER = 3,
-        ANIMATOR_ATTACK_NUMBER = 4,
-        ANIMATOR_LOST_NUMBER = 5,
-        ANIMATOR_TRAP_HIT_NUMBER = 6,
-        ANIMATOR_WALL_HIT_NUMBER = 7,
-        ANIMATOR_FAINT_NUMBER = 8,
-        ANIMATOR_DEAD_NUMBER = 9,
-        ANIMATOR_EAT_NUMBER = 10,
-        ANIMATOR_SLEEP_NUMBER = 11
-    };
-    #endregion
-
     #region 関数
     #region 基盤関数
     // Use this for initialization
     protected virtual void Start()
     {
+        // 状態関数の追加
+        AddStatus();
         // アニメーションリストにリソースを追加
         m_Rigidbody = GetComponent<Rigidbody>();
         m_Collider = GetComponent<Collider>();
@@ -224,7 +170,7 @@ public class Enemy3D : MonoBehaviour
                     m_Agent.isStopped = true;
                     m_Agent.enabled = false;
                 }
-                if (m_MotionNumber != (int)AnimatorNumber.ANIMATOR_DEAD_NUMBER)
+                if (m_MotionNumber != (int)AnimalAnimatorNumber.ANIMATOR_DEAD_NUMBER)
                     m_Animator.enabled = false;
                 return;
             }
@@ -232,7 +178,7 @@ public class Enemy3D : MonoBehaviour
             {
                 m_Animator.enabled = true;
                 if (!m_Agent.enabled) m_Agent.enabled = true;
-                if (m_Agent.enabled && m_State != State.Sleep) m_Agent.isStopped = false;
+                if (m_Agent.enabled && m_State != global::AnimalState.Sleep) m_Agent.isStopped = false;
                 m_Collider.enabled = true;
             }            
         }
@@ -262,34 +208,21 @@ public class Enemy3D : MonoBehaviour
         if (m_MoveStartTime > 0.0f) return;
 
         // オブジェクトの捜索
-        if ((m_State & (State.TrapHit | State.Meat | State.Faint | State.Attack | State.DiscoverAction | State.Sleep)) == 0)
+        if ((m_State & (global::AnimalState.TrapHit | global::AnimalState.Meat | global::AnimalState.Faint | global::AnimalState.Attack | global::AnimalState.DiscoverAction | global::AnimalState.Sleep)) == 0)
         {
-            if((m_DState & (DiscoverState.Discover_Food | DiscoverState.Discover_Animal | DiscoverState.Discover_Lost)) == 0)
+            if((m_DState & (global::AnimalState_DiscoverState.Discover_Food | global::AnimalState_DiscoverState.Discover_Animal | global::AnimalState_DiscoverState.Discover_Lost)) == 0)
                 SearchObject();
         }
 
         // ラムダでリスト内の関数を呼び出すように変更する
-        // 状態の変更
-        switch (m_State)
-        {
-            case State.Idel: Idel(deltaTime); break;
-            case State.Search: Search(deltaTime); break;
-            case State.Discover: Discover(deltaTime); break;
-            case State.DiscoverAction: DiscoverAction(deltaTime); break;
-            case State.Attack: Attack(deltaTime); break;
-            case State.Faint: Faint(deltaTime); break;
-            case State.Sleep: Sleep(deltaTime); break;
-            case State.TrapHit: TrapHit(deltaTime); break;
-            case State.Meat: MeatIdel(deltaTime); break;
-            case State.DeadIdel: DeadIdel(deltaTime); break;
-            case State.Runaway: Runaway(deltaTime); break;
-        };
+        // 状態の更新
+        m_Status[m_State](deltaTime);
         // 状態の時間加算
         m_StateTimer += deltaTime;
     }
 
     // 状態の変更
-    protected void ChangeState(State state, AnimatorNumber motion)
+    protected void ChangeState(global::AnimalState state, AnimalAnimatorNumber motion)
     {
         if (m_State == state) return;
         // 前回の状態を入れる
@@ -303,10 +236,10 @@ public class Enemy3D : MonoBehaviour
 
     // トラップヒット状態の変更
     protected void ChangeTrapHitState(
-        TrapHitState thState, AnimatorNumber motion = AnimatorNumber.ANIMATOR_TRAP_HIT_NUMBER)
+        global::AnimalState_TrapHitState thState, AnimalAnimatorNumber motion = AnimalAnimatorNumber.ANIMATOR_TRAP_HIT_NUMBER)
     {
         // 状態の変更
-        ChangeState(State.TrapHit, motion);
+        ChangeState(global::AnimalState.TrapHit, motion);
         // 同じトラップヒット状態なら返す
         if (m_THState == thState) return;
         m_THState = thState;
@@ -314,30 +247,31 @@ public class Enemy3D : MonoBehaviour
     }
 
     // アニメーションの変更
-    protected void ChangeAnimation(AnimatorNumber motion)
+    protected void ChangeAnimation(AnimalAnimatorNumber motion)
     {
-        if (motion == AnimatorNumber.ANIMATOR_NULL || (int)motion == m_MotionNumber) return;
+        if (motion == AnimalAnimatorNumber.ANIMATOR_NULL || (int)motion == m_MotionNumber) return;
         m_Animator.CrossFade(m_AnimatorStates[(int)motion], 0.1f, 0);
         m_MotionNumber = (int)motion;
     }
 
     // 待機状態
-    protected virtual void Idel(float deltaTime)
+    protected virtual int Idel(float deltaTime)
     {
         // 移動
         PointMove(deltaTime);
+        return 0;
     }
 
     // 捜索状態
-    protected void Search(float deltaTime)
+    protected int Search(float deltaTime)
     {
         m_Agent.isStopped = true;
 
         if (m_StateTimer >= 3.0f)
         {
-            ChangeState(State.Idel, AnimatorNumber.ANIMATOR_IDEL_NUMBER);
+            ChangeState(global::AnimalState.Idel, AnimalAnimatorNumber.ANIMATOR_IDEL_NUMBER);
             m_Agent.isStopped = false;
-            return;
+            return 0;
         }
 
         // 音の鳴った方向の取得
@@ -347,78 +281,64 @@ public class Enemy3D : MonoBehaviour
 
         float speed = 100.0f * deltaTime;
         // 値が小さくなったら返す返す
-        if (Mathf.Abs(dot) < 0.001f * speed) return;
+        if (Mathf.Abs(dot) < 0.001f * speed) return 0;
         // 内積が0未満なら、速度を負の値にする
         if (dot < 0.0f) speed *= -1.0f;
         this.transform.Rotate(this.transform.up * speed);
+        return 0;
     }
 
     #region 発見状態
     // 発見状態
-    protected virtual void Discover(float deltaTime)
+    protected virtual int Discover(float deltaTime)
     {
-        if (m_MotionNumber == (int)AnimatorNumber.ANIMATOR_DEAD_NUMBER) return;
-
-        switch (m_DState)
-        {
-            case DiscoverState.Discover_Player: DiscoverPlayer(deltaTime); break;
-            case DiscoverState.Discover_Animal: DiscoverAnimal(deltaTime); break;
-            case DiscoverState.Discover_Food: DiscoverFood(deltaTime); break;
-            case DiscoverState.Discover_Trap: DiscoverTrap(deltaTime); break;
-            case DiscoverState.Discover_Lost: DiscoverLost(deltaTime); break;
-            case DiscoverState.Discover_Lost_Stop: DiscoverLostStop(deltaTime); break;
-        }
+        if (m_MotionNumber == (int)AnimalAnimatorNumber.ANIMATOR_DEAD_NUMBER) return 0;
+        return m_DStatus[m_DState](deltaTime);
     }
     // 発見状態の変更
-    protected void ChangeDiscoverState(DiscoverState state)
+    protected void ChangeDiscoverState(AnimalState_DiscoverState state)
     {
-        var motion = AnimatorNumber.ANIMATOR_CHASE_NUMBER;
-        if (state == DiscoverState.Discover_Food) motion = AnimatorNumber.ANIMATOR_NULL;
-        ChangeState(State.Discover, motion);
+        var motion = AnimalAnimatorNumber.ANIMATOR_CHASE_NUMBER;
+        if (state == AnimalState_DiscoverState.Discover_Food) motion = AnimalAnimatorNumber.ANIMATOR_NULL;
+        ChangeState(AnimalState.Discover, motion);
         // 同じ行動なら返す
         if (m_DState == state) return;
         m_DState = state;
         m_StateTimer = 0.0f;
     }
-    protected virtual void DiscoverPlayer(float deltaTime)
+    protected virtual int DiscoverPlayer(float deltaTime)
     {
         GameObject obj = null;
         if (!InPlayer(out obj, 2.0f, true))
         {
             // 見失う状態に遷移
-            ChangeDiscoverState(DiscoverState.Discover_Lost);
+            ChangeDiscoverState(AnimalState_DiscoverState.Discover_Lost);
             // アニメーションの変更
             m_Agent.isStopped = false;
         };
+        return 0;
     }
 
     // 動物発見状態
-    protected virtual void DiscoverAnimal(float deltaTime) { }
+    protected virtual int DiscoverAnimal(float deltaTime) { return 0; }
 
     #region えさ発見状態
     // えさ発見状態
-    protected virtual void DiscoverFood(float deltaTime)
+    protected virtual int DiscoverFood(float deltaTime)
     {
-        switch (m_DFState)
-        {
-            case DiscoverFoodState.DiscoverFood_Move: DiscoverFoodMove(deltaTime); break;
-            case DiscoverFoodState.DiscoverFood_AnimalMove: DiscoverFoodAnimalMove(deltaTime); break;
-            case DiscoverFoodState.DiscoverFood_Eat: DiscoverFoodEat(deltaTime); break;
-            case DiscoverFoodState.DiscoverFood_Lift: DiscoverFoodLift(deltaTime); break;
-            case DiscoverFoodState.DiscoverFood_TakeAway: DiscoverFoodTakeOut(deltaTime); break;
-        }
+        return m_DFStatus[m_DFState](deltaTime);
     }
     // えさ発見状態の状態変更
-    protected void ChangeDiscoverFoodState(DiscoverFoodState state)
+    protected void ChangeDiscoverFoodState(AnimalState_DiscoverFoodState state)
     {
-        ChangeDiscoverState(DiscoverState.Discover_Food);
+        ChangeDiscoverState(AnimalState_DiscoverState.Discover_Food);
         // 同じ行動なら返す
         if (m_DFState == state) return;
         m_DFState = state;
         m_StateTimer = 0.0f;
     }
     // えさ発見移動
-    protected virtual void DiscoverFoodMove(float deltaTime)
+    protected virtual int DiscoverFoodMove(float deltaTime)
     {
         // 二次元(x, z)の距離を求める
         var v1 = new Vector2(m_Agent.destination.x, m_Agent.destination.z);
@@ -429,22 +349,23 @@ public class Enemy3D : MonoBehaviour
         if (length < 1.2f)
         {
             // えさ食べ状態に遷移
-            ChangeDiscoverFoodState(DiscoverFoodState.DiscoverFood_Eat);
-            ChangeAnimation(AnimatorNumber.ANIMATOR_EAT_NUMBER);
+            ChangeDiscoverFoodState(AnimalState_DiscoverFoodState.DiscoverFood_Eat);
+            ChangeAnimation(AnimalAnimatorNumber.ANIMATOR_EAT_NUMBER);
             SoundManger.Instance.PlaySE(11);
             m_Agent.isStopped = true;
-            return;
+            return 0;
         }
 
         // えさが無くなっていたら、待機状態に遷移
         if (m_FoodObj == null)
         {
-            ChangeState(State.Idel, AnimatorNumber.ANIMATOR_IDEL_NUMBER);
-            m_DState = DiscoverState.Discover_None;
+            ChangeState(AnimalState.Idel, AnimalAnimatorNumber.ANIMATOR_IDEL_NUMBER);
+            m_DState = AnimalState_DiscoverState.Discover_None;
         }
+        return 0;
     }
     // 動物発見状態
-    protected virtual void DiscoverFoodAnimalMove(float deltaTime)
+    protected virtual int DiscoverFoodAnimalMove(float deltaTime)
     {
         var v1 = new Vector2(m_Agent.destination.x, m_Agent.destination.z);
         var v2 = new Vector2(transform.position.x, transform.position.z);
@@ -453,20 +374,21 @@ public class Enemy3D : MonoBehaviour
         if (length < 0.8f)
         {
             // 持ち上げ状態に遷移
-            ChangeDiscoverFoodState(DiscoverFoodState.DiscoverFood_Lift);
-            return;
+            ChangeDiscoverFoodState(AnimalState_DiscoverFoodState.DiscoverFood_Lift);
+            return 0;
         }
         // えさがなかったら、待機状態に遷移
         if (m_SmallTrap == null)
         {
-            ChangeState(State.Idel, AnimatorNumber.ANIMATOR_IDEL_NUMBER);
-            m_DState = DiscoverState.Discover_None;
+            ChangeState(AnimalState.Idel, AnimalAnimatorNumber.ANIMATOR_IDEL_NUMBER);
+            m_DState = AnimalState_DiscoverState.Discover_None;
             ChangeMovePoint();
             m_Agent.isStopped = false;
         }
+        return 0;
     }
     // えさ食べ状態
-    protected void DiscoverFoodEat(float deltaTime)
+    protected int DiscoverFoodEat(float deltaTime)
     {
         // えさが無くなっていたら、待機状態に遷移
         if (m_FoodObj == null)
@@ -475,27 +397,29 @@ public class Enemy3D : MonoBehaviour
             if (mediator != null)
             {
                 // チュートリアルなら動かないようにする
-                if (TutorialMediator.GetInstance() != null) return;
+                if (TutorialMediator.GetInstance() != null) return 0;
             }
             // 待機状態に遷移
-            ChangeState(State.Idel, AnimatorNumber.ANIMATOR_IDEL_NUMBER);
-            m_DState = DiscoverState.Discover_None;
+            ChangeState(AnimalState.Idel, AnimalAnimatorNumber.ANIMATOR_IDEL_NUMBER);
+            m_DState = AnimalState_DiscoverState.Discover_None;
             m_Agent.isStopped = false;
+            return 0;
         }
 
-        if (m_StateTimer <= 3.0f) return;
+        if (m_StateTimer <= 3.0f) return 0;
         // えさを食べた時の処理
         EatFood();
+        return 0;
     }
 
     // えさ持ち上げ状態
-    protected virtual void DiscoverFoodLift(float deltaTime)
+    protected virtual int DiscoverFoodLift(float deltaTime)
     {
         // 仮
-        if (m_StateTimer < 1.0f) return;
+        if (m_StateTimer < 1.0f) return 0;
 
         // 持ち上げ終了したら、持ち帰り状態に遷移
-        ChangeDiscoverFoodState(DiscoverFoodState.DiscoverFood_TakeAway);
+        ChangeDiscoverFoodState(AnimalState_DiscoverFoodState.DiscoverFood_TakeAway);
 
         // 動物を持ち上げる
         var animal = m_SmallTrap.GetAnimal();
@@ -522,16 +446,17 @@ public class Enemy3D : MonoBehaviour
         // 初期位置に移動
         ChangeMovePoint(nest.transform.position);
         m_Agent.isStopped = false;
+        return 0;
     }
     // えさ持ち帰り状態
-    protected virtual void DiscoverFoodTakeOut(float deltaTime)
+    protected virtual int DiscoverFoodTakeOut(float deltaTime)
     {
         var length = Vector3.Distance(
             m_Agent.destination, this.transform.position
             );
         // 移動ポイントに到達したら消える
-        if (length > m_Speed) return;
-        ChangeState(State.DeadIdel, AnimatorNumber.ANIMATOR_DEAD_NUMBER);
+        if (length > m_Speed) return 0;
+        ChangeState(AnimalState.DeadIdel, AnimalAnimatorNumber.ANIMATOR_DEAD_NUMBER);
 
         // 持ち上げた動物の初期化
         //// 動物を持ち上げる
@@ -545,34 +470,35 @@ public class Enemy3D : MonoBehaviour
         m_TakeInAnimal = null;
         // ステータスの初期化
         InitState();
+        return 0;
     }
     #endregion
 
     // トラバサミ発見状態
-    protected virtual void DiscoverTrap(float deltaTime)
+    protected virtual int DiscoverTrap(float deltaTime)
     {
         GameObject obj = null;
         // トラバサミを見つけたか
         if (!InObject(TRAP_NAME, out obj))
         {
-            ChangeState(State.Idel, AnimatorNumber.ANIMATOR_IDEL_NUMBER);
+            ChangeState(AnimalState.Idel, AnimalAnimatorNumber.ANIMATOR_IDEL_NUMBER);
             m_Agent.isStopped = false;
-            ChangeSpriteColor(Color.red);
         }
+        return 0;
     }
     // 見失う状態
-    protected void DiscoverLost(float deltaTime)
+    protected int DiscoverLost(float deltaTime)
     {
         // プレイヤーが見えたら、再度追跡
         GameObject player = null;
         if (InPlayer(out player, 2.0f, true))
         {
             // 追跡状態に遷移
-            ChangeDiscoverState(DiscoverState.Discover_Player);
+            ChangeDiscoverState(AnimalState_DiscoverState.Discover_Player);
             SoundManger.Instance.PlaySE(13);
             // アニメーションの変更
-            ChangeAnimation(AnimatorNumber.ANIMATOR_CHASE_NUMBER);
-            return;
+            ChangeAnimation(AnimalAnimatorNumber.ANIMATOR_CHASE_NUMBER);
+            return 0;
         }
 
         // 二次元(x, z)の距離を求める
@@ -582,95 +508,88 @@ public class Enemy3D : MonoBehaviour
         // 見失ったポイントに移動してもいなかったら、待機状態に遷移
         if (length < 2.0f)
         {
-            ChangeDiscoverState(DiscoverState.Discover_Lost_Stop);
+            ChangeDiscoverState(AnimalState_DiscoverState.Discover_Lost_Stop);
             // アニメーションの変更
-            ChangeAnimation(AnimatorNumber.ANIMATOR_LOST_NUMBER);
+            ChangeAnimation(AnimalAnimatorNumber.ANIMATOR_LOST_NUMBER);
             m_TargetAnimal = null;
             m_Agent.isStopped = true;
         }
+        return 0;
     }
     // 見失い停止状態
-    protected void DiscoverLostStop(float deltaTime)
+    protected int DiscoverLostStop(float deltaTime)
     {
         // 見失ったポイントに移動してもいなかったら、待機状態に遷移
         if (IsEndTimeAnimation(0.9f))
         {
-            ChangeState(State.Idel, AnimatorNumber.ANIMATOR_IDEL_NUMBER);
-            m_DState = DiscoverState.Discover_None;
+            ChangeState(AnimalState.Idel, AnimalAnimatorNumber.ANIMATOR_IDEL_NUMBER);
+            m_DState = AnimalState_DiscoverState.Discover_None;
             m_Agent.isStopped = false;
             // 移動速度を変える
             m_Agent.speed = m_Speed;
             m_Player = null;
         }
+        return 0;
     }
     #endregion
 
     // 発見行動状態
-    protected virtual void DiscoverAction(float deltaTime)
+    protected virtual int DiscoverAction(float deltaTime)
     {
         // 一定時間経過したら、次のアニメーションを再生
-        if (m_MotionNumber == (int)AnimatorNumber.ANIMATOR_DISCOVER_NUMBER
+        if (m_MotionNumber == (int)AnimalAnimatorNumber.ANIMATOR_DISCOVER_NUMBER
             && !IsEndTimeAnimation(0.9f))
         {
             m_Agent.isStopped = true;
-            return;
+            return 0;
         }
         else
         {
             // アニメーションの変更
-            ChangeAnimation(AnimatorNumber.ANIMATOR_CHASE_NUMBER);
-            //m_Agent.isStopped = false;
+            ChangeAnimation(AnimalAnimatorNumber.ANIMATOR_CHASE_NUMBER);
         }
 
         ChangeDiscoverState(m_DState);
         m_Agent.isStopped = false;
+        return 0;
     }
 
     // 攻撃状態
-    protected virtual void Attack(float deltaTime)
+    protected virtual int Attack(float deltaTime)
     {
-        if (m_StateTimer < 2.0f) return;
+        if (m_StateTimer < 2.0f) return 0;
         // 待機状態に遷移
-        ChangeState(State.Idel, AnimatorNumber.ANIMATOR_IDEL_NUMBER);
-        m_DState = DiscoverState.Discover_None;
+        ChangeState(AnimalState.Idel, AnimalAnimatorNumber.ANIMATOR_IDEL_NUMBER);
+        m_DState = AnimalState_DiscoverState.Discover_None;
         m_TargetAnimal = null;
         m_Agent.isStopped = false;
+        return 0;
     }
 
     // 気絶状態
-    protected void Faint(float deltaTime)
+    protected int Faint(float deltaTime)
     {
         // 一定時間経過まで動かない
-        if (m_StateTimer < 3.0f) return;
+        if (m_StateTimer < 3.0f) return 0;
         // 待機状態に遷移
-        ChangeState(State.Idel, AnimatorNumber.ANIMATOR_IDEL_NUMBER);
+        ChangeState(AnimalState.Idel, AnimalAnimatorNumber.ANIMATOR_IDEL_NUMBER);
         ChangeMovePoint();
         m_Agent.isStopped = false;
-        ChangeSpriteColor(Color.red);
+        return 0;
     }
 
     // 睡眠状態
-    protected void Sleep(float deltaTime) { }
+    protected int Sleep(float deltaTime) { return 0; }
 
     #region トラバサミヒット状態
     // トラバサミに挟まれている状態
-    protected void TrapHit(float deltaTime)
-    {
-        switch (m_THState)
-        {
-            case TrapHitState.TrapHit_Change: TrapHitChange(deltaTime); break;
-            case TrapHitState.TrapHit_TakeIn: TrapHitTakeIn(deltaTime); break;
-            case TrapHitState.TrapHit_Runaway: TrapHitRunaway(deltaTime); break;
-        };
-    }
+    protected int TrapHit(float deltaTime) { return m_THtatus[m_THState](deltaTime); }
 
     // 飲み込まれ状態
-    protected void TrapHitTakeIn(float deltaTime)
-    {
-    }
+    protected int TrapHitTakeIn(float deltaTime) { return 0; }
 
     // トラバサミ逃げ状態
-    protected void TrapHitRunaway(float deltaTime)
+    protected int TrapHitRunaway(float deltaTime)
     {
         // トラバサミの方向に移動するように、ポイントの更新をする
         ChangeMovePoint(m_SmallTrap.transform.position);
@@ -679,11 +598,11 @@ public class Enemy3D : MonoBehaviour
         if (m_WChackPoint.IsWallHit())
         {
             // 気絶状態に遷移
-            ChangeState(State.Faint, AnimatorNumber.ANIMATOR_WALL_HIT_NUMBER);
+            ChangeState(AnimalState.Faint, AnimalAnimatorNumber.ANIMATOR_WALL_HIT_NUMBER);
             // 付属しているトラバサミの削除
             DeleteTrap();
             m_Agent.isStopped = true;
-            return;
+            return 0;
         }
 
         // オブジェクトの位置から地面までのレイを伸ばす
@@ -692,75 +611,102 @@ public class Enemy3D : MonoBehaviour
         RaycastHit hitInfo;
         var hit = Physics.Raycast(ray, out hitInfo);
         // 地面に当たらなかった場合は返す
-        if (!hit || hitInfo.collider.gameObject.tag != "Ground") return;
+        if (!hit || hitInfo.collider.gameObject.tag != "Ground") return 0;
         // ステージ外の床に接地していたら、逃げ状態に遷移
-        if (hitInfo.transform.name.IndexOf("StageOutPlane") < 0) return;
+        if (hitInfo.transform.name.IndexOf("StageOutPlane") < 0) return 0;
         // 逃げ状態に遷移
-        ChangeState(State.Runaway, AnimatorNumber.ANIMATOR_CHASE_NUMBER);
+        ChangeState(AnimalState.Runaway, AnimalAnimatorNumber.ANIMATOR_CHASE_NUMBER);
         // 自身の衝突判定のトリガーをオンにする
         m_Collider.isTrigger = true;
-
+        return 0;
     }
 
     // 罠状態
-    protected void TrapHitChange(float deltaTime)
+    protected int TrapHitChange(float deltaTime)
     {
         // トラップから解除されたら
-        //if (m_TrapObj != null) return;
-        if (m_SmallTrap != null) return;
-
+        if (m_SmallTrap != null) return 0;
         m_IsTrapHit = false;
-
-        //// 死亡待機状態に遷移
-        //ChangeState(State.DeadIdel, AnimationNumber.ANIME_DEAD_NUMBER);
-        //// トラバサミが解放されたときの行動
-        //TrapReleaseAction();
-        //// ステータスの初期化
-        //InitState();
-
         // トラバサミが解放されたときの行動
         TrapReleaseAction();
         // 動物の消去
         DeadAnimal();
+        return 0;
     }
     #endregion
 
     // 肉待機状態
-    protected void MeatIdel(float deltaTime)
+    protected int MeatIdel(float deltaTime)
     {
         // 持っている肉が無かったら、死亡待機状態に遷移
         var meat = this.transform.Find("Food(Clone)");
-        if (meat != null) return;
-        ChangeState(State.DeadIdel, AnimatorNumber.ANIMATOR_DEAD_NUMBER);
+        if (meat != null) return 0;
+        ChangeState(AnimalState.DeadIdel, AnimalAnimatorNumber.ANIMATOR_DEAD_NUMBER);
         // ステータスの初期化
         InitState();
+        return 0;
     }
 
     // 死亡待機状態
-    protected void DeadIdel(float deltaTime)
+    protected int DeadIdel(float deltaTime)
     {
         // 外部からアクティブ状態に変更されたら、待機状態に遷移
-        if (!gameObject.activeSelf) return;
+        if (!gameObject.activeSelf) return 0;
         gameObject.SetActive(true);
-        ChangeState(State.Idel, AnimatorNumber.ANIMATOR_IDEL_NUMBER);
+        ChangeState(AnimalState.Idel, AnimalAnimatorNumber.ANIMATOR_IDEL_NUMBER);
         // 最初のポイントに移動
         m_CurrentMovePoint = 0;
         ChangeMovePoint(m_MovePointPosition);
+        m_Collider.isTrigger = true;
         m_Agent.isStopped = false;
+        return 0;
     }
     // 逃げ状態
-    protected void Runaway(float deltaTime)
+    protected int Runaway(float deltaTime)
     {
         // トラバサミの方向に移動するように、ポイントの更新をする
         ChangeMovePoint(m_SmallTrap.transform.position);
         // 画面に映っている間は返す
-        if (IsRendered()) return;
-        // 自身の衝突判定のトリガーをオンにする
-        m_Collider.isTrigger = false;
+        if (IsRendered()) return 0;
         // 付属しているトラバサミの削除
         DeleteTrap();
         // 動物の消去
         DeadAnimal();
+        return 0;
+    }
+
+    protected void AddStatus()
+    {
+        // 状態関数の追加
+        m_Status.Add(AnimalState.Idel, (deltaTime) => { return Idel(deltaTime); });
+        m_Status.Add(AnimalState.Search, (deltaTime) => { return Search(deltaTime); });
+        m_Status.Add(AnimalState.Discover, (deltaTime) => { return Discover(deltaTime); });
+        m_Status.Add(AnimalState.DiscoverAction, (deltaTime) => { return DiscoverAction(deltaTime); });
+        m_Status.Add(AnimalState.Attack, (deltaTime) => { return Attack(deltaTime); });
+        m_Status.Add(AnimalState.Faint, (deltaTime) => { return Faint(deltaTime); });
+        m_Status.Add(AnimalState.Sleep, (deltaTime) => { return Sleep(deltaTime); });
+        m_Status.Add(AnimalState.TrapHit, (deltaTime) => { return TrapHit(deltaTime); });
+        m_Status.Add(AnimalState.Meat, (deltaTime) => { return MeatIdel(deltaTime); });
+        m_Status.Add(AnimalState.DeadIdel, (deltaTime) => { return DeadIdel(deltaTime); });
+        m_Status.Add(AnimalState.Runaway, (deltaTime) => { return Runaway(deltaTime); });
+        // 発見状態関数の追加
+        m_DStatus.Add(AnimalState_DiscoverState.Discover_None, (deltaTime) => { return 0; });
+        m_DStatus.Add(AnimalState_DiscoverState.Discover_Player, (deltaTime) => { return DiscoverPlayer(deltaTime); });
+        m_DStatus.Add(AnimalState_DiscoverState.Discover_Animal, (deltaTime) => { return DiscoverAnimal(deltaTime); });
+        m_DStatus.Add(AnimalState_DiscoverState.Discover_Food, (deltaTime) => { return DiscoverFood(deltaTime); });
+        m_DStatus.Add(AnimalState_DiscoverState.Discover_Trap, (deltaTime) => { return DiscoverTrap(deltaTime); });
+        m_DStatus.Add(AnimalState_DiscoverState.Discover_Lost, (deltaTime) => { return DiscoverLost(deltaTime); });
+        m_DStatus.Add(AnimalState_DiscoverState.Discover_Lost_Stop, (deltaTime) => { return DiscoverLostStop(deltaTime); });
+        // えさ発見状態の追加
+        m_DFStatus.Add(AnimalState_DiscoverFoodState.DiscoverFood_Move, (deltaTime) => { return DiscoverFoodMove(deltaTime); });
+        m_DFStatus.Add(AnimalState_DiscoverFoodState.DiscoverFood_AnimalMove, (deltaTime) => { return DiscoverFoodAnimalMove(deltaTime); });
+        m_DFStatus.Add(AnimalState_DiscoverFoodState.DiscoverFood_Eat, (deltaTime) => { return DiscoverFoodEat(deltaTime); });
+        m_DFStatus.Add(AnimalState_DiscoverFoodState.DiscoverFood_Lift, (deltaTime) => { return DiscoverFoodLift(deltaTime); });
+        m_DFStatus.Add(AnimalState_DiscoverFoodState.DiscoverFood_TakeAway, (deltaTime) => { return DiscoverFoodTakeOut(deltaTime); });
+        // トラバサミ発見状態の追加
+        m_THtatus.Add(AnimalState_TrapHitState.TrapHit_Change, (deltaTime) => { return TrapHitChange(deltaTime); });
+        m_THtatus.Add(AnimalState_TrapHitState.TrapHit_TakeIn, (deltaTime) => { return TrapHitTakeIn(deltaTime); });
+        m_THtatus.Add(AnimalState_TrapHitState.TrapHit_Runaway, (deltaTime) => { return TrapHitRunaway(deltaTime); });
     }
     #endregion
 
@@ -768,11 +714,11 @@ public class Enemy3D : MonoBehaviour
     // 小さいトラバサミに衝突した時の行動です
     protected virtual void SmallTrapHitAction()
     {
-        if (m_State == State.TrapHit) return;
+        if (m_State == AnimalState.TrapHit) return;
         // トラップ化状態に遷移
         ChangeTrapHitState(
-            TrapHitState.TrapHit_Change,
-            AnimatorNumber.ANIMATOR_DEAD_NUMBER
+            AnimalState_TrapHitState.TrapHit_Change,
+            AnimalAnimatorNumber.ANIMATOR_DEAD_NUMBER
             );
         //m_DState = DiscoverState.Discover_None;
         m_IsTrapHit = true;
@@ -799,7 +745,7 @@ public class Enemy3D : MonoBehaviour
         // 好きなえさだったら寄り付く　嫌いなえさだったら逃げる
         if (IsLikeFood(food.food_Kind))
         {
-            ChangeDiscoverFoodState(DiscoverFoodState.DiscoverFood_Move);
+            ChangeDiscoverFoodState(AnimalState_DiscoverFoodState.DiscoverFood_Move);
             ChangeMovePoint(food.transform.position);
         }
         else {
@@ -814,8 +760,8 @@ public class Enemy3D : MonoBehaviour
     protected virtual void EatFood()
     {
         // えさを食べ終わったら、待機状態に遷移
-        ChangeState(State.Idel, AnimatorNumber.ANIMATOR_IDEL_NUMBER);
-        m_DState = DiscoverState.Discover_None;
+        ChangeState(AnimalState.Idel, AnimalAnimatorNumber.ANIMATOR_IDEL_NUMBER);
+        m_DState = AnimalState_DiscoverState.Discover_None;
         m_Agent.isStopped = false;
         // えさの削除
         Destroy(m_FoodObj);
@@ -834,7 +780,7 @@ public class Enemy3D : MonoBehaviour
     // 特定の状態で動かないようにします(衝突判定時)
     protected virtual bool IsNotChangeState()
     {
-        return ((m_State & (State.TrapHit | State.Meat | State.Faint | State.Attack | State.DiscoverAction | State.Sleep)) != 0);
+        return ((m_State & (AnimalState.TrapHit | AnimalState.Meat | AnimalState.Faint | AnimalState.Attack | AnimalState.DiscoverAction | AnimalState.Sleep)) != 0);
     }
     #endregion
 
@@ -1047,11 +993,11 @@ public class Enemy3D : MonoBehaviour
     protected virtual void InitState()
     {
         // 待機状態に変更
-        ChangeState(State.Idel, AnimatorNumber.ANIMATOR_IDEL_NUMBER);
+        ChangeState(AnimalState.Idel, AnimalAnimatorNumber.ANIMATOR_IDEL_NUMBER);
         // トラバサミを空っぽにする
         m_SmallTrap = null;
         // 発見状態を初期化する
-        m_DState = DiscoverState.Discover_None;
+        m_DState = AnimalState_DiscoverState.Discover_None;
         // ナビメッシュエージェント関連の初期化
         m_Agent.enabled = true;
         m_CurrentMovePoint = 0;
@@ -1072,7 +1018,7 @@ public class Enemy3D : MonoBehaviour
     protected void DeadAnimal()
     {
         // 死亡待機状態に遷移
-        ChangeState(State.DeadIdel, AnimatorNumber.ANIMATOR_DEAD_NUMBER);
+        ChangeState(AnimalState.DeadIdel, AnimalAnimatorNumber.ANIMATOR_DEAD_NUMBER);
         // ステータスの初期化
         InitState();
     }
@@ -1111,12 +1057,12 @@ public class Enemy3D : MonoBehaviour
     protected virtual void ChangePlayerHitMove(GameObject player)
     {
         // 発見状態に遷移
-        if ((m_State & (State.Idel | State.Search)) != 0)
+        if ((m_State & (AnimalState.Idel | AnimalState.Search)) != 0)
         {
-            m_DState = DiscoverState.Discover_Player;
-            ChangeState(State.DiscoverAction, AnimatorNumber.ANIMATOR_DISCOVER_NUMBER);
+            m_DState = AnimalState_DiscoverState.Discover_Player;
+            ChangeState(AnimalState.DiscoverAction, AnimalAnimatorNumber.ANIMATOR_DISCOVER_NUMBER);
         }
-        else ChangeDiscoverState(DiscoverState.Discover_Player);
+        else ChangeDiscoverState(AnimalState_DiscoverState.Discover_Player);
 
         SoundManger.Instance.PlaySE(13);
         m_Mark.ExclamationMark();
@@ -1234,15 +1180,15 @@ public class Enemy3D : MonoBehaviour
     protected virtual void SetAnimator()
     {
         // 待機アニメーション
-        m_AnimatorStates[(int)AnimatorNumber.ANIMATOR_IDEL_NUMBER] = "Wait";
+        m_AnimatorStates[(int)AnimalAnimatorNumber.ANIMATOR_IDEL_NUMBER] = "Wait";
         // 発見アニメーション
-        m_AnimatorStates[(int)AnimatorNumber.ANIMATOR_DISCOVER_NUMBER] = "Discover";
+        m_AnimatorStates[(int)AnimalAnimatorNumber.ANIMATOR_DISCOVER_NUMBER] = "Discover";
         // 見失いアニメーション
-        m_AnimatorStates[(int)AnimatorNumber.ANIMATOR_LOST_NUMBER] = "Lost";
+        m_AnimatorStates[(int)AnimalAnimatorNumber.ANIMATOR_LOST_NUMBER] = "Lost";
         // 食べるアニメーション
-        m_AnimatorStates[(int)AnimatorNumber.ANIMATOR_EAT_NUMBER] = "Eat";
+        m_AnimatorStates[(int)AnimalAnimatorNumber.ANIMATOR_EAT_NUMBER] = "Eat";
         // 死亡アニメーション
-        m_AnimatorStates[(int)AnimatorNumber.ANIMATOR_DEAD_NUMBER] = "Death";
+        m_AnimatorStates[(int)AnimalAnimatorNumber.ANIMATOR_DEAD_NUMBER] = "Death";
     }
 
     // 敵のスプライトカラーの変更
@@ -1306,7 +1252,7 @@ public class Enemy3D : MonoBehaviour
     // プレイヤーの捜索
     protected bool SearchPlayer()
     {
-        if (m_DState == DiscoverState.Discover_Player) return false;
+        if (m_DState == AnimalState_DiscoverState.Discover_Player) return false;
         GameObject obj = null;
         if (!InPlayer(out obj)) return false;
         // プレイヤーを見つけた場合
@@ -1331,7 +1277,7 @@ public class Enemy3D : MonoBehaviour
     // トラバサミの捜索
     protected bool SearchTrap()
     {
-        if (m_DState == DiscoverState.Discover_Trap) return false;
+        if (m_DState == AnimalState_DiscoverState.Discover_Trap) return false;
         var traps = GameObject.Find(TRAP_NAME);
         if (traps == null) return false;
         GameObject obj = null;
@@ -1345,14 +1291,14 @@ public class Enemy3D : MonoBehaviour
         var animal = trap.GetAnimal();
         if (animal != null && animal.name == m_AnimalFeedName)
         {
-            ChangeDiscoverFoodState(DiscoverFoodState.DiscoverFood_AnimalMove);
+            ChangeDiscoverFoodState(AnimalState_DiscoverFoodState.DiscoverFood_AnimalMove);
             // 移動ポイントを動物に変更
             ChangeMovePoint(animal.transform.position);
             return true;
         }
 
         // トラバサミ発見状態に遷移
-        ChangeDiscoverState(DiscoverState.Discover_Trap);
+        ChangeDiscoverState(AnimalState_DiscoverState.Discover_Trap);
         var box = this.transform.parent.GetComponentInParent<EnemyCreateBox>();
         // 次のポイントに変更
         ChangeMovePoint();
@@ -1362,7 +1308,7 @@ public class Enemy3D : MonoBehaviour
     // 反応する動物を捜索します
     protected virtual bool SearchAnimal()
     {
-        if (m_DState == DiscoverState.Discover_Animal) return false;
+        if (m_DState == AnimalState_DiscoverState.Discover_Animal) return false;
         return SearchAnimal("LargeEnemy");
     }
 
@@ -1381,7 +1327,7 @@ public class Enemy3D : MonoBehaviour
             {
                 // 相手が特定の状態だったら返す
                 var animalScript = animal.GetComponent<Enemy3D>();
-                if (animalScript.GetState() == State.Meat) return false;
+                if (animalScript.GetState() == AnimalState.Meat) return false;
                 // 見つけた
                 AnimalHit(animal);
                 return true;
@@ -1395,9 +1341,9 @@ public class Enemy3D : MonoBehaviour
     // 動物を見つけた時の処理です
     protected virtual void AnimalHit(GameObject animal)
     {
-        ChangeDiscoverState(DiscoverState.Discover_Animal);
+        ChangeDiscoverState(AnimalState_DiscoverState.Discover_Animal);
         // アニメーションの変更
-        ChangeAnimation(AnimatorNumber.ANIMATOR_CHASE_NUMBER);
+        ChangeAnimation(AnimalAnimatorNumber.ANIMATOR_CHASE_NUMBER);
         m_TargetAnimal = animal;
         m_Agent.isStopped = false;
     }
@@ -1456,7 +1402,7 @@ public class Enemy3D : MonoBehaviour
         // プレイヤーがいなければ、待機状態に遷移
         if (player != null)
         {
-            ChangeState(State.Idel, AnimatorNumber.ANIMATOR_IDEL_NUMBER);
+            ChangeState(AnimalState.Idel, AnimalAnimatorNumber.ANIMATOR_IDEL_NUMBER);
             return;
         }
         // 移動ポイントの変更
@@ -1467,7 +1413,7 @@ public class Enemy3D : MonoBehaviour
     // 敵を待機状態にさせます
     public void ChangeWait()
     {
-        ChangeState(State.Idel, AnimatorNumber.ANIMATOR_IDEL_NUMBER);
+        ChangeState(AnimalState.Idel, AnimalAnimatorNumber.ANIMATOR_IDEL_NUMBER);
         ChangeSpriteColor(Color.red);
     }
 
@@ -1505,8 +1451,8 @@ public class Enemy3D : MonoBehaviour
     // 動物をお肉に変更します
     public void ChangeMeat()
     {
-        if (m_State == State.Meat) return;
-        ChangeState(State.Meat, AnimatorNumber.ANIMATOR_IDEL_NUMBER);
+        if (m_State == AnimalState.Meat) return;
+        ChangeState(AnimalState.Meat, AnimalAnimatorNumber.ANIMATOR_IDEL_NUMBER);
         // お肉の作成
         var meat = GameObject.Instantiate(m_Meat);
         meat.GetComponent<Food>().SelectFood(1);
@@ -1525,13 +1471,13 @@ public class Enemy3D : MonoBehaviour
     }
 
     // 動物の状態を取得します
-    public State GetState() { return m_State; }
+    public AnimalState GetState() { return m_State; }
 
     // トラバサミに挟まったかを返します
     public bool IsTrapHit() { return m_IsTrapHit; }
 
     // えさ食べ状態かを返します
-    public bool IsEatFood() { return m_DFState == DiscoverFoodState.DiscoverFood_Eat; }
+    public bool IsEatFood() { return m_DFState == AnimalState_DiscoverFoodState.DiscoverFood_Eat; }
 
     // カメラに映っているかを返します
     public bool IsRendered() { return m_IsRendered; }
@@ -1540,10 +1486,10 @@ public class Enemy3D : MonoBehaviour
     public virtual void SoundNotice(Transform point)
     {
         //SoundMove(point);
-        if (m_DState == DiscoverState.Discover_Player)
+        if (m_DState == AnimalState_DiscoverState.Discover_Player)
             return;
         m_SoundPoint = point.position;
-        ChangeState(State.Search, AnimatorNumber.ANIMATOR_IDEL_NUMBER);
+        ChangeState(AnimalState.Search, AnimalAnimatorNumber.ANIMATOR_IDEL_NUMBER);
     }
 
     // 音の位置に近づきます
@@ -1590,7 +1536,7 @@ public class Enemy3D : MonoBehaviour
         if (objName == "FoodCollide")
         {
             // すでにえさを発見している場合は、返す
-            if (m_State == State.Discover && m_DState == DiscoverState.Discover_Food) return;
+            if (m_State == AnimalState.Discover && m_DState == AnimalState_DiscoverState.Discover_Food) return;
             // 親である餌の取得
             var obj = other.transform.parent;
             var food = obj.GetComponent<Food>();
@@ -1598,7 +1544,7 @@ public class Enemy3D : MonoBehaviour
             if (!IsFoodCheck(food.CheckFoodKind())) return;
             // えさ発見移動状態に遷移
             ChangeFoodMove(food);
-            ChangeAnimation(AnimatorNumber.ANIMATOR_IDEL_NUMBER);
+            ChangeAnimation(AnimalAnimatorNumber.ANIMATOR_IDEL_NUMBER);
             m_FoodObj = obj.gameObject;
             // 動物を空にする
             m_TargetAnimal = null;
@@ -1786,8 +1732,8 @@ public class Enemy3D : MonoBehaviour
             EditorGUILayout.Space();
 
             // State
-            enemy.m_State = (State)EditorGUILayout.EnumPopup("現在の状態", enemy.m_State);
-            enemy.m_DState = (DiscoverState)EditorGUILayout.EnumPopup("発見状態の詳細", enemy.m_DState);
+            enemy.m_State = (AnimalState)EditorGUILayout.EnumPopup("現在の状態", enemy.m_State);
+            enemy.m_DState = (AnimalState_DiscoverState)EditorGUILayout.EnumPopup("発見状態の詳細", enemy.m_DState);
             EditorGUILayout.Space();
 
             OnChildInspectorGUI();

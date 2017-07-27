@@ -44,7 +44,7 @@ public class SmallEnemy : Enemy3D
         m_RunawayPoint.SetPosition(this.transform.position);
     }
 
-    protected override void DiscoverPlayer(float deltaTime)
+    protected override int DiscoverPlayer(float deltaTime)
     {
         // 移動(通常の移動速度の数倍)
         Move(deltaTime, m_DiscoverSpeed);
@@ -67,18 +67,19 @@ public class SmallEnemy : Enemy3D
         if (m_MoveLength > 20)
         {
             // 待機状態に遷移
-            ChangeState(State.Idel, AnimatorNumber.ANIMATOR_IDEL_NUMBER);
-            m_Agent.Resume();
+            ChangeState(AnimalState.Idel, AnimalAnimatorNumber.ANIMATOR_IDEL_NUMBER);
+            m_Agent.isStopped = false;
             m_Player = null;
             // 移動速度を変える
             m_Agent.speed = m_Speed;
             m_MoveLength = 0.0f;
             ChangeSpriteColor(Color.red);
-            return;
+            return 0;
         };
+        return 0;
     }
 
-    protected override void DiscoverAnimal(float deltaTime)
+    protected override int DiscoverAnimal(float deltaTime)
     {
         // 逃げる
         ChangeMovePoint(m_RunawayPoint.gameObject.transform.position);
@@ -90,43 +91,12 @@ public class SmallEnemy : Enemy3D
         if (InWall(out wall, out point, 2))
         {
             var up = wall.transform.up;
-            //var vec = Vector3.zero;
-            //var cross = Vector3.zero;
             var degree = 0.0f;
-
             var wallCollider = wall.GetComponent<BoxCollider>();
-            // 壁がボックスコライダーの場合の計算
-            //if(wallCollider != null)
-            //{
-            //    // 対象とのベクトル
-            //    //var objDir = point - wall.transform.position;
-            //    // ポイントの左ベクトルを求める
-            //    //var left = //point.
-
-            //    // 対象の方向を向いた単位ベクトル
-            //    //var oneDir = DirectionOne(point);
-            //    // 壁 - point
-            //    //var vec1 = new Vector2(point.x, point.z) - new Vector2(wall.transform.position.x, wall.transform.position.z);
-            //    // ベクトル間の角度を計算(二次元)
-            //    //var vec1 = new Vector2(objDir.x, objDir.z);
-            //    //var vec2 = new Vector2(oneDir.x, oneDir.z);
-            //    //var angle = Vector2.Angle(vec1, vec2);
-            //    //var cross = Vector2.
-            //    //degree = Mathf.Atan2(vec2.y, vec2.x) * Mathf.Rad2Deg;
-            //}
-            //else
-            //{
-            //    var vec = point - wall.transform.position;
-            //    // 壁と衝突点との外積を求めて、角度を決める
-            //    var cross = Vector3.Cross(vec, up);
-            //    degree = Mathf.Atan2(vec.z, vec.x) * Mathf.Rad2Deg;
-            //}
-
             var vec = point - wall.transform.position;
             // 壁と衝突点との外積を求めて、角度を決める
             var cross = Vector3.Cross(vec, up);
             degree = Mathf.Atan2(vec.z, vec.x) * Mathf.Rad2Deg;
-
             // 壁に沿うように逃げる
             m_RunawayPoint.ChangeAddPosition(degree);
         }
@@ -135,12 +105,13 @@ public class SmallEnemy : Enemy3D
         if (m_MoveLength > 20)
         {
             // 待機状態に遷移
-            ChangeState(State.Idel, AnimatorNumber.ANIMATOR_IDEL_NUMBER);
+            ChangeState(AnimalState.Idel, AnimalAnimatorNumber.ANIMATOR_IDEL_NUMBER);
             m_MoveLength = 0.0f;
             // 移動速度を変える
             m_Agent.speed = m_Speed;
             m_Agent.isStopped = false;
         }
+        return 0;
     }
     #endregion
 
@@ -169,7 +140,7 @@ public class SmallEnemy : Enemy3D
     {
         base.SetAnimator();
         // 逃げアニメーション
-        m_AnimatorStates[(int)AnimatorNumber.ANIMATOR_CHASE_NUMBER] = "Run";
+        m_AnimatorStates[(int)AnimalAnimatorNumber.ANIMATOR_CHASE_NUMBER] = "Run";
     }
 
     protected override void AnimalHit(GameObject animal)

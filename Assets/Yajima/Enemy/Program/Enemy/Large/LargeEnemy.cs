@@ -7,16 +7,11 @@ using UnityEditor;
 
 public class LargeEnemy : MiddleEnemy {
 
-    //#region 変数
-    //#region シリアライズ変数
-    //[SerializeField]
-    //protected GameObject m_AttackCollider;      // 攻撃判定
-    //#endregion
-    //#endregion
-
+    #region 関数
+    #region override関数
     protected override bool SearchAnimal()
     {
-        if (m_DState == DiscoverState.Discover_Animal) return false;
+        if (m_DState == AnimalState_DiscoverState.Discover_Animal) return false;
 
         // 自分以外の動物を襲うようにする
         if (SearchAnimal("SmallEnemy")) return true;
@@ -29,8 +24,10 @@ public class LargeEnemy : MiddleEnemy {
     {
         base.SetAnimator();
         // 睡眠アニメーション
-        m_AnimatorStates[(int)AnimatorNumber.ANIMATOR_SLEEP_NUMBER] = "Sleep";
+        m_AnimatorStates[(int)AnimalAnimatorNumber.ANIMATOR_SLEEP_NUMBER] = "Sleep";
     }
+    #endregion
+    #endregion
 
     #region エディターのシリアライズ変更
     // 変数名を日本語に変換する機能

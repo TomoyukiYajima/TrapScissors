@@ -16,17 +16,18 @@ public class MiddleEnemy : Enemy3D {
     #endregion
 
     #region protected変数
+    protected int m_MiddleSENumber = 0;         // 中型動物の再生するSE
+    protected float m_SENormalTime = 0.0f;      // SEの再生時間(正規化時間)
     protected float m_MoveDegree = 0.0f;        // 移動角度
+    protected bool m_IsPlayDiscoverSE = false;  // 発見SEを再生したか
     protected GameObject m_DiscoverObj;         // 発見したオブジェクト
     protected Enemy3D m_Animal = null;          // 発見した動物
-                                                //protected DiscoverMoveState m_DiscoverMoveState =
-                                                //    DiscoverMoveState.DiscoverMove_Animal;            // 発見状態
     #endregion
     #endregion
 
     #region 関数
     #region 状態関数
-    protected override void DiscoverPlayer(float deltaTime)
+    protected override int DiscoverPlayer(float deltaTime)
     {
         // プレイヤーとのベクトルを計算して、移動ポイントを更新する
         var vec = m_Player.transform.position - this.transform.position;
@@ -36,45 +37,72 @@ public class MiddleEnemy : Enemy3D {
         m_Agent.velocity = dir * m_DiscoverSpeed;
         m_Agent.destination = m_Player.transform.position;
 
-        base.DiscoverPlayer(deltaTime);
+        return base.DiscoverPlayer(deltaTime);
     }
     #endregion
 
     #region override関数
-    protected override void Attack(float deltaTime)
+    protected override int DiscoverAction(float deltaTime)
+    {
+        // 一定時間経過したら、次のアニメーションを再生
+        if (m_MotionNumber == (int)AnimalAnimatorNumber.ANIMATOR_DISCOVER_NUMBER
+            && !IsEndTimeAnimation(0.99f))
+        {
+            m_Agent.isStopped = true;
+            // SEの再生
+            if (!m_IsPlayDiscoverSE && IsEndTimeAnimation(m_SENormalTime))
+            {
+                SoundManger.Instance.PlaySE(m_MiddleSENumber);
+                m_IsPlayDiscoverSE = true;
+            }
+            return 0;
+        }
+        else
+        {
+            // アニメーションの変更
+            ChangeAnimation(AnimalAnimatorNumber.ANIMATOR_CHASE_NUMBER);
+        }
+
+        ChangeDiscoverState(m_DState);
+        m_Agent.isStopped = false;
+        m_IsPlayDiscoverSE = false;
+        return 0;
+    }
+    protected override int Attack(float deltaTime)
     {
         // 攻撃判定をアクティブ状態に変更
         if (!m_AttackCollider.activeSelf)
             m_AttackCollider.SetActive(true);
-        if (m_StateTimer < 2.0f) return;
+        if (m_StateTimer < 2.0f) return 0;
         // 待機状態に遷移
-        ChangeState(State.Idel, AnimatorNumber.ANIMATOR_IDEL_NUMBER);
-        m_DState = DiscoverState.Discover_None;
+        ChangeState(AnimalState.Idel, AnimalAnimatorNumber.ANIMATOR_IDEL_NUMBER);
+        m_DState = AnimalState_DiscoverState.Discover_None;
         m_Agent.isStopped = false;
         // 攻撃判定を非アクティブ状態に変更
         m_AttackCollider.SetActive(false);
+        return 0;
     }
 
     protected override void SetAnimator()
     {
         base.SetAnimator();
         // 攻撃アニメーション
-        m_AnimatorStates[(int)AnimatorNumber.ANIMATOR_ATTACK_NUMBER] = "Attack";
+        m_AnimatorStates[(int)AnimalAnimatorNumber.ANIMATOR_ATTACK_NUMBER] = "Attack";
         // トラバサミ衝突時のアニメーション
-        m_AnimatorStates[(int)AnimatorNumber.ANIMATOR_TRAP_HIT_NUMBER] = "SmallTrapHit";
+        m_AnimatorStates[(int)AnimalAnimatorNumber.ANIMATOR_TRAP_HIT_NUMBER] = "SmallTrapHit";
         // 追跡アニメーション
-        m_AnimatorStates[(int)AnimatorNumber.ANIMATOR_CHASE_NUMBER] = "Chase";
+        m_AnimatorStates[(int)AnimalAnimatorNumber.ANIMATOR_CHASE_NUMBER] = "Chase";
         // 壁衝突時のアニメーション
-        m_AnimatorStates[(int)AnimatorNumber.ANIMATOR_WALL_HIT_NUMBER] = "WallHit";
+        m_AnimatorStates[(int)AnimalAnimatorNumber.ANIMATOR_WALL_HIT_NUMBER] = "WallHit";
         // ぴよりアニメーション
-        m_AnimatorStates[(int)AnimatorNumber.ANIMATOR_FAINT_NUMBER] = "Faint";
+        m_AnimatorStates[(int)AnimalAnimatorNumber.ANIMATOR_FAINT_NUMBER] = "Faint";
     }
 
     // 小さいトラバサミに衝突した時の行動です
     protected override void SmallTrapHitAction()
     {
-        if (m_State == State.TrapHit) return;
-        ChangeTrapHitState(TrapHitState.TrapHit_Runaway);
+        if (m_State == AnimalState.TrapHit) return;
+        ChangeTrapHitState(AnimalState_TrapHitState.TrapHit_Runaway);
         //m_DState = DiscoverState.Discover_None;
         m_Agent.isStopped = false;
     }
@@ -85,7 +113,7 @@ public class MiddleEnemy : Enemy3D {
         // トラバサミが解放されたときの行動
         TrapReleaseAction();
         // 死亡状態に変更
-        ChangeAnimation(AnimatorNumber.ANIMATOR_DEAD_NUMBER);
+        ChangeAnimation(AnimalAnimatorNumber.ANIMATOR_DEAD_NUMBER);
         // トラバサミを空っぽにする
         m_SmallTrap = null;
         // ナビメッシュエージェント関連の初期化
@@ -96,6 +124,8 @@ public class MiddleEnemy : Enemy3D {
         // 自身の衝突判定をオンにする
         m_Collider.enabled = false;
         m_RayPoint.gameObject.SetActive(false);
+        // SEの再生
+        SoundManger.Instance.PlaySE(m_MiddleSENumber + 1);
     }
     protected override void AnimalHit(GameObject animal)
     {

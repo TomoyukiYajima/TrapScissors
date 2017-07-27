@@ -9,16 +9,16 @@ public class AnimalClearChacker : ClearChacker
 {
     #region シリアライズ変数
     [SerializeField]
-    private GameObject m_Animal;    // 動物オブジェクト
+    protected GameObject m_Animal;    // 動物オブジェクト
     #endregion
 
-    private Enemy3D m_Enemy;        // 動物スクリプト
+    protected Enemy3D m_Enemy;        // 動物スクリプト
 
     // Use this for initialization
     public override void Start () {
         base.Start();
 
-        m_Enemy = m_Animal.GetComponent<Enemy3D>();
+        if (m_Animal != null) m_Enemy = m_Animal.GetComponent<Enemy3D>();
     }
 
     // Update is called once per frame
