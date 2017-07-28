@@ -20,6 +20,8 @@ public class OpenStage : MonoBehaviour
             PlayerPrefs.SetInt(_openStage, 3);
         }
 #endif
+        //ステージのロックを全て解除(提出用)
+        PlayerPrefs.SetInt(_openStage, 3);
         //他に同じオブジェクトがあれば、自分を削除する
         if (GameObject.Find("OpenStage") != this.gameObject) Destroy(gameObject);
         //クリアしたステージが0未満もしくは数字ではなけらば、0を保存する
