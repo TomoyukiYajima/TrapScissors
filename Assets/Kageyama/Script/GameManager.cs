@@ -25,6 +25,7 @@ public class GameManager : MonoBehaviour
     //トラップの最大数
     [SerializeField]
     private int _trapNumber;
+    private int _trapCount;
     //餌の最大数
     [SerializeField]
     private int _foodNumber;
@@ -215,6 +216,21 @@ public class GameManager : MonoBehaviour
     public int TrapNumber()
     {
         return _trapNumber;
+    }
+
+    public void TrapCountAdd()
+    {
+        _trapCount++;
+    }
+
+    public void TrapCountSub()
+    {
+        _trapCount--;
+    }
+
+    public int TrapCountCheck()
+    {
+        return _trapCount;
     }
 
     public int FoodNumber()
