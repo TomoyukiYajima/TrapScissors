@@ -18,7 +18,7 @@ public class PlayerAction : MonoBehaviour
     [TooltipAttribute("罠を回収できるかどうか")]
     private bool _onTrapFlag;
     public int _trapMax;
-    private int _trapCount;
+    //public int _trapCount;
     #endregion
     #region 餌設置に必要な変数
     [SerializeField]
@@ -140,12 +140,17 @@ public class PlayerAction : MonoBehaviour
             {
                 setTrap = true;
             }
-            if (m_NavMeshPlayer._AState != NavMeshPlayer.AnimationState.Set && _trapCount < _trapMax)
+            if (m_NavMeshPlayer._AState != NavMeshPlayer.AnimationState.Set && GameManager.gameManager.TrapCountCheck() < _trapMax)
             {
                 StartCoroutine(TrapIns(setTime));
                 SoundManger.Instance.PlaySE(9);
                 m_NavMeshPlayer._AState = NavMeshPlayer.AnimationState.Set;
                 m_Animator.CrossFade("Set", 0.1f, -1);
+            }
+            if (m_NavMeshPlayer._AState != NavMeshPlayer.AnimationState.Set && GameManager.gameManager.TrapCountCheck() == _trapMax)
+            {
+                StartCoroutine(TrapDestroy(setTime));
+                SoundManger.Instance.PlaySE(9);
             }
         }
 
@@ -276,7 +281,7 @@ public class PlayerAction : MonoBehaviour
 
         GameObject traps = GameObject.Find("Traps");
 
-        if (_onTrapFlag == false && _trapCount < _trapMax)
+        if (_onTrapFlag == false && GameManager.gameManager.TrapCountCheck() < _trapMax)
         {
             Vector3 pos = new Vector3(this.transform.position.x,
            this.transform.position.y,
@@ -287,7 +292,7 @@ public class PlayerAction : MonoBehaviour
                     traps.transform.rotation, traps.transform
                     );
 
-            _trapCount++;
+            GameManager.gameManager.TrapCountAdd();
         }
         else if (_onTrapFlag == true)
         {
@@ -295,17 +300,35 @@ public class PlayerAction : MonoBehaviour
             X_Collect.SetActive(false);
             _onTrapFlag = false;
 
+            //if (m_NavMeshPlayer._AState != NavMeshPlayer.AnimationState.Set)
+            //{
+            //    m_NavMeshPlayer._AState = NavMeshPlayer.AnimationState.Set;
+            //    m_Animator.CrossFade("Set", 0.1f, -1);
+            //}
+            GameManager.gameManager.TrapCountSub();
+        }
+
+    }
+
+    IEnumerator TrapDestroy(float time)
+    {
+        if (_onTrapFlag == true)
+        {
+
             if (m_NavMeshPlayer._AState != NavMeshPlayer.AnimationState.Set)
             {
                 m_NavMeshPlayer._AState = NavMeshPlayer.AnimationState.Set;
                 m_Animator.CrossFade("Set", 0.1f, -1);
             }
 
-            _trapCount--;
+            yield return new WaitForSecondsRealtime(time);
+
+            Destroy(_recovery);
+            X_Collect.SetActive(false);
+            _onTrapFlag = false;
+            GameManager.gameManager.TrapCountSub();
         }
-
     }
-
 
     IEnumerator FoodIns(float time)
     {
