@@ -5,16 +5,13 @@ using UnityEngine.UI;
 
 public class TutorialFadeChanger : MonoBehaviour {
 
-    public GameObject m_Player;
-    public int m_FadeNumber = 1;
     [SerializeField]
-    public GameObject[] m_ActiveAnimal;
+    public GameObject[] m_ActiveAnimal;     // アクティブ状態の動物
     [SerializeField]
-    //private TutorialTexture[] m_Textures;      // 表示するテクスチャ
-    public GameObject[] m_NotActiveAnimal;
+    public GameObject[] m_NotActiveAnimal;  // 非アクティブ状態の動物
 
-    private GameObject m_Fade;
-    private Color m_FadeColor;
+    public GameObject m_Player;             // プレイヤー
+    public int m_FadeNumber = 1;            // フェード番号
 
     private bool m_IsFadeOut = false;
     private bool m_IsFadeIn = false;
@@ -22,13 +19,10 @@ public class TutorialFadeChanger : MonoBehaviour {
 
     private float m_ChangeTimer;
 
-    private Vector3 m_InitPosition;
+    private Vector3 m_InitPosition;         // プレイヤーの初期位置
 
 	// Use this for initialization
 	void Start () {
-        m_Fade = GameObject.Find("Fade");
-        m_FadeColor = m_Fade.GetComponent<Image>().color;
-
         // プレイヤー
         m_InitPosition = m_Player.transform.position;
     }

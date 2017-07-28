@@ -7,6 +7,7 @@ using UnityEditor;
 
 public class AnimalFoodEatClearChacker : ClearChacker
 {
+    #region 変数
     #region シリアライズ変数
     [SerializeField]
     private GameObject m_Animal;    // 動物オブジェクト
@@ -14,8 +15,13 @@ public class AnimalFoodEatClearChacker : ClearChacker
     private GameObject m_AnimalCreate;        // 動物スクリプト
     #endregion
 
+    #region private変数
     private Enemy3D m_Enemy;        // 動物スクリプト
+    #endregion
+    #endregion
 
+    #region 関数
+    #region 基盤関数
     // Use this for initialization
     public override void Start()
     {
@@ -37,6 +43,8 @@ public class AnimalFoodEatClearChacker : ClearChacker
                 m_AnimalCreate.SetActive(true);
         }
     }
+    #endregion
+    #endregion
 
     #region シリアライズ変更
 #if UNITY_EDITOR

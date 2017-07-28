@@ -15,12 +15,6 @@ public class TutorialActionChecker : MonoBehaviour
         m_Particle = m_Obj.GetComponent<ParticleSystem>();
     }
 
-    // Update is called once per frame
-    void Update()
-    {
-
-    }
-
     public void OnTriggerEnter(Collider other)
     {
         if (other.transform.parent.tag != "Player") return;

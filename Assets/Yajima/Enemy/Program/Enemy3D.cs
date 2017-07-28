@@ -971,20 +971,28 @@ public class Enemy3D : MonoBehaviour
         //GameObject hitObj = null;
         //var hitPoint = Vector3.zero;
         //// レイポイントからオブジェクトの位置までのレイを伸ばす
-        //var point = m_RayPoint.position + this.transform.forward * length;
-        //var dir = point - m_RayPoint.position;
+        //var point = this.transform.position - this.transform.up * 2.0f;
+        //var dir = point - this.transform.position;
         ////var playerDir = obj.transform.position - m_RayPoint.position;
-        //Ray ray = new Ray(m_RayPoint.position, dir);
+        //Ray ray = new Ray(this.transform.position, dir);
         //RaycastHit hitInfo;
         //var hit = Physics.Raycast(ray, out hitInfo);
-        ////print("見えているか調査");
-        //if (!hit || hitInfo.collider.tag != "Wall") return false;
-        //// 指定距離より長かったら返す
-        //if (hitInfo.distance > length) return false;
-        //// 当たった壁
-        //hitObj = hitInfo.collider.gameObject;
-        //hitPoint = hitInfo.point;
-        //return true;
+        //////print("見えているか調査");
+        //// if (!hit || hitInfo.collider.tag != "Wall")
+        //if (!hit) return;
+        //// 移動量が小さいならば、返す
+        //float moveV = m_Agent.velocity.x + m_Agent.velocity.y + m_Agent.velocity.z;
+        //if (moveV <= 0.1f) return;
+        //// 角度を合わせる
+        //var rotation = new Vector3(
+        //    -this.transform.forward.z * hitInfo.transform.rotation.eulerAngles.z
+        //    -(this.transform.forward.z * hitInfo.transform.rotation.eulerAngles.x / 2), 
+        //    1.0f,
+        //    this.transform.forward.x * hitInfo.transform.rotation.eulerAngles.x
+        //    );
+        //var prevQ = this.transform.rotation;
+        //var q = prevQ * Quaternion.Euler(rotation);
+        //this.transform.rotation = q;
     }
     #endregion
 
@@ -1388,6 +1396,9 @@ public class Enemy3D : MonoBehaviour
             // 自身に付属しているトラバサミなら削除する
             if (trap.GetAnimal() != gameObject) continue;
             trap.Null();
+            // トラップ数を減らす
+            GameManager.gameManager.TrapCountSub();
+            // トラバサミの削除
             Destroy(child.gameObject);
         }
         m_SmallTrap = null;
@@ -1428,7 +1439,7 @@ public class Enemy3D : MonoBehaviour
         if (smallTrap != null)
         {
             // すでにはさんでいる場合は、返す
-            if (smallTrap._state == Trap_Small.TrapState.CAPTURE_TRAP) return;
+            if (smallTrap._state == Trap_Small.TrapState.CAPTURE_TRAP || m_SmallTrap != null) return;
             m_SmallTrap = smallTrap;
             // トラバサミに挟まった時のアクション
             SmallTrapHitAction();

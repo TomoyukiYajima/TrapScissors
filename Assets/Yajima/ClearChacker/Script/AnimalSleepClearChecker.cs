@@ -5,13 +5,17 @@ using UnityEngine;
 using UnityEditor;
 #endif
 
-public class AnimalSleepClearChecker : AnimalClearChacker {
+public class AnimalSleepClearChecker : ClearChacker {
 
+    #region 変数
+    #region シリアライズ変数
     [SerializeField]
     private GameObject m_Animal;
-
+    #endregion
     private Enemy3D m_AnimalScript;
+    #endregion
 
+    #region 関数
     // Use this for initialization
     public override void Start () {
         base.Start();
@@ -32,6 +36,7 @@ public class AnimalSleepClearChecker : AnimalClearChacker {
             }
         }
     }
+    #endregion
 
     #region シリアライズ変更
 #if UNITY_EDITOR

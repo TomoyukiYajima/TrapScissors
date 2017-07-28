@@ -8,21 +8,14 @@ using UnityEditor;
 
 public class TutorialDrawTexture : MonoBehaviour {
 
+    #region 変数
     [SerializeField]
     private TutorialTexture[] m_Textures;      // 表示するテクスチャ
 
     private int m_DrawCount;            // 表示カウント
+    #endregion
 
-    // Use this for initialization
-    void Start () {
-
-    }
-	
-	// Update is called once per frame
-	void Update () {
-
-	}
-
+    #region 関数
     public void SetTexture(int number, int point)
     {
         // 登録している画像全体で調べる
@@ -42,6 +35,7 @@ public class TutorialDrawTexture : MonoBehaviour {
             }
         }
     }
+    #endregion
 
     #region シリアライズ変更
 #if UNITY_EDITOR
