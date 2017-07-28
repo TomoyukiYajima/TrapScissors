@@ -1497,7 +1497,8 @@ public class Enemy3D : MonoBehaviour
     public virtual void SoundNotice(Transform point)
     {
         //SoundMove(point);
-        if (m_DState == AnimalState_DiscoverState.Discover_Player)
+        if ((m_DState & (AnimalState_DiscoverState.Discover_Food | AnimalState_DiscoverState.Discover_Animal | AnimalState_DiscoverState.Discover_Player)) != 0
+            || (m_State & (AnimalState.DiscoverAction)) != 0)
             return;
         m_SoundPoint = point.position;
         ChangeState(AnimalState.Search, AnimalAnimatorNumber.ANIMATOR_IDEL_NUMBER);
