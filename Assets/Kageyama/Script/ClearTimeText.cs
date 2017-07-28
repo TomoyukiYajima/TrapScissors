@@ -64,7 +64,7 @@ public class ClearTimeText : MonoBehaviour
                 yield return new WaitForSecondsRealtime(0.02f);
             }
         }
-        _huntCountText.GetComponent<HuntCountText>().CountStart();
+        _huntCountText.SetActive(true);
     }
 
     void TextWrite()
