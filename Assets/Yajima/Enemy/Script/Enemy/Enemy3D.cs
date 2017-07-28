@@ -208,9 +208,9 @@ public class Enemy3D : MonoBehaviour
         if (m_MoveStartTime > 0.0f) return;
 
         // オブジェクトの捜索
-        if ((m_State & (global::AnimalState.TrapHit | global::AnimalState.Meat | global::AnimalState.Faint | global::AnimalState.Attack | global::AnimalState.DiscoverAction | global::AnimalState.Sleep)) == 0)
+        if ((m_State & (AnimalState.TrapHit | AnimalState.Meat | AnimalState.Faint | AnimalState.Attack | AnimalState.DiscoverAction | AnimalState.Sleep)) == 0)
         {
-            if((m_DState & (global::AnimalState_DiscoverState.Discover_Food | global::AnimalState_DiscoverState.Discover_Animal | global::AnimalState_DiscoverState.Discover_Lost)) == 0)
+            if((m_DState & (AnimalState_DiscoverState.Discover_Food | AnimalState_DiscoverState.Discover_Animal | AnimalState_DiscoverState.Discover_Lost)) == 0)
                 SearchObject();
         }
 
@@ -222,7 +222,7 @@ public class Enemy3D : MonoBehaviour
     }
 
     // 状態の変更
-    protected void ChangeState(global::AnimalState state, AnimalAnimatorNumber motion)
+    protected void ChangeState(AnimalState state, AnimalAnimatorNumber motion)
     {
         if (m_State == state) return;
         // 前回の状態を入れる
@@ -235,11 +235,10 @@ public class Enemy3D : MonoBehaviour
     }
 
     // トラップヒット状態の変更
-    protected void ChangeTrapHitState(
-        global::AnimalState_TrapHitState thState, AnimalAnimatorNumber motion = AnimalAnimatorNumber.ANIMATOR_TRAP_HIT_NUMBER)
+    protected void ChangeTrapHitState(AnimalState_TrapHitState thState, AnimalAnimatorNumber motion = AnimalAnimatorNumber.ANIMATOR_TRAP_HIT_NUMBER)
     {
         // 状態の変更
-        ChangeState(global::AnimalState.TrapHit, motion);
+        ChangeState(AnimalState.TrapHit, motion);
         // 同じトラップヒット状態なら返す
         if (m_THState == thState) return;
         m_THState = thState;
@@ -281,7 +280,7 @@ public class Enemy3D : MonoBehaviour
 
         float speed = 100.0f * deltaTime;
         // 値が小さくなったら返す返す
-        if (Mathf.Abs(dot) < 0.001f * speed) return 0;
+        if (Mathf.Abs(dot) < 0.1f * speed) return 0;
         // 内積が0未満なら、速度を負の値にする
         if (dot < 0.0f) speed *= -1.0f;
         this.transform.Rotate(this.transform.up * speed);
@@ -788,7 +787,7 @@ public class Enemy3D : MonoBehaviour
     // プレイヤーが見えているか
     protected bool InPlayer(out GameObject player, float addLength = 1.0f, bool isDiscover = false)
     {
-        return InObject("PlayerSprite", out player, addLength, isDiscover, 8);
+        return InObject("PlayerSprite", out player, addLength, isDiscover, 1 << 8);
     }
 
     // タグの付いたオブジェクトを捜します
@@ -836,8 +835,8 @@ public class Enemy3D : MonoBehaviour
         RaycastHit hitInfo;
         var hit = Physics.Raycast(ray, out hitInfo);
         // 指定レイヤーと衝突する場合
-        //if (layerMask != -1)
-        //    hit = Physics.Raycast(ray, out hitInfo, layerMask);
+        if (layerMask != -1)
+            hit = Physics.Raycast(ray, out hitInfo, layerMask);
         // プレイヤーに当たらなかった場合、
         // プレイヤー以外に当たった場合は返す
         //print("見えているか調査");

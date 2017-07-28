@@ -106,6 +106,7 @@ public class SmallEnemy : Enemy3D
         {
             // 待機状態に遷移
             ChangeState(AnimalState.Idel, AnimalAnimatorNumber.ANIMATOR_IDEL_NUMBER);
+            m_DState = AnimalState_DiscoverState.Discover_None;
             m_MoveLength = 0.0f;
             // 移動速度を変える
             m_Agent.speed = m_Speed;
