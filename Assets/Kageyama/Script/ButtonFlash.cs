@@ -6,10 +6,14 @@ public class ButtonFlash : MonoBehaviour
 {
     private RectTransform _myRect;
 
+    void Awake()
+    {
+        _myRect = this.GetComponent<RectTransform>();
+    }
+
 	// Use this for initialization
 	void Start ()
     {
-        _myRect = this.GetComponent<RectTransform>();
         Scale();
         Flash();
     }
