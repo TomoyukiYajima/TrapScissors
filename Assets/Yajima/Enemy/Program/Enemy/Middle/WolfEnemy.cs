@@ -17,6 +17,8 @@ public class WolfEnemy : MiddleEnemy {
     {
         base.Start();
         m_AnimalFeedName = "RabbitEnemy";
+        m_MiddleSENumber = 19;
+        m_SENormalTime = 0.3f;
 
         // イノシシの追加処理
         var enemies = GameObject.Find("Enemies");
@@ -56,7 +58,7 @@ public class WolfEnemy : MiddleEnemy {
             // プレイヤーを見つけていたら、追跡状態に遷移
             if(m_Player != null)
             {
-                ChangeDiscoverState(DiscoverState.Discover_Player);
+                ChangeDiscoverState(AnimalState_DiscoverState.Discover_Player);
                 // えさの削除
                 Destroy(m_FoodObj);
                 m_FoodObj = null;
@@ -64,7 +66,7 @@ public class WolfEnemy : MiddleEnemy {
                 // ゲームマネージャ側の減算処理を呼ぶ
                 ////GameManager.gameManager.FoodCountSub();
                 // アニメーションの変更
-                ChangeAnimation(AnimatorNumber.ANIMATOR_CHASE_NUMBER);
+                ChangeAnimation(AnimalAnimatorNumber.ANIMATOR_CHASE_NUMBER);
                 return;
             }
         }
@@ -73,7 +75,7 @@ public class WolfEnemy : MiddleEnemy {
     }
 
     // 動物発見時の行動
-    protected override void DiscoverAnimal(float deltaTime)
+    protected override int DiscoverAnimal(float deltaTime)
     {
         // 移動ポイントを見つけた動物の位置にする
         m_Agent.destination = m_TargetAnimal.transform.position;
@@ -81,15 +83,16 @@ public class WolfEnemy : MiddleEnemy {
         var length = Vector3.Distance(this.transform.position, m_TargetAnimal.transform.position);
         var otherCol = m_TargetAnimal.GetComponent<BoxCollider>();
         var scale = m_TargetAnimal.transform.localScale.z * otherCol.size.z;
-        if (length > scale + 1.0f) return;
-        ChangeState(State.Attack, AnimatorNumber.ANIMATOR_ATTACK_NUMBER);
+        if (length > scale + 1.0f) return 0;
+        ChangeState(AnimalState.Attack, AnimalAnimatorNumber.ANIMATOR_ATTACK_NUMBER);
         // アニメーションの変更
         m_Agent.isStopped = true;
+        return 0;
     }
 
     protected override bool SearchAnimal()
     {
-        if (m_DState == DiscoverState.Discover_Animal) return false;
+        if (m_DState == AnimalState_DiscoverState.Discover_Animal) return false;
         // 小さい動物を捜す
         if (SearchAnimal("SmallEnemy")) return true;
         // イノシシが見えているかを確かめる
@@ -99,11 +102,11 @@ public class WolfEnemy : MiddleEnemy {
             if (!m_Boars[i].gameObject.transform.parent.parent.gameObject.activeSelf) continue;
             // 相手が特定の状態だったら返す
             var boar = m_Boars[i].GetComponent<Enemy3D>();
-            if (boar.GetState() == State.Meat) return false;
+            if (boar.GetState() == AnimalState.Meat) return false;
             // 動物発見状態に遷移
-            ChangeDiscoverState(DiscoverState.Discover_Animal);
+            ChangeDiscoverState(AnimalState_DiscoverState.Discover_Animal);
             // アニメーションの変更
-            ChangeAnimation(AnimatorNumber.ANIMATOR_CHASE_NUMBER);
+            ChangeAnimation(AnimalAnimatorNumber.ANIMATOR_CHASE_NUMBER);
             m_TargetAnimal = m_Boars[i].gameObject;
             return true;
             //break;

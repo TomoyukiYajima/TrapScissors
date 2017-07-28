@@ -7,6 +7,8 @@ using UnityEditor;
 
 public class EnemyCreateBox : MonoBehaviour {
 
+    #region 変数
+    #region シリアライズ変数
     [SerializeField]
     private Transform[] m_MovePoints = null;    // 移動用ポイント配列
     [SerializeField]
@@ -15,10 +17,15 @@ public class EnemyCreateBox : MonoBehaviour {
     private GameObject m_MainCamera;            // メインカメラ
     [SerializeField]
     private bool m_IsStartCreate = false;       // ゲーム開始時に生成するか
+    #endregion
 
+    #region private変数
     private bool m_IsRendered = true;           // カメラ内か
-    private AnimalManager m_AnimalManager;      // 動物マネージャー
+    #endregion
+    #endregion
 
+    #region 関数
+    #region 基盤関数
     // Use this for initialization
     void Start () {
         // メインカメラがなかった場合は、探す
@@ -47,25 +54,25 @@ public class EnemyCreateBox : MonoBehaviour {
 
         m_IsRendered = false;
     }
-    private void SetAnimalManager(GameObject obj)
-    {
-        var manager = obj.GetComponent<AnimalManager>();
-        if (manager == null) return;
-        m_AnimalManager = manager;
-    }
+    #endregion
 
+    #region public関数
+    // 移動ポイント配列のポイントを取得します
+    public Transform GetMovePoint(int num) { return m_MovePoints[num]; }
+
+    // 移動ポイント配列のサイズを取得します
+    public int GetMovePointsSize() { return m_MovePoints.Length; }
+    #endregion
+
+    #region Unity関数
     public void OnWillRenderObject()
     {
         if (m_MainCamera.tag != "MainCamera") return;
         // 見えている
         m_IsRendered = true;
     }
-
-    // 移動ポイント配列のポイントを取得します
-    public Transform GetMovePoint(int num) { return m_MovePoints[num]; }
-
-    // 移動ポイント配列のサイズを取得します
-    public int GetMovePointsSize() { return m_MovePoints.Length; }
+    #endregion
+    #endregion
 
     #region エディターのシリアライズ変更
     // 変数名を日本語に変換する機能

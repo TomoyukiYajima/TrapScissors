@@ -22,9 +22,11 @@ public class CameraClearChacker : ClearChacker {
 	public override void Start () {
         base.Start();
 
-        m_Player = GameObject.FindGameObjectWithTag("Player");
+        if (m_GameStart == null) m_GameStart = GameObject.Find("GameStart");
 
-        m_ClearChacker = GameObject.Find("ClearChacker");
+        if (m_Player == null) m_Player = GameObject.FindGameObjectWithTag("Player");
+
+        if (m_ClearChacker == null) m_ClearChacker = GameObject.Find("ClearChacker");
 
         m_MainCamera = GameObject.Find("Main Camera");
         if (m_MainCamera != null) m_Camera = m_MainCamera.GetComponent<Camera>();

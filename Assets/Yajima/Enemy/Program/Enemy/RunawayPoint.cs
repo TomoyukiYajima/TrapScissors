@@ -3,10 +3,14 @@ using System.Collections;
 
 public class RunawayPoint : MonoBehaviour {
 
+    #region 変数
     private Vector3 m_AddPosition;      // 追加位置
     private Vector3 m_InitAddPosition;  // 初期の追加位置
     private float m_Length;             // 追加位置との長さ
+    #endregion
 
+    #region 関数
+    #region 基盤関数
     // Use this for initialization
     void Start () {
         // 追加位置を入れる
@@ -15,12 +19,9 @@ public class RunawayPoint : MonoBehaviour {
         m_InitAddPosition = m_AddPosition;
         m_Length = Vector3.Distance(Vector3.zero, m_AddPosition);
 	}
-	
-	// Update is called once per frame
-	void Update () {
+    #endregion
 
-	}
-
+    #region public関数
     // 位置の設定を行います
     public void SetPosition(Vector3 position)
     {
@@ -43,4 +44,6 @@ public class RunawayPoint : MonoBehaviour {
     {
         m_AddPosition = m_InitAddPosition;
     }
+    #endregion
+    #endregion
 }
