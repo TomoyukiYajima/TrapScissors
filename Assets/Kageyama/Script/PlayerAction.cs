@@ -125,6 +125,13 @@ public class PlayerAction : MonoBehaviour
             m_NavMeshPlayer._AState = NavMeshPlayer.AnimationState.Idle;
             foodCount = 0;
         }
+
+        if (_foodRecovery == null)
+        {
+            _onFoodFlag = false;
+            Y_Collect.SetActive(false);
+        }
+
     }
 
     //プレイヤーのボタン操作
