@@ -1329,6 +1329,10 @@ public class Enemy3D : MonoBehaviour
     // 反応する動物を捜索します
     protected virtual bool SearchAnimal()
     {
+        var mediator = GameObject.Find("TutorialMediator");
+        // チュートリアルステージの2なら、動物に反応しない
+        if (mediator != null && !TutorialMediator.GetInstance().IsTutorialAction(2)) return false;
+        // 動物発見状態ならfalseを返す
         if (m_DState == AnimalState_DiscoverState.Discover_Animal) return false;
         return SearchAnimal("LargeEnemy");
     }

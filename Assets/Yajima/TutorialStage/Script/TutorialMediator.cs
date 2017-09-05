@@ -86,6 +86,7 @@ public class TutorialMediator : MonoBehaviour {
             // フェードインする
             SceneManagerScript.sceneManager.FadeWhite();
             // プレイヤーを初期位置に戻す
+            m_Player.transform.position = Vector2.zero;
             m_Player.transform.position = m_InitPlayerPosition;
             m_Timer = 0.0f;
             m_Init = false;

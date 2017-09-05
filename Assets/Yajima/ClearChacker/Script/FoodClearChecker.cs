@@ -9,7 +9,9 @@ using UnityEditor;
 public class FoodClearChecker : ClearChacker
 {
 
-    public GameObject m_Food;   // えさオブジェクト
+    public GameObject m_Food;           // えさオブジェクト
+
+    private bool m_IsGetFood = false;   // えさを取得したか
 
     // Use this for initialization
     public override void Start()
@@ -26,18 +28,24 @@ public class FoodClearChecker : ClearChacker
     // Update is called once per frame
     public override void Update()
     {
-        if (m_Food == null) DrawText();
+        if (m_Food == null)
+        {
+            if (m_IsGetFood) return;
+            DrawText();
+            TutorialMediator.GetInstance().SetTutorialAction(false);
+            m_IsGetFood = true;
+        }
     }
 
     public void OnTriggerEnter(Collider other)
     {
-        if (other.transform.parent.tag != "Player") return;
+        if (other.transform.parent.tag != "Player" || m_IsGetFood) return;
         TutorialMediator.GetInstance().SetTutorialAction(true);
     }
 
     public void OnTriggerExit(Collider other)
     {
-        if (other.transform.parent.tag != "Player") return;
+        if (other.transform.parent.tag != "Player" || m_IsGetFood) return;
         TutorialMediator.GetInstance().SetTutorialAction(false);
     }
 
