@@ -351,6 +351,9 @@ public class Enemy3D : MonoBehaviour
             ChangeDiscoverFoodState(AnimalState_DiscoverFoodState.DiscoverFood_Eat);
             ChangeAnimation(AnimalAnimatorNumber.ANIMATOR_EAT_NUMBER);
             SoundManger.Instance.PlaySE(11);
+            // 視野オブジェクトを非表示
+            if (m_RayPoint != null) m_RayPoint.gameObject.SetActive(false);
+            // エージェントの停止
             m_Agent.isStopped = true;
             return 0;
         }
@@ -400,6 +403,8 @@ public class Enemy3D : MonoBehaviour
             }
             // 待機状態に遷移
             ChangeState(AnimalState.Idel, AnimalAnimatorNumber.ANIMATOR_IDEL_NUMBER);
+            // 視野オブジェクトを表示
+            if (m_RayPoint != null) m_RayPoint.gameObject.SetActive(true);
             m_DState = AnimalState_DiscoverState.Discover_None;
             m_Agent.isStopped = false;
             return 0;
@@ -408,6 +413,8 @@ public class Enemy3D : MonoBehaviour
         if (m_StateTimer <= 3.0f) return 0;
         // えさを食べた時の処理
         EatFood();
+        // 視野オブジェクトを表示
+        if (m_RayPoint != null) m_RayPoint.gameObject.SetActive(true);
         return 0;
     }
 
@@ -572,6 +579,8 @@ public class Enemy3D : MonoBehaviour
         if (m_StateTimer < 3.0f) return 0;
         // 待機状態に遷移
         ChangeState(AnimalState.Idel, AnimalAnimatorNumber.ANIMATOR_IDEL_NUMBER);
+        // 視野オブジェクトを表示
+        if (m_RayPoint != null) m_RayPoint.gameObject.SetActive(true);
         ChangeMovePoint();
         m_Agent.isStopped = false;
         return 0;
@@ -600,6 +609,7 @@ public class Enemy3D : MonoBehaviour
             ChangeState(AnimalState.Faint, AnimalAnimatorNumber.ANIMATOR_WALL_HIT_NUMBER);
             // 付属しているトラバサミの削除
             DeleteTrap();
+            m_DState = AnimalState_DiscoverState.Discover_None;
             m_Agent.isStopped = true;
             return 0;
         }
@@ -658,6 +668,8 @@ public class Enemy3D : MonoBehaviour
         ChangeMovePoint(m_MovePointPosition);
         m_Collider.isTrigger = true;
         m_Agent.isStopped = false;
+        // 視野オブジェクトを表示
+        if (m_RayPoint != null) m_RayPoint.gameObject.SetActive(true);
         return 0;
     }
     // 逃げ状態
@@ -667,6 +679,8 @@ public class Enemy3D : MonoBehaviour
         ChangeMovePoint(m_SmallTrap.transform.position);
         // 画面に映っている間は返す
         if (IsRendered()) return 0;
+        // 視野オブジェクトを表示
+        if (m_RayPoint != null) m_RayPoint.gameObject.SetActive(true);
         // 付属しているトラバサミの削除
         DeleteTrap();
         // 動物の消去

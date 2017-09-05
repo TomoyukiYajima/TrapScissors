@@ -103,6 +103,8 @@ public class MiddleEnemy : Enemy3D {
     {
         if (m_State == AnimalState.TrapHit) return;
         ChangeTrapHitState(AnimalState_TrapHitState.TrapHit_Runaway);
+        // 視野オブジェクトを非表示に変更
+        if (m_RayPoint != null) m_RayPoint.gameObject.SetActive(false);
         //m_DState = DiscoverState.Discover_None;
         m_Agent.isStopped = false;
     }

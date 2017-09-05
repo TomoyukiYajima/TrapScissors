@@ -45,6 +45,8 @@ public class BoarEnemy : MiddleEnemy {
         // 逃げる
         ChangeMovePoint(m_RunawayPoint.gameObject.transform.position);
         m_MoveLength += m_DiscoverSpeed * deltaTime;
+        // 視野オブジェクトを非表示に変更
+        m_RayPoint.gameObject.SetActive(false);
 
         // 壁を発見したとき
         GameObject wall = null;
@@ -66,6 +68,8 @@ public class BoarEnemy : MiddleEnemy {
             // 待機状態に遷移
             ChangeState(AnimalState.Idel, AnimalAnimatorNumber.ANIMATOR_IDEL_NUMBER);
             m_DState = AnimalState_DiscoverState.Discover_None;
+            // 視野オブジェクト表示する
+            m_RayPoint.gameObject.SetActive(true);
             m_MoveLength = 0.0f;
             // 移動速度を変える
             m_Agent.speed = m_Speed;

@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using UnityEngine.UI;
 using System.Collections;
 
 #if UNITY_EDITOR
@@ -36,8 +37,17 @@ public class TutorialStage : MonoBehaviour {
         if (TutorialMediator.GetInstance().IsTextDrawEnd())
         {
             var camera = GameObject.Find("Main Camera").GetComponent<CameraMove>();
+
+            if (camera.enabled)
+            {
+                // カメラムーブのenableがtrueならカメラ移動UIを表示する
+                var cameraPosUI = GameObject.Find("MainCameraPos").GetComponent<Image>();
+                cameraPosUI.enabled = true;
+                m_IsMove = true;
+                return;
+            }
+            // カメラムーブをオンにする
             camera.enabled = true;
-            m_IsMove = true;
         }
     }
 

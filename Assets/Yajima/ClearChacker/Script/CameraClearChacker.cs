@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using UnityEngine.UI;
 using System.Collections;
 
 #if UNITY_EDITOR
@@ -10,6 +11,12 @@ public class CameraClearChacker : ClearChacker {
     #region シリアライズ変数
     [SerializeField]
     private GameObject m_GameStart;     // ゲームスタートオブジェクト
+    [SerializeField]
+    private GameObject m_FreeLookUI;     // フリーロックUI
+    [SerializeField]
+    private GameObject m_CameraMapUI;     // カメラマップUI
+    [SerializeField]
+    private bool m_IsLookDraw;          // フリーロックUIを表示するか
     #endregion
 
     private GameObject m_Player;        // プレイヤー
@@ -24,13 +31,20 @@ public class CameraClearChacker : ClearChacker {
 
         if (m_GameStart == null) m_GameStart = GameObject.Find("GameStart");
 
+        if (m_CameraMapUI == null) m_CameraMapUI = GameObject.Find("MainCameraPos");
+        if (!TutorialMediator.GetInstance().IsTutorialAction(4))
+            m_CameraMapUI.GetComponent<Image>().enabled = false;
+
+        //if (m_FreeLookUI == null) GameObject.Find("FreeLook");
+        if (!m_IsLookDraw) m_FreeLookUI.GetComponent<Image>().enabled = false;
+
         if (m_Player == null) m_Player = GameObject.FindGameObjectWithTag("Player");
 
         if (m_ClearChacker == null) m_ClearChacker = GameObject.Find("ClearChacker");
 
         m_MainCamera = GameObject.Find("Main Camera");
         if (m_MainCamera != null) m_Camera = m_MainCamera.GetComponent<Camera>();
-	}
+    }
 	
 	// Update is called once per frame
 	public override void Update () {
@@ -50,6 +64,7 @@ public class CameraClearChacker : ClearChacker {
         // 一定範囲内に入っていなかったら、返す
         if (distance > 0.1f) return;
         m_GameStart.SetActive(true);
+        m_FreeLookUI.GetComponent<Image>().enabled = true;
         // テキストボックスの表示
         DrawText();
     }
@@ -74,10 +89,14 @@ public class CameraClearChacker : ClearChacker {
     public class CameraClearChackerEditor : ClearChackerEditor
     {
         SerializedProperty GameStart;
+        SerializedProperty FreeLookUI;
+        SerializedProperty IsLookDraw;
 
         protected override void OnChildEnable()
         {
             GameStart = serializedObject.FindProperty("m_GameStart");
+            FreeLookUI = serializedObject.FindProperty("m_FreeLookUI");
+            IsLookDraw = serializedObject.FindProperty("m_IsLookDraw");
         }
 
         protected override void OnChildInspectorGUI()
@@ -86,6 +105,8 @@ public class CameraClearChacker : ClearChacker {
 
             EditorGUILayout.LabelField("〇カメラクリアチェッカーの設定");
             GameStart.objectReferenceValue = EditorGUILayout.ObjectField("ゲームスタートオブジェクト", chacker.m_GameStart, typeof(GameObject), true);
+            FreeLookUI.objectReferenceValue = EditorGUILayout.ObjectField("フリーロックUI", chacker.m_FreeLookUI, typeof(GameObject), true);
+            IsLookDraw.boolValue = EditorGUILayout.Toggle("フリーロックUIを表示するか", chacker.m_IsLookDraw);
         }
     }
 #endif
